@@ -1,0 +1,19 @@
+# Node
+client/node_modules
+client/dist
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+env/
+venv/
+
+# Env
+infra/.env
+
+# OS
+**/.DS_Store
+Thumbs.db

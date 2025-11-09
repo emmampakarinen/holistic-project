@@ -4,9 +4,7 @@ export default function App() {
   const [api, setApi] = useState<{ ok: boolean; db?: string } | null>(null);
 
   useEffect(() => {
-    const url =
-      import.meta.env.VITE_API_URL ?? "http://localhost:5000/api/health";
-    fetch(url)
+    fetch("/api/health")
       .then((r) => r.json())
       .then(setApi)
       .catch(() => setApi({ ok: false }));

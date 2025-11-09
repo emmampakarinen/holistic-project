@@ -3,6 +3,7 @@ import os, pymysql
 
 bp = Blueprint("health", __name__)
 
+# Health check endpoint
 @bp.get("/health")
 def health():
     try:
