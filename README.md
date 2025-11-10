@@ -19,7 +19,7 @@ holistic-project/
 
 ## Quick start for local development (with Docker)
 
-### 1️. Clone the repo
+### 1. Clone the repo
 
 ```bash
 git clone https://github.com/emmampakarinen/holistic-project
