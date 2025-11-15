@@ -40,6 +40,7 @@ services:
   client:
     build:
       context: ../client
+      dockerfile: Dockerfile
     container_name: holistic-client
     env_file:
       - ./.env
@@ -54,6 +55,7 @@ services:
     volumes:
       - ../client:/app
       - /app/node_modules
+      - vite_cache:/app/node_modules/.vite
 
   adminer:
     image: adminer:4
@@ -66,3 +68,4 @@ services:
 
 volumes:
   mysql_data:
+  vite_cache:
