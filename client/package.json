@@ -13,6 +13,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/joy": "^5.0.0-beta.52",
+    "@react-oauth/google": "^0.12.2",
     "@tailwindcss/vite": "^4.1.17",
     "lucide-react": "^0.553.0",
     "react": "^19.1.1",
