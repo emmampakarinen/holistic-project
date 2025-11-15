@@ -1,0 +1,55 @@
+# Global ignore, prevents sending unnecessary files to Docker context
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+*.log
+*.swp
+*.swo
+*.tmp
+.vscode/
+.idea/
+.env
+.env.*
+*.bak
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Node (client)
+client/node_modules
+client/dist
+client/.vite
+client/.env
+client/.env.local
+client/npm-debug.log
+client/yarn-error.log
+
+# Python (server)
+server/.venv
+server/env
+server/venv
+server/.pytest_cache
+server/.mypy_cache
+server/.coverage
+server/htmlcov
+server/.env
+
+# Cache / build artifacts
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/*.egg-info/
+**/build/
+**/dist/
+**/coverage/
+**/reports/
+
+# Git & Docker
+.git
+.gitignore
+docker-compose*.yml
+infra/.env
+infra/.env.example
