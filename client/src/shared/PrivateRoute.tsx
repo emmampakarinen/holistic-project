@@ -6,10 +6,10 @@ interface PrivateRouteProps {
 }
 
 export const PrivateRoute = ({ children }: PrivateRouteProps) => {
-  // TODO: Replace with real authentication check
-  // const isAuthenticated = !!localStorage.getItem("accessToken");
+  // Get Google login token from localStorage
+  const token = localStorage.getItem("google_token");
 
-  const isAuthenticated = true; // Temporary hardcoded value
+  const isAuthenticated = !!token; // true if token exists
   const location = useLocation();
 
   if (!isAuthenticated) {
