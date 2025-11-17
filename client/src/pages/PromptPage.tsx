@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function PromptPage() {
   // Custom hooks to get current temperature and users location
-  const { city } = useCurrentLocation();
+  const { city, latitude, longitude } = useCurrentLocation();
   const { temp, loading } = useCurrentTemperature();
   const navigate = useNavigate();
 
@@ -34,6 +34,8 @@ export default function PromptPage() {
 
     // Prepare payload
     const payload = {
+      latitude,
+      longitude,
       location,
       destination,
       EVModel,
