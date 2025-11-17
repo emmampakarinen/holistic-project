@@ -2,11 +2,15 @@ import { useEffect, useState } from "react";
 
 export function useCurrentLocation() {
   const [city, setCity] = useState<string>("Loading...");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords;
+        setLatitude(latitude);
+        setLongitude(longitude);
 
         // Reverse geocode
         const response = await fetch(
@@ -27,6 +31,8 @@ export function useCurrentLocation() {
       async () => {
         const lahtiLat = 60.9827;
         const lahtiLon = 25.6615;
+        setLatitude(lahtiLat);
+        setLongitude(lahtiLon);
 
         // Reverse geocode Lahti from OSM
         const response = await fetch(
@@ -45,5 +51,5 @@ export function useCurrentLocation() {
     );
   }, []);
 
-  return { city };
+  return { city, latitude, longitude };
 }
