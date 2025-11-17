@@ -107,14 +107,7 @@ export default function AppLayout() {
       </Drawer>
 
       {/* routed content */}
-      <Box
-        component="main"
-        sx={{
-          flex: 1,
-          p: 2,
-          bgcolor: "background.body",
-        }}
-      >
+      <Box component="main" sx={{ flexGrow: 1 }}>
         <Outlet />
       </Box>
     </Box>
