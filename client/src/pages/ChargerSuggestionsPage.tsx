@@ -2,13 +2,22 @@ import { useEffect, useState } from "react";
 import ChargerCard from "../components/ChargerCard";
 import { mockChargers } from "../data/mockChargers";
 import type { Charger } from "../types/charger";
-import { Grid, Typography } from "@mui/joy";
-import { BatteryMedium, Clock3, MapPin, Thermometer } from "lucide-react";
+import { Button, Grid, Typography } from "@mui/joy";
+import {
+  ArrowLeft,
+  BatteryMedium,
+  Clock3,
+  MapPin,
+  Thermometer,
+} from "lucide-react";
 import InfoCard from "../components/InfoCard";
+import { useNavigate } from "react-router-dom";
 
 function ChargerSuggestionsPage() {
   const [chargers, setChargers] = useState<Charger[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchData() {
@@ -30,6 +39,14 @@ function ChargerSuggestionsPage() {
   return (
     <div className="min-h-screen bg-[#f4f6fb]">
       <div className="max-w-6xl mx-auto px-6 py-6">
+        <Button
+          size="sm"
+          variant="plain"
+          startDecorator={<ArrowLeft size={18} />}
+          onClick={() => navigate("/app/prompt")}
+        >
+          Back to Planning
+        </Button>
         <div className="mb-6">
           <Typography level="h2" fontSize="2.2rem" fontWeight={700}>
             Recommended Chargers Near Your Destination
