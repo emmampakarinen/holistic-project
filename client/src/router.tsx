@@ -3,12 +3,12 @@ import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import AppLayout from "./layouts/AppLayout";
-import PromptPage from "./pages/PromptPage";
 import ChargerSuggestionsPage from "./pages/ChargerSuggestionsPage";
 import JourneyPage from "./pages/ChargeJourneyPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { PrivateRoute } from "./shared/PrivateRoute";
+import PlanningPage from "./pages/PlanningPage";
 
 export const router = createBrowserRouter([
   {
@@ -36,8 +36,8 @@ export const router = createBrowserRouter([
         element: <Navigate to="prompt" replace />,
       },
       {
-        path: "prompt",
-        element: <PromptPage />,
+        path: "planning",
+        element: <PlanningPage />,
       },
       {
         path: "suggestions",

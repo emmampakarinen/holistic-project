@@ -8,7 +8,7 @@ interface InfoCardProps {
 
 // A small card component to display an the user's current info when planning a trip on the
 // charger suggestions page
-function InfoCard({ icon, label, value }: InfoCardProps) {
+export default function InfoCard({ icon, label, value }: InfoCardProps) {
   return (
     <div className="flex items-center gap-3">
       {icon}
@@ -23,5 +23,3 @@ function InfoCard({ icon, label, value }: InfoCardProps) {
     </div>
   );
 }
-
-export default InfoCard;
