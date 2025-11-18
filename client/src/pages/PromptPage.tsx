@@ -53,7 +53,7 @@ export default function PromptPage() {
       });*/
       // handle response
       // Navigate to results page
-      navigate("/app/plan");
+      navigate("/app/suggestions");
     } catch (err) {
       console.error("Failed to send trip data", err);
     }
