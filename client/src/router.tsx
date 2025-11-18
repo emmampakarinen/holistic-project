@@ -4,7 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import AppLayout from "./layouts/AppLayout";
 import PromptPage from "./pages/PromptPage";
-import RoutePlannerPage from "./pages/ChargePlannerPage";
+import ChargerSuggestionsPage from "./pages/ChargerSuggestionsPage";
 import JourneyPage from "./pages/ChargeJourneyPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -40,8 +40,8 @@ export const router = createBrowserRouter([
         element: <PromptPage />,
       },
       {
-        path: "plan",
-        element: <RoutePlannerPage />,
+        path: "suggestions",
+        element: <ChargerSuggestionsPage />,
       },
       {
         path: "journey",
