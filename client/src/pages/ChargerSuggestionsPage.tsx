@@ -13,7 +13,7 @@ import {
 import InfoCard from "../components/InfoCard";
 import { useNavigate } from "react-router-dom";
 
-function ChargerSuggestionsPage() {
+export default function ChargerSuggestionsPage() {
   const [chargers, setChargers] = useState<Charger[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -99,5 +99,3 @@ function ChargerSuggestionsPage() {
     </div>
   );
 }
-
-export default ChargerSuggestionsPage;

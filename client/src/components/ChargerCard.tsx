@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import type { Charger } from "../types/charger";
 
 // A card component to display individual charger details on the charger suggestions page
-function ChargerCard({ charger }: { charger: Charger }) {
+export default function ChargerCard({ charger }: { charger: Charger }) {
   return (
     <Card
       variant="outlined"
@@ -75,5 +75,3 @@ function ChargerCard({ charger }: { charger: Charger }) {
     </Card>
   );
 }
-
-export default ChargerCard;

@@ -13,7 +13,7 @@ import { useCurrentTemperature } from "../hooks/useWeather";
 import { useCurrentLocation } from "../hooks/useLocation";
 import { useNavigate } from "react-router-dom";
 
-export default function PromptPage() {
+export default function PlanningPage() {
   // Custom hooks to get current temperature and users location
   const { city, latitude, longitude } = useCurrentLocation();
   const { temp, loading } = useCurrentTemperature();
