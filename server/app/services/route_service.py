@@ -1,7 +1,6 @@
-import os
 import requests
 
-def get_travel_times(maps_api_key, start_location, potential_chargers):
+def fetch_drive_metrics(maps_api_key, start_location, potential_chargers):
 
     # find time it takes to drive to the specific found chargers
 
@@ -53,6 +52,20 @@ def get_travel_times(maps_api_key, start_location, potential_chargers):
             potential_chargers[dest_index]["travelTimeSecondsDrivingToCharger"] = int(time_str.replace('s', ''))
             potential_chargers[dest_index]["distanceMetersDrivingToCharger"] = route_segment.get('distanceMeters', 0)
             
+            # generate maps link
+
+            charger = potential_chargers[dest_index]
+            dest_lat = charger['location']['latitude']
+            dest_lng = charger['location']['longitude']
+
+            maps_link = (
+                f"https://www.google.com/maps/dir/?api=1"
+                f"&origin={start_location["lat"]},{start_location["lng"]}"
+                f"&destination={dest_lat},{dest_lng}"
+                f"&travelmode=driving"
+            )
+            potential_chargers[dest_index]["googleMapsLink"] = maps_link
+
         print("success - calculated all travel times")
         return potential_chargers
 

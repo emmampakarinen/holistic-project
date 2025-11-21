@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint, jsonify, request 
 from app.services.receive_weather_info import get_latest_weather
 from app.services.receive_ev_chargers import find_chargers_by_travel_time
@@ -6,19 +7,34 @@ from app.services.handle_db_connections import create_conn, execute_insert, exec
 
 bp = Blueprint("logic", __name__)
 
-@bp.get("/find-charger")
+@bp.route("/find-charger", methods=['POST'])
 def find_charge():
 
+    # format from front-end
+
     '''
+    {
+        "EVModel": "BMW iX xDrive45 (11 kW AC)",
+        "battery": 100,
+        "destination": "Radio iela 8, Liepāja, LV-3401",
+        "latitude": 56.9540608,
+        "location": "Riga",
+        "longitude": 24.117248,
+        "minutesAtDestination": 120,
+        "temperature": 2.9
+    }
+    '''
+
     try:
-        user_info = request.get_json()
-        if not user_info:
+        core_info = request.get_json()
+        if not core_info:
             return jsonify({"error": "No JSON data provided"}), 400
     except:
         return jsonify({"error": "Invalid JSON format"}), 400
-    '''
 
-    maps_api_key = "*"
+    # key
+
+    maps_api_key = os.getenv("GOOGLE_MAPS_PLATFORM_API_KEY", "key")
 
     # system inputs
 
@@ -27,14 +43,24 @@ def find_charge():
 
     # user inputs
 
-    user_lat = 56.536015
-    user_lng = 21.009796
+    user_lat = core_info.get('latitude')
+    user_lng = core_info.get('longitude')
     user_coords = {'lat': user_lat, 'lng': user_lng}
-    dest_addr = "Lugažu Iela 2A"
+    dest_addr = core_info.get('destination')
+    vehicle_model = core_info.get('EVModel')
+    stay_duration_sec = core_info.get('minutesAtDestination') * 60
+    start_battery_pct = core_info.get('battery')
+
+    '''
+    user_lat = 60.170363
+    user_lng = 24.941479
+    user_coords = {'lat': user_lat, 'lng': user_lng}
+    dest_addr = "Mukkulankatu 19, 15210 Lahti, Finland"
     vehicle_model = "BMW iX xDrive45 (11 kW AC)"
     stay_duration_sec = 18000 # the total duration the user intends to stay at the destination (5 hours)
     start_battery_pct = 100 # the current battery level of the vehicle before starting the trip (in percentage)
-
+    '''
+    
     ####################################
     
     db_conn = create_conn() # Establish a connection to the database.
