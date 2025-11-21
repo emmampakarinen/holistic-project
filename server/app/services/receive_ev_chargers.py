@@ -1,156 +1,161 @@
-import os
 import requests
 
-def get_coordinates(api_key, address):
+def get_coordinates(maps_api_key, target_address):
 
     # geocoding
 
-    geocode_url = "https://maps.googleapis.com/maps/api/geocode/json"
-    geocode_params = {"address": address, "key": api_key}
+    maps_geocode_url = "https://maps.googleapis.com/maps/api/geocode/json" # google maps geocoding api endpoint
+    query_params = {"address": target_address, "key": maps_api_key}
     
     try:
-        response = requests.get(geocode_url, params=geocode_params)
-        response.raise_for_status()
-        geocode_data = response.json()
+        api_response = requests.get(maps_geocode_url, params=query_params)
+        api_response.raise_for_status()
+        geo_json = api_response.json() # parsed json response from geocoding api
         
-        if not geocode_data.get("results"):
+        if not geo_json.get("results"):
             print("error - address not found")
             return None
             
-        location = geocode_data["results"][0]["geometry"]["location"]
-        print(f"success - found coordinates {location['lat']}, {location['lng']}")
-        return location 
+        # extract the latitude and longitude from the first result
+        geo_coords = geo_json["results"][0]["geometry"]["location"]
+        print(f"success - found coordinates {geo_coords['lat']}, {geo_coords['lng']}")
+        return geo_coords 
 
-    except requests.exceptions.RequestException as e:
-        print(f"geocoding api error: {e}")
+    except requests.exceptions.RequestException as request_error:
+        print(f"geocoding api error: {request_error}")
         return None
     
-def find_candidate_chargers(api_key, location, radius_meters):
+def find_candidate_chargers(maps_api_key, search_center_coords, search_radius_meters):
 
     # find chargers in proximity
 
-    places_url = "https://places.googleapis.com/v1/places:searchNearby"
-    headers = {
+    places_api_url = "https://places.googleapis.com/v1/places:searchNearby" # google places api (new) endpoint for nearby search
+    auth_headers = {
         "Content-Type": "application/json",
-        "X-Goog-Api-Key": api_key,
-        "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.location,places.rating,places.evChargeOptions"
+        "X-Goog-Api-Key": maps_api_key,
+        "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.location,places.rating,places.evChargeOptions" # specific fields to retrieve
     }
 
-    body = {
-      "includedTypes": ["electric_vehicle_charging_station"],
+    search_payload = {
+      "includedTypes": ["electric_vehicle_charging_station"], # filter for EV charging stations only
       "locationRestriction": {
         "circle": {
-          "center": {"latitude": location["lat"], "longitude": location["lng"]},
-          "radius": radius_meters
+          "center": {"latitude": search_center_coords["lat"], "longitude": search_center_coords["lng"]},
+          "radius": search_radius_meters # search radius in meters
         }
       }
     }
     
     try:
         
-        response = requests.post(places_url, json=body, headers=headers)
-        response.raise_for_status()
-        places_data = response.json()
-        candidates = places_data.get("places", [])
+        api_response = requests.post(places_api_url, json=search_payload, headers=auth_headers)
+        api_response.raise_for_status()
+        places_json = api_response.json()
+        found_places = places_json.get("places", []) # list of places returned by the api
         
-        actual_candidates = []
-        for i in candidates:
-            if i.get('evChargeOptions'):
-                actual_candidates.append(i)
+        valid_chargers = []
+        for place in found_places:
+            # ensure the place actually has EV charging options data
+            if place.get('evChargeOptions'):
+                valid_chargers.append(place)
 
-        print(f"success - found {len(actual_candidates)} candidates.")
+        print(f"success - found {len(valid_chargers)} candidates.")
         
-        return actual_candidates
+        return valid_chargers
         
-    except requests.exceptions.RequestException as e:
-        print(f"places api error: {e}")
+    except requests.exceptions.RequestException as request_error:
+        print(f"places api error: {request_error}")
         return []
     
-def get_travel_times(api_key, origin, candidates):
+def get_travel_times(maps_api_key, origin_coords, charger_candidates):
 
-    # find time it takes to drive to the specific found chargers
+    # find time it takes to walk from the charger to the destination
 
-    routes_url = "https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix"
-    headers = {
+    matrix_api_url = "https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix"
+    auth_headers = {
         "Content-Type": "application/json",
-        "X-Goog-Api-Key": api_key,
+        "X-Goog-Api-Key": maps_api_key,
         "X-Goog-FieldMask": "destinationIndex,duration,distanceMeters"
     }
     
-    destinations_payload = []
-    for place in candidates:
-        dest = {
+    dest_list_json = [] # list of formatted destinations (chargers)
+    for charger in charger_candidates:
+        dest_item = {
             "waypoint": {
                 "location": {
                     "latLng": {
-                        "latitude": place["location"]["latitude"],
-                        "longitude": place["location"]["longitude"]
+                        "latitude": charger["location"]["latitude"],
+                        "longitude": charger["location"]["longitude"]
                     }
                 }
             }
         }
-        destinations_payload.append(dest)
+        dest_list_json.append(dest_item)
 
-    origin_payload = [{
+    start_list_json = [{
         "waypoint": {
-            "location": {"latLng": {"latitude": origin["lat"], "longitude": origin["lng"]}}
+            "location": {"latLng": {"latitude": origin_coords["lat"], "longitude": origin_coords["lng"]}}
         }
     }]
     
-    body = {
-        "origins": origin_payload,
-        "destinations": destinations_payload,
-        "travelMode": "WALK"
+    request_body = {
+        "origins": start_list_json, # starting point (destination address)
+        "destinations": dest_list_json, # target points (chargers)
+        "travelMode": "WALK" # calculate walking time (not driving)
     }
     
-    print(f"calculating travel times to {len(candidates)} destinations...")
+    print(f"calculating travel times to {len(charger_candidates)} destinations...")
     try:
-        response = requests.post(routes_url, json = body, headers = headers)
-        response.raise_for_status()
+        api_response = requests.post(matrix_api_url, json = request_body, headers = auth_headers)
+        api_response.raise_for_status()
         
-        routes_data = response.json()
+        matrix_data = api_response.json()
         
-        for route_info in routes_data:
-            idx = route_info['destinationIndex']
-            duration_str = route_info.get('duration', '99999s')
+        for route_segment in matrix_data:
+            dest_index = route_segment['destinationIndex']
+            time_str = route_segment.get('duration', '99999s') # duration string (e.g. 300s)
             
-            candidates[idx]["travelTimeSecondsWalkingToDestination"] = int(duration_str.replace('s', ''))
-            candidates[idx]["distanceMetersWalkingToDestination"] = route_info.get('distanceMeters', 0)
+            # parse duration string to integer seconds
+            charger_candidates[dest_index]["travelTimeSecondsWalkingToDestination"] = int(time_str.replace('s', ''))
+            charger_candidates[dest_index]["distanceMetersWalkingToDestination"] = route_segment.get('distanceMeters', 0)
             
         print("success - calculated all travel times")
-        return candidates
+        return charger_candidates
 
-    except requests.exceptions.RequestException as e:
-        print(f"routes api error: {e}")
-        print("api response:", response.text)
+    except requests.exceptions.RequestException as request_error:
+        print(f"routes api error: {request_error}")
+        print("api response:", api_response.text)
         return []
 
-def find_chargers_by_travel_time(api_key, address, max_travel_seconds, max_radius):
+def find_chargers_by_travel_time(maps_api_key, target_address, max_walk_seconds, max_search_radius):
 
-    location = get_coordinates(api_key, address)
-    if not location:
+    dest_coords = get_coordinates(maps_api_key, target_address)
+    if not dest_coords:
         return []
     
-    candidate_chargers = find_candidate_chargers(api_key, location, max_radius)
-    if not candidate_chargers:
+    nearby_stations = find_candidate_chargers(maps_api_key, dest_coords, max_search_radius)
+    if not nearby_stations:
         return []
         
-    chargers_with_times = get_travel_times(api_key, location, candidate_chargers)
-    if not chargers_with_times:
+    stations_with_walk_times = get_travel_times(maps_api_key, dest_coords, nearby_stations)
+    if not stations_with_walk_times:
         return []
         
-    print(f"filtering for chargers within {max_travel_seconds} seconds...")
+    print(f"filtering for chargers within {max_walk_seconds} seconds...")
     
-    final_list = []
-    for place in chargers_with_times:
-        if "travelTimeSecondsWalkingToDestination" in place and place["travelTimeSecondsWalkingToDestination"] <= max_travel_seconds:
-            final_list.append(place)
+    filtered_stations = []
+    for station in stations_with_walk_times:
+        # check if the walking time is within the user's limit
+        if "travelTimeSecondsWalkingToDestination" in station and station["travelTimeSecondsWalkingToDestination"] <= max_walk_seconds:
+            filtered_stations.append(station)
             
-    final_list.sort(key=lambda x: x.get("travelTimeSecondsWalkingToDestination", 9999))        
+    # sort by walking time (closest first)
+    filtered_stations.sort(key=lambda x: x.get("travelTimeSecondsWalkingToDestination", 9999))        
 
-    if not final_list:
-        chargers_with_times.sort(key=lambda x: x.get("travelTimeSecondsWalkingToDestination", 9999))    
-        final_list = [chargers_with_times[0]]
+    # fallback - if no chargers meet the strict walking criteria, return the closest one anyway
+    if not filtered_stations:
+        stations_with_walk_times.sort(key=lambda x: x.get("travelTimeSecondsWalkingToDestination", 9999))    
+        filtered_stations = [stations_with_walk_times[0]]
 
-    return final_list
+    return filtered_stations
 
