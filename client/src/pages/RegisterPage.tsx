@@ -5,6 +5,7 @@ function RegisterPage() {
     <>
      <h1>Register</h1>
       <p>Registration form will be here.</p>
+      
 </>
 );
   }
