@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent} from "react";
 import {
   Button,
   Card,
@@ -29,7 +29,10 @@ export default function PromptPage() {
   const timeAtDestinationMinutes =
     (Number(hours) || 0) * 60 + (Number(minutes) || 0);
 
-  const handleFindChargers = async () => {
+  const handleFindChargers = async (event: FormEvent<HTMLFormElement>) => {
+
+    event.preventDefault();
+    
     const minutesAtDestination = timeAtDestinationMinutes;
 
     // Prepare payload
@@ -45,15 +48,23 @@ export default function PromptPage() {
     };
 
     try {
-      /*await fetch("", {
-        // backend endpoint to be added
+      const response = await fetch("http://localhost:5000/api/find-charger", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json" 
+        },
         body: JSON.stringify(payload),
-      });*/
-      // handle response
-      // Navigate to results page
-      navigate("/app/plan");
+      });
+
+      if (!response.ok) {
+        const errorDetails = await response.text();
+        throw new Error(`HTTP error! Status: ${response.status}. Details: ${errorDetails}`);
+      }
+
+      const chargerData = await response.json();
+
+      navigate("/app/plan", { state: { chargerData } });
+
     } catch (err) {
       console.error("Failed to send trip data", err);
     }
