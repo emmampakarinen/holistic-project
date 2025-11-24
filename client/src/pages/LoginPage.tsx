@@ -99,11 +99,7 @@ function LoginPage() {
       </div>
 
       {/* FOOTER */}
-      <footer className="mt-6 text-gray-400 text-sm flex gap-4">
-        <a href="#">About</a> · <a href="#">Help</a> · <a href="#">Contact</a>
-      </footer>
-
-      <p className="text-xs text-gray-300 mt-2">
+          <p className="text-xs text-gray-300 mt-2">
         Secure authentication powered by Google
       </p>
 
