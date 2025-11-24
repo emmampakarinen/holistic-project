@@ -12,13 +12,16 @@ import {
 import { useCurrentTemperature } from "../hooks/useWeather";
 import { useCurrentLocation } from "../hooks/useLocation";
 import { useNavigate } from "react-router-dom";
+import type { TripPlan } from "../types/trip";
 
-export default function PromptPage() {
+// The planning page where users input their trip details to find suitable chargers
+export default function PlanningPage() {
   // Custom hooks to get current temperature and users location
   const { city, latitude, longitude } = useCurrentLocation();
   const { temp, loading } = useCurrentTemperature();
   const navigate = useNavigate();
 
+  // State variables for form inputs
   const [location, setLocation] = useState("");
   const [destination, setDestination] = useState("");
   const [hours, setHours] = useState("");
@@ -29,11 +32,13 @@ export default function PromptPage() {
   const timeAtDestinationMinutes =
     (Number(hours) || 0) * 60 + (Number(minutes) || 0);
 
-  const handleFindChargers = async () => {
+  // Handle form submission to find chargers
+  const handleFindChargers = async (e: React.FormEvent) => {
+    e.preventDefault();
     const minutesAtDestination = timeAtDestinationMinutes;
 
     // Prepare payload
-    const payload = {
+    const payload: TripPlan = {
       latitude,
       longitude,
       location,
@@ -53,12 +58,13 @@ export default function PromptPage() {
       });*/
       // handle response
       // Navigate to results page
-      navigate("/app/plan");
+      navigate("/app/suggestions", { state: { trip: payload } }); // Navigate to charger suggestions page
     } catch (err) {
       console.error("Failed to send trip data", err);
     }
   };
 
+  // Auto-fill location when available
   useEffect(() => {
     if (city && city !== "Loading...") {
       setLocation(city);
