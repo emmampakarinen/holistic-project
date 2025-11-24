@@ -11,14 +11,25 @@ import {
   Thermometer,
 } from "lucide-react";
 import InfoCard from "../components/InfoCard";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import type { TripPlan } from "../types/trip";
 
+// The charger suggestions page that displays recommended chargers based on user input
 export default function ChargerSuggestionsPage() {
   const [chargers, setChargers] = useState<Charger[]>([]);
   const [loading, setLoading] = useState(true);
+  const [trip, setTrip] = useState<TripPlan | null>(null);
 
+  const location = useLocation();
   const navigate = useNavigate();
 
+  // Grab trip from navigation state
+  useEffect(() => {
+    const stateTrip = (location.state as { trip?: TripPlan })?.trip ?? null;
+    setTrip(stateTrip);
+  }, [location.state]);
+
+  // Fetch charger suggestions from backend
   useEffect(() => {
     async function fetchData() {
       try {
@@ -36,6 +47,14 @@ export default function ChargerSuggestionsPage() {
     fetchData();
   }, []);
 
+  // for showing the stay duration in hours and minutes
+  const stayText =
+    trip != null
+      ? `${Math.floor(trip.minutesAtDestination / 60)} h ${
+          trip.minutesAtDestination % 60
+        } min`
+      : "-";
+
   return (
     <div className="min-h-screen bg-[#f4f6fb]">
       <div className="max-w-6xl mx-auto px-6 py-6">
@@ -43,7 +62,7 @@ export default function ChargerSuggestionsPage() {
           size="sm"
           variant="plain"
           startDecorator={<ArrowLeft size={18} />}
-          onClick={() => navigate("/app/prompt")}
+          onClick={() => navigate("/app/planning")}
         >
           Back to Planning
         </Button>
@@ -58,21 +77,25 @@ export default function ChargerSuggestionsPage() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-          <InfoCard icon={<MapPin size={18} />} label="Destination" value="" />
+          <InfoCard
+            icon={<MapPin size={18} />}
+            label="Destination"
+            value={trip?.destination ?? "-"}
+          />
           <InfoCard
             icon={<Clock3 size={18} />}
             label="Stay Duration"
-            value=""
+            value={stayText}
           />
           <InfoCard
             icon={<BatteryMedium size={18} />}
             label="Current Battery"
-            value=""
+            value={trip ? `${trip.battery}%` : "-"}
           />
           <InfoCard
             icon={<Thermometer size={18} />}
             label="Temperature"
-            value=""
+            value={trip?.temperature != null ? `${trip.temperature} °C` : "N/A"}
           />
         </div>
 
