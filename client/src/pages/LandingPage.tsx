@@ -7,15 +7,7 @@ export default function LandingPage() {
 
   return (
     <div className="w-full flex flex-col items-center bg-gray-50 text-gray-800">
-      <nav className="w-full flex justify-between px-10 py-4 bg-white shadow-sm">
-       <div className="font-bold text-lg">EV SmartCharge</div>
-        {/* <div className="flex gap-6 text-sm">
-          <a href="#" className="hover:text-blue-600">About</a>
-          <a href="#" className="hover:text-blue-600">Help</a>
-          <a href="#" className="hover:text-blue-600">Contact</a>
-        </div> */}
-      </nav>
-
+     
       <section className="text-center mt-20 max-w-2xl">
         <img src="/images/logo.png" alt="icon" className="icon-lg mx-auto mb-6" />
         <h1 className="text-4xl font-bold mb-4 leading-tight">
@@ -71,6 +63,8 @@ export default function LandingPage() {
         <p className="text-gray-600">Join thousands of EV drivers who plan charging efficiently.</p>
       </section>
 
+
+      {/* FOOTER */}
       <footer className="w-full py-6 bg-white border-t text-center text-sm text-gray-500">
         © 2025 EV SmartCharge. All rights reserved.
       </footer>
