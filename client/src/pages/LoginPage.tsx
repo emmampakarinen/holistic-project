@@ -33,6 +33,7 @@ function LoginPage() {
 
       {/* CARD */}
       <div className="bg-white shadow-lg rounded-3xl px-10 py-12 max-w-md w-full text-center">
+
         <h1 className="text-2xl font-bold mb-2">EV SmartCharge</h1>
         <p className="text-gray-500 text-sm mb-6">
           Plan smarter EV charging sessions
@@ -44,10 +45,10 @@ function LoginPage() {
         </p>
 
         {/* GOOGLE LOGIN */}
-        <div className="mb-6 flex justify-center">
-          <GoogleLogin
-            onSuccess={handleSuccess}
-            onError={() => console.log("Login Failed")}
+        <div className="mb-4 flex justify-center">
+          <GoogleLogin 
+            onSuccess={handleSuccess} 
+            onError={() => console.log("Login Failed")} 
           />
         </div>
 
@@ -63,36 +64,38 @@ function LoginPage() {
         </div>
 
         {/* FEATURES */}
-        <div className="rounded-xl p-7 mt-7 text-center flex flex-col items-center justify-center">
-          <div className="space-y-4">
-            <div className="flex flex-col items-center gap-1">
-              <div>
-                <h5 className="font-semibold">Smart Charging Plans</h5>
-                <p className="text-gray-500 text-xs text-center">
-                  Find optimal chargers for your journey
-                </p>
-              </div>
+        <div className="space-y-4 text-left">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 bg-green-300 rounded-full"></div>
+            <div>
+              <p className="font-medium">Smart Charging Plans</p>
+              <p className="text-gray-500 text-sm">
+                Find optimal chargers for your journey
+              </p>
             </div>
+          </div>
 
-            <div className="flex flex-col items-center gap-1">
-              <div>
-                <h5  className="font-semibold">Location-Based Recommendations</h5>
-                <p className="text-gray-500 text-xs text-center">
-                  Chargers near your destination
-                </p>
-              </div>
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 bg-blue-300 rounded-full"></div>
+            <div>
+              <p className="font-medium">Location-Based Recommendations</p>
+              <p className="text-gray-500 text-sm">
+                Chargers near your destination
+              </p>
             </div>
+          </div>
 
-            <div className="flex flex-col items-center gap-1">
-              <div>
-                <h5  className="font-semibold">Real-Time Tracking</h5>
-                <p className="text-gray-500 text-xs  text-center">
-                  Monitor your charging progress
-                </p>
-              </div>
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 bg-purple-300 rounded-full"></div>
+            <div>
+              <p className="font-medium">Real-Time Tracking</p>
+              <p className="text-gray-500 text-sm">
+                Monitor your charging progress
+              </p>
             </div>
           </div>
         </div>
+
       </div>
 
       {/* FOOTER */}
@@ -103,6 +106,7 @@ function LoginPage() {
       <p className="text-xs text-gray-300 mt-2">
         Secure authentication powered by Google
       </p>
+
     </div>
   );
 }
