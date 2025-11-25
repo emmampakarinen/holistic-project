@@ -12,7 +12,9 @@ env/
 venv/
 
 # Env
-infra/.env
+**/*.env
+
+
 
 # OS
 **/.DS_Store
