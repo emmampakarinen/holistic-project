@@ -1,4 +1,3 @@
-import React from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 
@@ -19,7 +18,7 @@ function LoginPage() {
     localStorage.setItem("google_token", token);
     localStorage.setItem("google_email", email);
 
-     const previouslyRegistered = localStorage.getItem("profile_completed");
+    const previouslyRegistered = localStorage.getItem("profile_completed");
 
     if (previouslyRegistered === "true") {
       navigate("/prompt");
@@ -29,11 +28,9 @@ function LoginPage() {
   };
 
   return (
-   <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-50 px-10">
-
+    <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-50 px-10">
       {/* CARD */}
       <div className="bg-white shadow-lg rounded-3xl px-10 py-12 max-w-md w-full text-center">
-
         <h1 className="text-2xl font-bold mb-2">EV SmartCharge</h1>
         <p className="text-gray-500 text-sm mb-6">
           Plan smarter EV charging sessions
@@ -46,9 +43,9 @@ function LoginPage() {
 
         {/* GOOGLE LOGIN */}
         <div className="mb-4 flex justify-center">
-          <GoogleLogin 
-            onSuccess={handleSuccess} 
-            onError={() => console.log("Login Failed")} 
+          <GoogleLogin
+            onSuccess={handleSuccess}
+            onError={() => console.log("Login Failed")}
           />
         </div>
 
@@ -95,21 +92,9 @@ function LoginPage() {
             </div>
           </div>
         </div>
-
       </div>
-
-      {/* FOOTER */}
-      <footer className="mt-6 text-gray-400 text-sm flex gap-4">
-        <a href="#">About</a> · <a href="#">Help</a> · <a href="#">Contact</a>
-      </footer>
-
-      <p className="text-xs text-gray-300 mt-2">
-        Secure authentication powered by Google
-      </p>
-
     </div>
   );
 }
 
 export default LoginPage;
-
