@@ -10,6 +10,7 @@ export default function LandingPage() {
      
       <section className="text-center mt-20 max-w-2xl">
         <img src="/images/logo.png" alt="Ev-Logo" className="icon-lg mx-auto mb-6" />
+
         <h1 className="text-4xl font-bold mb-4 leading-tight">
           Plan smarter EV charging sessions <br /> that fit your journey
         </h1>
