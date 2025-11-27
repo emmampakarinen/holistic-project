@@ -6,6 +6,7 @@ export default function LandingPage() {
   const navigate = useNavigate();
 
   return (
+    
     <div className="w-full flex flex-col items-center bg-gray-50 text-gray-800">
      
       <section className="text-center mt-20 max-w-2xl">

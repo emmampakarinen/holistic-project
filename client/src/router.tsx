@@ -12,7 +12,7 @@ import PlanningPage from "./pages/PlanningPage";
 import Index from "./pages/Index";
 import ChargerDetails from "./pages/ChargerDetails";
 import ChargingProgress from "./pages/ChargingProgress";
-import MyNotFound from "./pages/NotFound"; 
+import MyNotFound from "./pages/NotFound";
 
 export const router = createBrowserRouter([
   {
@@ -55,27 +55,26 @@ export const router = createBrowserRouter([
         path: "profile",
         element: <ProfilePage />,
       },
+
+      // ✅ FIXED: removed leading slashes
       {
-        path: "/",
+        path: "prompt",
         element: <Index />,
       },
       {
-        path: "/charger/:id",
+        path: "charger/:id",
         element: <ChargerDetails />,
       },
       {
-        path: "/charging/:id",
+        path: "charging/:id",
         element: <ChargingProgress />,
       },
-
     ],
   },
+
+  // Only one catch-all route is needed
   {
     path: "*",
     element: <NotFoundPage />,
-  },
-  {
-    path: "*",
-    element: <MyNotFound />,
   },
 ]);
