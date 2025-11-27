@@ -10,24 +10,49 @@ export default function RegisterPage() {
 
   const email = localStorage.getItem("google_email");
 
-  const handleSubmit = () => {
+  const handleSubmit = async() => {
     if (!fullName || !carName || !mobile) {
       alert("Please fill in all fields.");
       return;
     }
+    
+
+    // Save profile data to backend
+    // try {
+    //   const response = await fetch("/api/register", {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify({
+    //       fullName,
+    //       carName,
+    //       mobile,
+    //       email,
+    //     }),
+    //   });
+
+      // const data = await response.json();
+      // console.log("Saved to backend:", data);
+
 
     // Save profile data to localStorage (or send to backend)
     localStorage.setItem("profile_completed", "true");
 
     // Go to PromptPage
-    navigate("/prompt");
+    navigate("/planning");
+
+  //   } catch (error) {
+  //   console.error("Error saving to backend:", error);
+  // }
+
   };
 
   return (
-    <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-50 px-6">
-      <div className="bg-white shadow-lg rounded-3xl px-10 py-12 max-w-xl w-full">
+    <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-50 px-5 p-5">
+      <div className="bg-white shadow-lg rounded-3xl px-10 py-5 max-w-xl w-full">
         {/* Top Icon */}
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-2">
           <div className="w-14 h-14 bg-blue-100 flex items-center justify-center rounded-full">
             <span className="text-blue-600 text-3xl">👤</span>
           </div>
@@ -121,9 +146,9 @@ export default function RegisterPage() {
         {/* Submit Button */}
         <button
           onClick={handleSubmit}
-          className="w-full mt-10 py-4 text-white font-medium rounded-xl bg-linear-to-r from-green-400 to-blue-500 shadow-md hover:opacity-90"
+          className="w-full mt-5 py-4 text-white font-medium rounded-xl btn-primary flex items-center justify-center gap-2 whitespace-nowrap"
         >
-          Save & Continue →
+          Save & Continue
         </button>
 
         {/* Security Notice */}
