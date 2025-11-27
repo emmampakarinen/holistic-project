@@ -1,15 +1,25 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "./styles/global.css";
-
 import { RouterProvider } from "react-router-dom";
-import { router } from "./router";
+import { router } from "./router.tsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import "./styles/global.css"
 
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 createRoot(document.getElementById("root")!).render(
-  <GoogleOAuthProvider clientId={clientId}>
+<GoogleOAuthProvider clientId={clientId}>
+
     <RouterProvider router={router} />
-  </GoogleOAuthProvider>
+</GoogleOAuthProvider>
+=======
+
+
+>>>>>>> main
+
+createRoot(document.getElementById("root")!).render(
+   <GoogleOAuthProvider clientId={clientId}>
+    <RouterProvider router={router} />
+ </GoogleOAuthProvider>
+>>>>>>> origin/feature-23
 );
