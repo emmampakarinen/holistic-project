@@ -12,7 +12,7 @@ export default function LandingPage() {
         <img src="/images/logo.png" alt="Ev-Logo" className="icon-lg mx-auto mb-6" />
 
         <h1 className="text-4xl font-bold mb-4 leading-tight">
-          Plan smarter EV charging sessions <br /> that fit your journey
+          Plan timer EV charging sessions <br /> that fit your journey
         </h1>
        
         <p  className="center-text-box mb-2">
@@ -24,15 +24,15 @@ export default function LandingPage() {
           Get Started
         </button>
         <p className="text-xs text-gray-500 mt-3">
-          Sign in with Google to begin your smart charging journey
+          Sign in with Google to begin your time charging journey
         </p>
       </section>
 
-      <section className="mt-28 w-full max-w-5xl">
-        <h2 className="text-center text-2xl font-bold mb-10">Why Choose EV SmartCharge?</h2>
+      <section className="mt-8 w-full max-w-5xl">
+        <h2 className="text-center text-2xl font-bold mb-10">Why Choose EV timeCharge?</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-10">
           <Card variant="soft" className="p-6 text-center rounded-xl">
-            <h3 className="font-semibold text-lg mb-2">Smart Planning</h3>
+            <h3 className="font-semibold text-lg mb-2">Time Planning</h3>
             <p className="text-sm text-gray-500">Plan your charging session based on destination and trip duration.</p>
           </Card>
 
@@ -48,10 +48,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-   <section className="mt-28 w-full max-w-3xl px-10">
+   <section className="mt-8 w-full max-w-3xl px-10">
   <ol className="space-y-4 text-gray-700 text-left list-decimal list-inside leading-tight pl-0 mx-auto w-fit">
     <li><strong>Enter Your Journey Details</strong> — Add destination, time, and battery level.</li>
-    <li><strong>Get Smart Recommendations</strong> — We suggest the best slow chargers.</li>
+    <li><strong>Get Recommendations</strong> — We suggest the best slow chargers.</li>
     <li><strong>Navigate & Book</strong> — Get directions and book through partner apps.</li>
     <li><strong>Track Your Charge</strong> — Monitor charging in real-time.</li>
   </ol>
@@ -59,7 +59,7 @@ export default function LandingPage() {
 
 
 
-      <section className="mt-28 mb-20 text-center">
+      <section className="mt-10 mb-10 text-center">
         <h2 className="text-2xl font-bold mb-3">Ready to charge smarter?</h2>
         <p className="text-gray-600">Join thousands of EV drivers who plan charging efficiently.</p>
       </section>
@@ -67,7 +67,7 @@ export default function LandingPage() {
 
       {/* FOOTER */}
       <footer className="w-full py-6 bg-white border-t text-center text-sm text-gray-500">
-        © 2025 EV SmartCharge. All rights reserved.
+        © 2025 EV timeCharge. All rights reserved.
       </footer>
     </div>
   );
