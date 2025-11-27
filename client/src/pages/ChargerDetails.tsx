@@ -1,11 +1,11 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "../../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
 import { ArrowLeft, MapPin, Clock, Map, Navigation, Calendar, Star, Info } from "lucide-react";
 import { Zap } from "lucide-react";
 import Footer from "@/components/Footer";
-import logo from "@/assests/logo.png";
+import logo from "../assets/logo.png";
 
 const ChargerDetails = () => {
   const {
