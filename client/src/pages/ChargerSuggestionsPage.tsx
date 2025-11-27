@@ -33,9 +33,23 @@ export default function ChargerSuggestionsPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        // replace this with backend API call
 
-        setChargers(mockChargers);
+        const response = await fetch("http://localhost:5000/api/find-charger", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json" 
+          },
+          body: JSON.stringify(location.state.trip),
+        });
+
+        if (!response.ok) {
+          const errorDetails = await response.text();
+          throw new Error(`HTTP error! Status: ${response.status}. Details: ${errorDetails}`);
+        }
+
+        const chargerData = await response.json();
+
+        setChargers(chargerData);
       } catch (err) {
         console.error("Failed to fetch chargers", err);
         setChargers(mockChargers); // fallback

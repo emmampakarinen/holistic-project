@@ -10,17 +10,45 @@ export default function RegisterPage() {
 
   const email = localStorage.getItem("google_email");
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!fullName || !carName || !mobile) {
       alert("Please fill in all fields.");
       return;
     }
 
-    // Save profile data to localStorage (or send to backend)
-    localStorage.setItem("profile_completed", "true");
+    const payload = {
+      email: email, 
+      name: fullName, 
+      ev_cars: carName 
+    };
 
-    // Go to PromptPage
-    navigate("/prompt");
+
+    try {
+      const response = await fetch("http://localhost:5000/api/insert-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Success:", data);
+        localStorage.setItem("profile_completed", "true");
+        navigate("/app/planning");
+      } else {
+        alert("Error saving profile: " + data.error);
+      }
+    } catch (error) {
+      console.error("Network Error:", error);
+      alert("Failed to connect to the server.");
+    }
+
+    // save profile data to localStorage (or send to backend)
+    // localStorage.setItem("profile_completed", "true");
+
   };
 
   return (

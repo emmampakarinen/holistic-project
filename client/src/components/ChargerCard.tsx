@@ -16,7 +16,7 @@ export default function ChargerCard({ charger }: { charger: Charger }) {
       <CardContent>
         <div className="flex items-center justify-between">
           <Typography level="title-lg" fontWeight={600}>
-            {charger.name}
+            {charger.displayName.text}
           </Typography>
 
           <Chip
@@ -33,7 +33,7 @@ export default function ChargerCard({ charger }: { charger: Charger }) {
           <span role="img" aria-label="location">
             📍
           </span>{" "}
-          {charger.distanceKm} km from destination
+          {charger.distanceMetersWalkingToDestination} km from destination
         </Typography>
 
         <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
@@ -42,7 +42,7 @@ export default function ChargerCard({ charger }: { charger: Charger }) {
               Power Output
             </Typography>
             <Typography level="body-md" fontWeight={600}>
-              {charger.powerOutputKw} kW
+              {charger.bestEvChargeOption?.maxChargeRateKw ?? "d"} kW
             </Typography>
           </div>
 
@@ -51,7 +51,7 @@ export default function ChargerCard({ charger }: { charger: Charger }) {
               Est. Charge Time
             </Typography>
             <Typography level="body-md" fontWeight={600}>
-              {charger.estimatedChargeTime}
+              {charger.total_time_to_charge}
             </Typography>
           </div>
 
@@ -60,7 +60,7 @@ export default function ChargerCard({ charger }: { charger: Charger }) {
               Connector Type
             </Typography>
             <Typography level="body-md" fontWeight={600}>
-              {charger.connectorType}
+              {charger.bestEvChargeOption.type}
             </Typography>
           </div>
         </div>

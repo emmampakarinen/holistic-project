@@ -58,6 +58,7 @@ export default function PlanningPage() {
       });*/
       // handle response
       // Navigate to results page
+      console.log(payload)
       navigate("/app/suggestions", { state: { trip: payload } }); // Navigate to charger suggestions page
     } catch (err) {
       console.error("Failed to send trip data", err);
