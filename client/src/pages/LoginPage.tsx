@@ -18,20 +18,38 @@ function LoginPage() {
     localStorage.setItem("google_token", token);
     localStorage.setItem("google_email", email);
 
+    //      try {
+    //   const res = await fetch(
+    //     `/api/users/check?email=${email}`
+    //   );
+    //   const data = await res.json();
+
+    //   if (data.exists === true) {
+    //     // Already registered → go to planning
+    //     navigate("/planning");
+    //   } else {
+    //     // New user → go to register
+    //     navigate("/register");
+    //   }
+    // } catch (error) {
+    //   console.error("Error checking email:", error);
+    //   alert("Server error. Please try again.");
+    // }
+
     const previouslyRegistered = localStorage.getItem("profile_completed");
 
     if (previouslyRegistered === "true") {
-      navigate("/prompt");
+      navigate("/app/planning");
     } else {
       navigate("/register");
     }
   };
 
   return (
-    <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-50 px-10">
+    <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-50 px-5">
       {/* CARD */}
       <div className="bg-white shadow-lg rounded-3xl px-10 py-12 max-w-md w-full text-center">
-        <h1 className="text-2xl font-bold mb-2">EV SmartCharge</h1>
+        <h1 className="text-2xl font-bold mb-2">EV timeCharge</h1>
         <p className="text-gray-500 text-sm mb-6">
           Plan smarter EV charging sessions
         </p>
@@ -42,11 +60,16 @@ function LoginPage() {
         </p>
 
         {/* GOOGLE LOGIN */}
-        <div className="mb-4 flex justify-center">
-          <GoogleLogin
-            onSuccess={handleSuccess}
-            onError={() => console.log("Login Failed")}
-          />
+        <div className="flex justify-center w-full mb-5">
+          <div
+            className="flex justify-center items-center"
+            style={{ minWidth: "280px" }}
+          >
+            <GoogleLogin
+              onSuccess={handleSuccess}
+              onError={() => console.log("Login Failed")}
+            />
+          </div>
         </div>
 
         <p className="text-gray-400 text-xs mb-6">
@@ -56,7 +79,7 @@ function LoginPage() {
         {/* Second-time DIVIDER */}
         <div className="flex items-center gap-4 justify-center mb-6">
           <span className="w-16 h-px bg-gray-300"></span>
-          <span className="text-gray-400 text-xs">Second-time</span>
+          <span className="text-gray-400 text-xs">Second Time</span>
           <span className="w-16 h-px bg-gray-300"></span>
         </div>
 
@@ -65,7 +88,7 @@ function LoginPage() {
           <div className="flex items-center gap-3">
             <div className="w-6 h-6 bg-green-300 rounded-full"></div>
             <div>
-              <p className="font-medium">Smart Charging Plans</p>
+              <p className="font-medium">Time Charging Plans</p>
               <p className="text-gray-500 text-sm">
                 Find optimal chargers for your journey
               </p>
