@@ -21,7 +21,7 @@ function LoginPage() {
     const previouslyRegistered = localStorage.getItem("profile_completed");
 
     if (previouslyRegistered === "true") {
-      navigate("/prompt");
+      navigate("/app/planning");
     } else {
       navigate("/register");
     }

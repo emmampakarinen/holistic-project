@@ -1,10 +1,12 @@
 // for charger suggestions page
 export interface Charger {
   id: string;
-  name: string;
-  distanceKm: number;
-  powerOutputKw: number;
-  connectorType: string;
-  estimatedChargeTime: string;
+  displayName: {text: string};
+  distanceMetersWalkingToDestination: number;
+  bestEvChargeOption: {
+    maxChargeRateKw: number;
+    type: string;
+  };
+  total_time_to_charge: string;
   type: "slow" | "fast";
 }

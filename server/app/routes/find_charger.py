@@ -118,9 +118,9 @@ def find_charge():
 
             ####################################
 
-            weather_temp = get_latest_weather(maps_api_key, charger.get('location').get('latitude'), charger.get('location').get('longtitude')) # currently not used
+            #weather_temp = get_latest_weather(maps_api_key, charger.get('location').get('latitude'), charger.get('location').get('longtitude')) # currently not used
             
-            temp_coeff = 1 # coefficient to adjust charging speed based on temperature (default is 1)
+            #temp_coeff = 1 # coefficient to adjust charging speed based on temperature (default is 1)
 
             ####################################
 
@@ -248,4 +248,4 @@ def find_charge():
     }
     '''
 
-    return final_result
+    return [final_result]

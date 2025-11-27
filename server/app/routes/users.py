@@ -1,12 +1,15 @@
+import json
 from flask import Blueprint, jsonify, request 
 from app.services.handle_db_connections import create_conn, execute_insert
 
 bp = Blueprint("users", __name__)
 
-@bp.get("/insert-user")
+@bp.route("/insert-user", methods=['POST'])
 def insert_user():
 
+    print("WOW")
     # user_info = {"email": "tes111t@example.com", "name": "Test User", "ev_cars": '["Tesla Model Y", "Nissan Leaf", "Rivian R1S"]'}    
+    print(request.get_json())
 
     try:
         user_info = request.get_json()
@@ -24,7 +27,7 @@ def insert_user():
     
     user_email = user_info.get("email")
     user_name = user_info.get("name")
-    ev_cars = user_info.get("ev_cars")
+    ev_cars = json.dumps([user_info.get("ev_cars")])
     
     insert_statements = [(user_email, user_name, ev_cars)]
 

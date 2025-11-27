@@ -3,38 +3,56 @@ import type { Charger } from "../types/charger";
 export const mockChargers: Charger[] = [
   {
     id: "1",
-    name: "GreenCharge Station A",
-    distanceKm: 0.3,
-    powerOutputKw: 7.4,
-    connectorType: "Type 2",
-    estimatedChargeTime: "1h 45m",
+    displayName: {
+      text: "GreenCharge Station A"
+    },
+    // Converted 0.3km -> 300m
+    distanceMetersWalkingToDestination: 300, 
+    bestEvChargeOption: {
+      maxChargeRateKw: 7.4,
+      type: "Type 2"
+    },
+    total_time_to_charge: "105", // 1h 45m in minutes
     type: "slow",
+    // Add missing required fields from your interface if any (e.g. googleMapsLink)
   },
   {
     id: "2",
-    name: "EcoCharge Hub B",
-    distanceKm: 0.5,
-    powerOutputKw: 11,
-    connectorType: "Type 2",
-    estimatedChargeTime: "1h 20m",
+    displayName: {
+      text: "EcoCharge Hub B"
+    },
+    distanceMetersWalkingToDestination: 500, // 0.5km
+    bestEvChargeOption: {
+      maxChargeRateKw: 11,
+      type: "Type 2"
+    },
+    total_time_to_charge: "80", // 1h 20m in minutes
     type: "slow",
   },
   {
     id: "3",
-    name: "PowerPoint Station C",
-    distanceKm: 0.7,
-    powerOutputKw: 7.4,
-    connectorType: "Type 2",
-    estimatedChargeTime: "1h 50m",
+    displayName: {
+      text: "PowerPoint Station C"
+    },
+    distanceMetersWalkingToDestination: 700,
+    bestEvChargeOption: {
+      maxChargeRateKw: 7.4,
+      type: "Type 2"
+    },
+    total_time_to_charge: "110",
     type: "slow",
   },
   {
     id: "4",
-    name: "City Charge Point D",
-    distanceKm: 0.9,
-    powerOutputKw: 11,
-    connectorType: "Type 2",
-    estimatedChargeTime: "1h 25m",
+    displayName: {
+      text: "City Charge Point D"
+    },
+    distanceMetersWalkingToDestination: 900,
+    bestEvChargeOption: {
+      maxChargeRateKw: 11,
+      type: "Type 2"
+    },
+    total_time_to_charge: "85",
     type: "slow",
   },
 ];
