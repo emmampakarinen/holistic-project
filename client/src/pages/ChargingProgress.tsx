@@ -6,7 +6,7 @@ import { Badge } from "../components/ui/badge";
 import { Progress } from "../components/ui/progress";
 import { ArrowLeft, Clock, Battery, MapPin, Thermometer } from "lucide-react";
 import { Zap } from "lucide-react";
-import Footer from "@/components/Footer";
+import Footer from "../../components/Footer";
 import logo from "../assets/logo.png";
 ";
 
