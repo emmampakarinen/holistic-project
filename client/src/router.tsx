@@ -9,6 +9,10 @@ import ProfilePage from "./pages/ProfilePage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { PrivateRoute } from "./shared/PrivateRoute";
 import PlanningPage from "./pages/PlanningPage";
+import Index from "./pages/Index";
+import ChargerDetails from "./pages/ChargerDetails";
+import ChargingProgress from "./pages/ChargingProgress";
+import MyNotFound from "./pages/NotFound"; 
 
 export const router = createBrowserRouter([
   {
@@ -51,10 +55,27 @@ export const router = createBrowserRouter([
         path: "profile",
         element: <ProfilePage />,
       },
+      {
+        path: "/",
+        element: <Index />,
+      },
+      {
+        path: "/charger/:id",
+        element: <ChargerDetails />,
+      },
+      {
+        path: "/charging/:id",
+        element: <ChargingProgress />,
+      },
+
     ],
   },
   {
     path: "*",
     element: <NotFoundPage />,
+  },
+  {
+    path: "*",
+    element: <MyNotFound />,
   },
 ]);
