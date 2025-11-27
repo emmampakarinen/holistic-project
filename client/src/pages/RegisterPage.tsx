@@ -10,20 +10,19 @@ export default function RegisterPage() {
 
   const email = localStorage.getItem("google_email");
 
-  const handleSubmit = async() => {
+  const handleSubmit = async () => {
     if (!fullName || !carName || !mobile) {
       alert("Please fill in all fields.");
       return;
     }
-    
 
-    // Save profile data to backend
+
+     // Save profile data to backend
     // try {
     //   const response = await fetch("/api/register", {
     //     method: "POST",
     //     headers: {
     //       "Content-Type": "application/json",
-    //     },
     //     body: JSON.stringify({
     //       fullName,
     //       carName,
@@ -36,13 +35,12 @@ export default function RegisterPage() {
       // console.log("Saved to backend:", data);
 
 
-    // Save profile data to localStorage (or send to backend)
+    // Save profile locally (or send to backend)
     localStorage.setItem("profile_completed", "true");
 
-    // Go to PromptPage
-    navigate("/planning");
-
-  //   } catch (error) {
+    // Go to planning inside /app
+    navigate("/app/planning");
+     //   } catch (error) {
   //   console.error("Error saving to backend:", error);
   // }
 
@@ -151,7 +149,6 @@ export default function RegisterPage() {
           Save & Continue
         </button>
 
-        {/* Security Notice */}
         <div className="flex items-center justify-center mt-6 text-gray-400 text-xs gap-2">
           <span className="text-blue-600">🔒</span>
           <span>Your information is secure and will never be shared</span>
