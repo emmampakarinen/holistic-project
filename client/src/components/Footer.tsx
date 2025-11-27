@@ -1,4 +1,5 @@
-import logo from "@/assests/logo.png";
+import logo from "../assets/logo.png";
+
 
 const Footer = () => {
   return <footer className="bg-card border-t border-border mt-auto">
