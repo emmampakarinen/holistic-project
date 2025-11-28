@@ -1,10 +1,12 @@
+/* Google Font MUST come first */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+/* Tailwind directives */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom fonts */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
-
+/* Custom CSS */
 :root {
   --gradient-green-blue: linear-gradient(90deg, #30c67c 0%, #2979ff 100%);
 }
@@ -18,12 +20,15 @@ body {
 h1 {
   font-size: 36px;
 }
+
 h2 {
   font-size: 24px;
 }
+
 h3 {
   font-size: 20px;
 }
+
 .icon {
   display: inline-flex;
   width: 24px;
@@ -37,10 +42,12 @@ h3 {
   width: 20px;
   height: 20px;
 }
+
 .icon-md {
   width: 50px;
   height: 50px;
 }
+
 .icon-lg {
   width: 60px;
   height: 60px;
@@ -66,6 +73,7 @@ h3 {
 .btn-primary:active {
   transform: scale(0.97);
 }
+
 .btn-secondary {
   background: var(--gradient-green-blue);
   color: #ffffff;
@@ -82,9 +90,11 @@ h3 {
 .btn-secondary:hover {
   filter: brightness(1.08);
 }
+
 .btn-secondary:active {
   transform: scale(0.97);
 }
+
 .center-text-box {
   max-width: 600px;
   padding-left: 24px;
