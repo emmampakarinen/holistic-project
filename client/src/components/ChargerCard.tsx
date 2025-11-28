@@ -25,7 +25,7 @@ export default function ChargerCard({ charger }: { charger: Charger }) {
             color="success"
             sx={{ borderRadius: "999px", fontSize: 12 }}
           >
-            {charger.type} charger
+            {charger.bestEvChargeOption.charging_speed} charger
           </Chip>
         </div>
 
@@ -33,7 +33,7 @@ export default function ChargerCard({ charger }: { charger: Charger }) {
           <span role="img" aria-label="location">
             📍
           </span>{" "}
-          {charger.distanceMetersWalkingToDestination} km from destination
+          {charger.distanceMetersWalkingToDestination} meters from destination, {charger.travelTimeSecondsWalkingToDestination} minute walk
         </Typography>
 
         <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
@@ -42,16 +42,16 @@ export default function ChargerCard({ charger }: { charger: Charger }) {
               Power Output
             </Typography>
             <Typography level="body-md" fontWeight={600}>
-              {charger.bestEvChargeOption?.maxChargeRateKw ?? "d"} kW
+              {charger.bestEvChargeOption.maxChargeRateKw} kW
             </Typography>
           </div>
 
           <div>
             <Typography level="body-xs" className="text-slate-500">
-              Est. Charge Time
+              Est. Charge Time to 100%
             </Typography>
             <Typography level="body-md" fontWeight={600}>
-              {charger.total_time_to_charge}
+              {charger.bestEvChargeOption.total_time_to_charge}
             </Typography>
           </div>
 
@@ -61,6 +61,15 @@ export default function ChargerCard({ charger }: { charger: Charger }) {
             </Typography>
             <Typography level="body-md" fontWeight={600}>
               {charger.bestEvChargeOption.type}
+            </Typography>
+          </div>
+
+          <div>
+            <Typography level="body-xs" className="text-slate-500">
+              Battery at the Charger
+            </Typography>
+            <Typography level="body-md" fontWeight={600}>
+              {charger.battery_at_charger_near_destination}
             </Typography>
           </div>
         </div>

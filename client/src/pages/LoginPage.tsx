@@ -13,10 +13,12 @@ function LoginPage() {
     // decode Google email
     const payload = JSON.parse(atob(token.split(".")[1]));
     const email = payload.email;
+    const google_user_id = payload.sub;
 
     // Save user info
     localStorage.setItem("google_token", token);
     localStorage.setItem("google_email", email);
+    localStorage.setItem("google_sub", google_user_id);
 
     //      try {
     //   const res = await fetch(

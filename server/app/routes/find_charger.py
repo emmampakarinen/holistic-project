@@ -66,12 +66,12 @@ def find_charge():
     db_conn = create_conn() # Establish a connection to the database.
 
     sql_query = """
-    SELECT * FROM charger_analysis WHERE ev_name = %s
+    SELECT * FROM ev_charger_analysis WHERE ev_name = %s
     """
 
     query_params = (vehicle_model,)
 
-    vehicle_specs = execute_select(db_conn, sql_query, query_params)
+    vehicle_specs = execute_select(db_conn, sql_query, query_params)[0]
 
     # example data structure (commented out for validity)
     
@@ -99,6 +99,9 @@ def find_charge():
         soc_loss_pct = (trip_energy_kwh / vehicle_specs.get('max_capacity')) * 100
         arrival_soc = start_battery_pct - soc_loss_pct
         charger_stat["battery_at_charger_near_destination"] = arrival_soc
+
+    if arrival_soc < 5:
+        return {"error": "can't reach charger"}
 
     ####################################
 
@@ -211,41 +214,79 @@ def find_charge():
     best_charger_loc = None  
     best_connector_opt = None
 
+    all_candidates = []
+
     for charger in nearby_chargers:
-        conn_agg_list = charger.get('evChargeOptions', {}).get('connectorAggregation')
-        if not conn_agg_list:
-            continue
+        conn_agg_list = charger.get('evChargeOptions', {}).get('connectorAggregation', [])        
         for connector in conn_agg_list:
-            time_diff = connector.get('charger_delta_seconds')
+            time_diff = connector.get('charger_delta_seconds')            
             if time_diff is not None:
-                if min_time_diff is None or time_diff < min_time_diff:                    
-                    min_time_diff = time_diff
-                    best_charger_loc = charger
-                    best_connector_opt = connector
-    if best_charger_loc and best_connector_opt:
-        final_result = best_charger_loc.copy()
-        final_result.pop('evChargeOptions', None)
-        final_result["bestEvChargeOption"] = best_connector_opt
-        print(final_result)
-    else:
-        print("no valid charging options with charger_delta_seconds were found")
+                all_candidates.append({
+                    "sort_key": time_diff, 
+                    "charger": charger,  
+                    "connector": connector
+                })
+
+    all_candidates.sort(key=lambda x: x['sort_key'])
+
+    top_3_candidates = all_candidates[:3]
+    final_results = []
+
+    speed_category_map = {
+        "EV_CONNECTOR_TYPE_TYPE_2": "slow",
+        "EV_CONNECTOR_TYPE_CCS_COMBO_2": "fast",
+        "EV_CONNECTOR_TYPE_CHADEMO": "fast"
+    }
+
+    for candidate in top_3_candidates:
+        charger = candidate['charger']
+        connector = candidate['connector']
+
+        hours, remainder = divmod(connector.get("total_time_to_charge"), 3600)
+        minutes = remainder // 60
+        total_time_to_charge_formatted_time = f"{int(hours)}h {int(minutes)} min"
+
+        charger = candidate['charger']
+        connector = candidate['connector']
+        raw_type = connector.get("type")
+
+        formatted_entry = {
+            "battery_at_charger_near_destination": charger.get("battery_at_charger_near_destination"),
+            "displayName": charger.get("displayName"),
+            "distanceMetersDrivingToCharger": charger.get("distanceMetersDrivingToCharger"),
+            "distanceMetersWalkingToDestination": charger.get("distanceMetersWalkingToDestination"),
+            "travelTimeSecondsDrivingToCharger": charger.get("travelTimeSecondsDrivingToCharger"),
+            "travelTimeSecondsWalkingToDestination": round((charger.get("travelTimeSecondsWalkingToDestination") / 60)),
+            "bestEvChargeOption": {
+                "charger_delta_seconds": connector.get("charger_delta_seconds"),
+                "maxChargeRateKw": connector.get("maxChargeRateKw"),
+                "total_time_to_charge_seconds": connector.get("total_time_to_charge"),
+                "total_time_to_charge_formatted_time": total_time_to_charge_formatted_time,
+                "type": connector_map.get(raw_type, raw_type),
+                "charging_speed": speed_category_map.get(raw_type)
+            }
+        }
+
+        print(formatted_entry)
+        
+        final_results.append(formatted_entry)
 
     '''
     example output explanation:
     {
-    "battery_at_charger_near_destination": 67.2, # the estimated battery percentage remaining when the car arrives at this charger
-    "bestEvChargeOption": {                      # the specific connector selected as the optimal choice based on time calculations
-        "charger_delta_seconds": 9784.9,           # the difference between the charging time and your total time spent at the destination (including walking)
-        "maxChargeRateKw": 43,                     # the maximum power output (kW) supported by this specific connector
-        "total_time_to_charge": 10175.1,           # the total time (seconds) required to charge the battery to 100% from its arrival level
-        "type": "EV_CONNECTOR_TYPE_TYPE_2"         # the technical type of the plug/connector (e.g., Type 2 for AC charging)
-    },
-    "displayName": {...},                        # the public name of the charging station (e.g., "CSDD Charging Station")
-    "distanceMetersDrivingToCharger": 215159,    # the driving distance in meters from your current location to this charger
-    "distanceMetersWalkingToDestination": 1192,  # the walking distance in meters from this charger to your final destination address
-    "travelTimeSecondsDrivingToCharger": 10198,  # the estimated time in seconds it takes to drive to this charger
-    "travelTimeSecondsWalkingToDestination": 980 # the estimated time in seconds it takes to walk from this charger to your final destination
+        "battery_at_charger_near_destination": 67.2, # the estimated battery percentage remaining when the car arrives at this charger
+        "bestEvChargeOption": {                      # the specific connector selected as the optimal choice based on time calculations
+            "charger_delta_seconds": 9784.9,           # the difference between the charging time and your total time spent at the destination (including walking)
+            "maxChargeRateKw": 43,                     # the maximum power output (kW) supported by this specific connector
+            "total_time_to_charge": 10175.1,           # the total time (seconds) required to charge the battery to 100% from its arrival level
+            "type": "EV_CONNECTOR_TYPE_TYPE_2"         # the technical type of the plug/connector (e.g., Type 2 for AC charging)
+        },
+        "displayName": {...},                        # the public name of the charging station (e.g., "CSDD Charging Station")
+        "distanceMetersDrivingToCharger": 215159,    # the driving distance in meters from your current location to this charger
+        "distanceMetersWalkingToDestination": 1192,  # the walking distance in meters from this charger to your final destination address
+        "travelTimeSecondsDrivingToCharger": 10198,  # the estimated time in seconds it takes to drive to this charger
+        "travelTimeSecondsWalkingToDestination": 980 # the estimated time in seconds it takes to walk from this charger to your final destination
     }
     '''
 
-    return [final_result]
+    return final_results

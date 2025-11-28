@@ -39,6 +39,8 @@ def execute_select(db_connection, sql_query, query_params = None):
         
         column_headers = [x[0] for x in db_cursor.description] # extract the column names from the query result metadata
         
+        results_list = []
+
         for raw_row in fetched_rows:
             sanitized_row = [] # a list to hold the processed values for the current row
             for cell_value in raw_row:
@@ -57,7 +59,10 @@ def execute_select(db_connection, sql_query, query_params = None):
                     sanitized_row.append(cell_value)
             
             # combine column headers with the sanitized row values into a dictionary and return it immediately
-            return dict(zip(column_headers, sanitized_row))
+            row_dict = dict(zip(column_headers, sanitized_row))
+            results_list.append(row_dict)
+        
+        return results_list
         
     finally:
         db_cursor.close() # close the cursor to free up resources
