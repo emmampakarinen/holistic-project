@@ -14,54 +14,52 @@ import InfoCard from "../components/InfoCard";
 import { useNavigate, useLocation } from "react-router-dom";
 import type { TripPlan } from "../types/trip";
 
-// The charger suggestions page that displays recommended chargers based on user input
+// the charger suggestions page that displays recommended chargers based on user input
 export default function ChargerSuggestionsPage() {
-  const [chargers, setChargers] = useState<Charger[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [trip, setTrip] = useState<TripPlan | null>(null);
 
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Grab trip from navigation state
+  const [chargers, setChargers] = useState<Charger[]>(location.state?.chargers || []);
+  const [loading, setLoading] = useState(!location.state?.chargers);
+  const [trip, setTrip] = useState<TripPlan | null>(null);
+
   useEffect(() => {
     const stateTrip = (location.state as { trip?: TripPlan })?.trip ?? null;
     setTrip(stateTrip);
   }, [location.state]);
 
-  // Fetch charger suggestions from backend
   useEffect(() => {
+
+    if (location.state?.chargers) {
+      return;
+    }
+
     async function fetchData() {
       try {
 
-        const response = await fetch("http://localhost:5000/api/find-charger", {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json" 
-          },
-          body: JSON.stringify(location.state.trip),
+        setChargers(location.state.chargers);
+
+        navigate(".", { 
+            state: { ...location.state, chargers: location.state.chargers }, 
+            replace: true 
         });
 
-        if (!response.ok) {
-          const errorDetails = await response.text();
-          throw new Error(`HTTP error! Status: ${response.status}. Details: ${errorDetails}`);
-        }
-
-        const chargerData = await response.json();
-
-        setChargers(chargerData);
       } catch (err) {
         console.error("Failed to fetch chargers", err);
-        setChargers(mockChargers); // fallback
+        setChargers(mockChargers);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchData();
+    if (location.state?.trip) {
+        fetchData();
+    }
   }, []);
 
   // for showing the stay duration in hours and minutes
+
   const stayText =
     trip != null
       ? `${Math.floor(trip.minutesAtDestination / 60)} h ${

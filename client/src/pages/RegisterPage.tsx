@@ -1,27 +1,63 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Select from "@mui/joy/Select";
+import Option from "@mui/joy/Option";
+import Chip from "@mui/joy/Chip";
+import Box from "@mui/joy/Box"; 
 
 export default function RegisterPage() {
+
   const navigate = useNavigate();
 
   const [fullName, setFullName] = useState("");
-  const [carName, setCarName] = useState("");
   const [mobile, setMobile] = useState("");
 
+  const [selectedCars, setSelectedCars] = useState<string[]>([]); 
+  const [evList, setEvList] = useState<{ ev_name: string }[]>([]);
+
   const email = localStorage.getItem("google_email");
+  const google_user_id = localStorage.getItem("google_sub");
+
+  // useEffect(() => {
+      // const isProfileDone = localStorage.getItem("profile_completed");
+      
+      // if (isProfileDone === "true") {
+        // navigate("/app/planning", { replace: true });
+      // }
+  // }, [navigate]);
+
+  useEffect(() => {
+    const fetchEvs = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/get-available-evs");
+        if (response.ok) {
+          const data = await response.json();
+          setEvList(data);
+        } 
+        else {
+          console.error("Failed to fetch EV list");
+        }
+      } 
+      catch (error) {
+        console.error("Error fetching EVs:", error);
+      }
+    };
+
+    fetchEvs();
+  }, []);
 
   const handleSubmit = async () => {
-    if (!fullName || !carName || !mobile) {
+    if (!fullName || !evList || !mobile) {
       alert("Please fill in all fields.");
       return;
     }
 
     const payload = {
+      google_user_id: google_user_id,
       email: email, 
       name: fullName, 
-      ev_cars: carName 
+      ev_cars: evList,
     };
-
 
     try {
       const response = await fetch("http://localhost:5000/api/insert-user", {
@@ -90,18 +126,60 @@ export default function RegisterPage() {
           {/* EV Car Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              EV Car Name
+              EV Car Models (Select all that apply)
             </label>
-            <div className="flex items-center gap-3 bg-gray-100 rounded-xl px-4 py-3">
-              <span className="text-gray-400">🚗</span>
-              <input
-                type="text"
-                placeholder="e.g., Tesla Model 3, Nissan Leaf"
-                className="bg-transparent outline-none w-full"
-                value={carName}
-                onChange={(e) => setCarName(e.target.value)}
-              />
-            </div>
+            <Select
+              multiple // <--- ENABLE MULTI SELECT
+              placeholder="Select your EV model(s)"
+              startDecorator={<span className="text-xl">🚗</span>}
+              value={selectedCars}
+              onChange={(e, newValues) => setSelectedCars(newValues)}
+              
+              // This prop controls how the selected values look inside the box
+              renderValue={(selected) => (
+                <Box sx={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+                  {selected.map((selectedOption) => (
+                    <Chip 
+                        key={selectedOption.value} 
+                        variant="soft" 
+                        color="primary" 
+                        size="sm"
+                    >
+                      {selectedOption.label}
+                    </Chip>
+                  ))}
+                </Box>
+              )}
+
+              variant="soft"
+              color="neutral"
+              sx={{
+                borderRadius: "12px",
+                paddingBlock: "12px",
+                backgroundColor: "#f3f4f6",
+                "&:hover": { backgroundColor: "#e5e7eb" },
+                "--Select-decoratorChildHeight": "30px",
+                minHeight: "52px" // Ensure height allows for chips
+              }}
+              slotProps={{
+                listbox: {
+                  sx: {
+                    maxHeight: '200px', // Limit dropdown height
+                    overflow: 'auto',   // Scroll if too many cars
+                  },
+                },
+              }}
+            >
+              {evList.length === 0 && (
+                 <Option value={null} disabled>Loading cars...</Option>
+              )}
+              
+              {evList.map((ev, index) => (
+                <Option key={index} value={ev.ev_name}>
+                  {ev.ev_name}
+                </Option>
+              ))}
+            </Select>
           </div>
 
           {/* Mobile Number */}

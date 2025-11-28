@@ -8,64 +8,146 @@ import {
   Sheet,
   Slider,
   Typography,
+  Alert,
+  Select,
+  Option,
 } from "@mui/joy";
 import { useCurrentTemperature } from "../hooks/useWeather";
 import { useCurrentLocation } from "../hooks/useLocation";
 import { useNavigate } from "react-router-dom";
 import type { TripPlan } from "../types/trip";
 
-// The planning page where users input their trip details to find suitable chargers
+// the planning page where users input their trip details to find suitable chargers
+
 export default function PlanningPage() {
-  // Custom hooks to get current temperature and users location
+
+  // custom hooks to get current temperature and users location
   const { city, latitude, longitude } = useCurrentLocation();
-  const { temp, loading } = useCurrentTemperature();
+  const { temp, loading} = useCurrentTemperature();
   const navigate = useNavigate();
 
-  // State variables for form inputs
-  const [location, setLocation] = useState("");
-  const [destination, setDestination] = useState("");
-  const [hours, setHours] = useState("");
-  const [minutes, setMinutes] = useState("");
-  const [battery, setBattery] = useState(65);
-  const [EVModel, setEVModel] = useState("");
+  // state variables for form inputs
 
-  const timeAtDestinationMinutes =
-    (Number(hours) || 0) * 60 + (Number(minutes) || 0);
+  const [location, setLocation] = useState(() => {
+    return localStorage.getItem("location") || "";
+  });
 
-  // Handle form submission to find chargers
+  const [destination, setDestination] = useState(() => {
+    return localStorage.getItem("destination") || "";
+  });
+
+  const [hours, setHours] = useState(() => {
+    return localStorage.getItem("hours") || "";
+  });
+
+  const [minutes, setMinutes] = useState(() => {
+    return localStorage.getItem("minutes") || "";
+  });
+
+  const [battery, setBattery] = useState(() => {
+    const saved = localStorage.getItem("battery");
+    return saved !== null ? Number(saved) : 65;
+  });
+
+  const [EVModel, setEVModel] = useState(() => {
+    const saved = localStorage.getItem("EVModel");
+    return (saved === "null" || !saved) ? null : saved;
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const [evList, setEvList] = useState<{ ev_name: string }[]>([]);
+
+  const timeAtDestinationMinutes =(Number(hours) || 0) * 60 + (Number(minutes) || 0);
+
+  const google_user_id = localStorage.getItem("google_sub");
+
+  useEffect(() => {
+    const fetchEvs = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/get-user-evs", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(google_user_id),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setEvList(data.ev_cars || []);
+        } 
+        else {
+          console.error("Failed to fetch EV list");
+        }
+      } 
+      catch (error) {
+        console.error("Error fetching EVs:", error);
+      }
+    };
+
+    fetchEvs();
+  }, []);
+
+  // handle form submission to find chargers
+
   const handleFindChargers = async (e: React.FormEvent) => {
+    
     e.preventDefault();
-    const minutesAtDestination = timeAtDestinationMinutes;
+    setErrorMessage(null); // Clear previous errors
+    setIsSubmitting(true);   // Start loading spinner/disable button
 
-    // Prepare payload
     const payload: TripPlan = {
       latitude,
       longitude,
       location,
       destination,
       EVModel,
-      minutesAtDestination,
+      minutesAtDestination: timeAtDestinationMinutes,
       battery,
       temperature: temp,
     };
 
+    localStorage.setItem("location", location);
+    localStorage.setItem("destination", destination);
+    localStorage.setItem("hours", hours);
+    localStorage.setItem("minutes", minutes);
+    localStorage.setItem("battery", battery.toString());
+    localStorage.setItem("EVModel", EVModel || "");
+    
     try {
-      /*await fetch("", {
-        // backend endpoint to be added
+
+      const response = await fetch("http://localhost:5000/api/find-charger", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      });*/
-      // handle response
-      // Navigate to results page
-      console.log(payload)
-      navigate("/app/suggestions", { state: { trip: payload } }); // Navigate to charger suggestions page
-    } catch (err) {
-      console.error("Failed to send trip data", err);
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data.error) {
+        setErrorMessage(data.error || "can't reach destinaton chargers");
+        return; 
+      }
+
+      navigate("/app/suggestions", { 
+        state: { 
+          trip: payload, 
+          chargers: data
+        } 
+      });
+
+    } 
+    catch (err) {
+      console.error("failed to fetch trip data", err);
+      setErrorMessage("network error, please try again");
+    } 
+    finally {
+      setIsSubmitting(false);
     }
   };
 
-  // Auto-fill location when available
   useEffect(() => {
     if (city && city !== "Loading...") {
       setLocation(city);
@@ -109,6 +191,7 @@ export default function PlanningPage() {
                 <FormLabel>Destination</FormLabel>
                 <Input
                   placeholder="Where are you going?"
+                  value={destination}
                   onChange={(e) => setDestination(e.target.value)}
                   required
                 />
@@ -124,6 +207,7 @@ export default function PlanningPage() {
                       type="number"
                       placeholder="0"
                       slotProps={{ input: { min: 0, max: 12 } }}
+                      value={hours}
                       onChange={(e) => setHours(e.target.value)}
                       required
                     />
@@ -135,6 +219,7 @@ export default function PlanningPage() {
                       type="number"
                       placeholder="0"
                       slotProps={{ input: { min: 0, max: 59 } }}
+                      value={minutes}
                       onChange={(e) => setMinutes(e.target.value)}
                       required
                     />
@@ -167,11 +252,48 @@ export default function PlanningPage() {
 
               <FormControl>
                 <FormLabel>EV Car Model</FormLabel>
-                <Input
-                  placeholder="e.g., Tesla Model 3, Nissan Leaf"
-                  onChange={(e) => setEVModel(e.target.value)}
+                
+                <Select
+                  
+                  placeholder="Select your EV model"
+                  startDecorator={<span className="text-xl">🚗</span>}
+                  
+                  // connect to your existing state variable
+                  value={EVModel} 
+                  onChange={(e, value) => setEVModel(value)}
+                  
                   required
-                />
+                  
+                  // apply your custom styling
+                  variant="soft"
+                  color="neutral"
+                  sx={{
+                    borderRadius: "12px",     // matches your other inputs
+                    paddingBlock: "12px", 
+                    backgroundColor: "#f3f4f6", // matches bg-gray-100
+                    "&:hover": { backgroundColor: "#e5e7eb" },
+                    "--Select-decoratorChildHeight": "30px",
+                    width: "100%" // ensure it fills the form control
+                  }}
+
+                >
+                  {EVModel && (
+                      <Option value={EVModel} style={{ display: 'none' }}>
+                        {EVModel}
+                      </Option>
+                  )}
+
+                  {evList.length === 0 && (
+                    <Option value={null} disabled>Loading cars...</Option>
+                  )}
+
+                  {evList.map((ev, index) => (
+                    <Option key={index} value={ev.ev_name}>
+                      {ev.ev_name}
+                    </Option>
+                  ))}
+                  
+                </Select>
               </FormControl>
 
               <Sheet
@@ -211,9 +333,24 @@ export default function PlanningPage() {
                 sx={{ mt: 2, borderRadius: "xl" }}
                 className="w-full"
                 type="submit"
+                disabled={isSubmitting}
               >
-                Find Chargers
+                {isSubmitting ? "Calculating..." : "Find Chargers"}
+                
               </Button>
+
+              {errorMessage && (
+                <Alert 
+                  variant="soft" 
+                  color="danger" 
+                  sx={{ mb: 2, borderRadius: "md" }}
+                >
+                  <Typography level="body-sm" color="danger">
+                    {errorMessage}
+                  </Typography>
+                </Alert>
+              )}
+
             </div>
           </form>
 
