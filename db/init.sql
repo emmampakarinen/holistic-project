@@ -79,7 +79,7 @@ CREATE TABLE charger_reviews (
     review TEXT DEFAULT NULL,
     user_id VARCHAR(255) NOT NULL,     
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 INSERT INTO charger_reviews (google_charger_id, rating, review, user_id)
