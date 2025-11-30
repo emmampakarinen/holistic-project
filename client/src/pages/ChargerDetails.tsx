@@ -1,4 +1,5 @@
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useLocation, useParams, useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -6,28 +7,113 @@ import { ArrowLeft, MapPin, Clock, Map, Navigation, Calendar, Star, Info } from 
 import { Zap } from "lucide-react";
 import Footer from "../components/Footer";
 import logo from "../assets/logo.png";
+import type { Charger } from "../types/charger";
+//import { time } from "console";
+
+// formats date as "yyyy-mm-dd hh:mm:ss"
+const formatToPythonString = (date: Date) => {
+  return date.toLocaleString("sv-SE").replace("T", " ");
+};
 
 const ChargerDetails = () => {
-  const {
-    id
-  } = useParams();
-  const navigate = useNavigate();
 
-  // Mock data - in real app this would come from an API
-  const charger = {
-    id,
-    name: "GreenCharge Station",
-    address: "123 Main Street, Downtown District",
-    distance: "0.3 km",
-    type: "Slow Charger",
-    power: "7.2 kW",
-    estimatedTime: "2.5 hours",
-    rating: 4.2,
-    reviews: 127
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { id } = useParams();
+
+  // get charger data
+  const charger = location.state?.charger; 
+
+  // handle missing data (refresh protection)
+  if (!charger) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen space-y-4">
+        <h2 className="text-xl font-bold text-red-600">Charger Not Found</h2>
+        <p className="text-muted-foreground">Session data was lost (likely due to a refresh).</p>
+        <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onClick={() => navigate("/planning")}>
+          Back to Planning
+        </button>
+      </div>
+    );
+  }
+
+  // start charging handler
+  const handleStartCharging = async () => {
+    try {
+
+      // generate timestamps
+      const nowObject = new Date();
+      const timestampString = formatToPythonString(nowObject);
+
+      const storedPlan = localStorage.getItem("currentTripPlan");
+      const tripData = storedPlan ? JSON.parse(storedPlan) : {};
+
+      const trip_history_payload = {
+        starting_points: tripData.location,
+        ending_points: tripData.destination,
+        car_start_charging_timestamp: timestampString,
+        expected_charging_time: charger?.totalTimeToChargeSeconds || 0,
+        user_id: localStorage.getItem("google_sub")
+      };
+
+      const response_history = await fetch("http://localhost:5000/api/save-history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(trip_history_payload),
+      });
+
+      // save session info to localStorage
+      // note: we overwrite active_session_start here because a new session is starting.
+      localStorage.setItem("activeSessionStart", timestampString);
+
+      // build payload
+      const payload = {
+        ev_name: localStorage.getItem("EVModel") || "Unknown EV",
+        chosen_charger_type: charger?.type || "Unknown Connector",
+        soc_at_charger: charger?.batteryAtChargerNearDestination,
+        charging_power: charger?.maxChargeRateKw,
+        car_start_charging_timestamp: timestampString,
+        fetching_timestamp: timestampString,         
+        expected_charging_time: charger?.total_time_to_charge_seconds || 0,
+      };
+
+      console.log("sending to backend:", payload);
+
+      // send request
+      const response = await fetch("http://localhost:5000/api/charging-details", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      localStorage.setItem("activeChargerSession", JSON.stringify(data));
+
+      // handle response
+      if (response.ok && !data.error) {
+        console.log("received from backend:", data);
+        
+        // navigate on success
+        navigate(`/charging/${id}`, { 
+          state: { 
+            charger: charger,
+            sessionData: data,
+            currentPayload: payload,
+          } 
+        }); 
+      } 
+      else {
+        console.error("backend error:", data.error);
+        alert(`error starting session: ${data.error || "unknown error"}`);
+      }
+    } 
+    catch (err) {
+      console.error("network error:", err);
+      alert("network error, please check your connection");
+    }
   };
-  const handleStartCharging = () => {
-    navigate(`/charging/${id}`);
-  };
+  
   return <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-10 shadow-sm">
@@ -56,10 +142,10 @@ const ChargerDetails = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Station Header */}
             <div>
-              <h1 className="text-4xl font-bold mb-2">{charger.name}</h1>
+              <h1 className="text-4xl font-bold mb-2">{charger?.displayName?.text}</h1>
               <div className="flex items-center text-muted-foreground">
                 <MapPin className="h-5 w-5 mr-2 text-primary" />
-                <span className="text-lg">{charger.address}</span>
+                <span className="text-lg">{charger?.address}</span>
               </div>
             </div>
 
@@ -69,7 +155,7 @@ const ChargerDetails = () => {
                 <div className="relative h-80 bg-muted rounded-lg flex items-center justify-center">
                   <div className="absolute top-4 right-4 bg-card px-3 py-1.5 rounded-full shadow-md flex items-center gap-2 text-sm">
                     <Navigation className="h-4 w-4 text-secondary" />
-                    <span className="font-medium">{charger.distance} from destination</span>
+                    <span className="font-medium">{charger?.distanceMetersWalkingToDestination} meters from destination</span>
                   </div>
                   <div className="text-center">
                     <Map className="h-16 w-16 text-muted-foreground mx-auto mb-3" />
@@ -107,7 +193,7 @@ const ChargerDetails = () => {
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground mb-1">Power Output</p>
-                        <p className="font-bold text-lg">{charger.power}</p>
+                        <p className="font-bold text-lg">{charger.maxChargeRateKw} kW</p>
                       </div>
                     </div>
                   </CardContent>
@@ -121,7 +207,7 @@ const ChargerDetails = () => {
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground mb-1">Est. Charge Time</p>
-                        <p className="font-bold text-lg">{charger.estimatedTime}</p>
+                        <p className="font-bold text-lg">{charger.totalTimeToChargeFormattedTime}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -139,7 +225,7 @@ const ChargerDetails = () => {
                   <div>
                     <h3 className="font-bold text-lg mb-2">Perfect Match for Your Trip</h3>
                     <p className="text-muted-foreground">
-                      This slow charger is ideal for your 2-hour destination stay. Your vehicle
+                      This slow charger is ideal for your {localStorage.getItem("hours")}h {localStorage.getItem("minutes")} min destination stay. Your vehicle
                       will be fully charged by the time you're ready to leave.
                     </p>
                   </div>
@@ -156,16 +242,20 @@ const ChargerDetails = () => {
                 <h3 className="font-bold text-lg mb-4">Quick Actions</h3>
                 <div className="space-y-3">
                   <Button className="w-full bg-primary hover:bg-primary/90 h-12" onClick={handleStartCharging}>
-                    
                     Start Charging
                   </Button>
                   <Button variant="outline" className="w-full h-12 border-secondary text-secondary hover:bg-secondary/10">
                     <Navigation className="mr-2 h-5 w-5" />
-                    Navigate to Charger
+                    <a href={charger.googleMapsLink} target="_blank" rel="noopener noreferrer">
+                      Navigate to Charger
+                    </a>
                   </Button>
-                  <Button variant="outline" className="w-full h-12">
-                    <Calendar className="mr-2 h-5 w-5" />
-                    Book Charger
+                  <Button variant="outline" className="w-full h-12" asChild>
+                    {/* Use a standard anchor tag for external sites */}
+                    <a href={charger.websiteUri} target="_blank" rel="noopener noreferrer">
+                      <Calendar className="mr-2 h-5 w-5" />
+                      Book Charger
+                    </a>
                   </Button>
                 </div>
               </CardContent>
@@ -192,4 +282,5 @@ const ChargerDetails = () => {
       <Footer />
     </div>;
 };
+
 export default ChargerDetails;

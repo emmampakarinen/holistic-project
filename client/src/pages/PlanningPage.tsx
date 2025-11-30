@@ -8,68 +8,211 @@ import {
   Sheet,
   Slider,
   Typography,
+  Alert,
+  Select,
+  Option,
 } from "@mui/joy";
 import { useCurrentTemperature } from "../hooks/useWeather";
 import { useCurrentLocation } from "../hooks/useLocation";
 import { useNavigate } from "react-router-dom";
 import type { TripPlan } from "../types/trip";
 
-// The planning page where users input their trip details to find suitable chargers
+interface PlanningFormData {
+  location: string;
+  destination: string;
+  hours: string;
+  minutes: string;
+  battery: number;
+  EVModel: string | null;
+}
+
+interface TripHistoryItem {
+  starting_points: string;
+  ending_points: string;
+  car_start_charging_timestamp: string;
+  expected_charging_time: number; 
+}
+
+// the planning page where users input their trip details to find suitable chargers
+
 export default function PlanningPage() {
-  // Custom hooks to get current temperature and users location
+
+  // custom hooks to get current temperature and users location
+
+  const navigate = useNavigate();
   const { city, latitude, longitude } = useCurrentLocation();
   const { temp, loading } = useCurrentTemperature();
-  const navigate = useNavigate();
 
-  // State variables for form inputs
-  const [location, setLocation] = useState("");
-  const [destination, setDestination] = useState("");
-  const [hours, setHours] = useState("");
-  const [minutes, setMinutes] = useState("");
-  const [battery, setBattery] = useState(65);
-  const [EVModel, setEVModel] = useState("");
+  // state variables for form inputs
 
-  const timeAtDestinationMinutes =
-    (Number(hours) || 0) * 60 + (Number(minutes) || 0);
+  const [formData, setFormData] = useState<PlanningFormData>(() => ({
+    location: localStorage.getItem("location") || "",
+    destination: localStorage.getItem("destination") || "",
+    hours: localStorage.getItem("hours") || "",
+    minutes: localStorage.getItem("minutes") || "",
+    battery: Number(localStorage.getItem("battery")) || 65,
+    EVModel: localStorage.getItem("EVModel") === "null" ? null : localStorage.getItem("EVModel"),
+  }));
 
-  // Handle form submission to find chargers
+  const [evList, setEvList] = useState<{ ev_name: string }[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [tripHistory, setTripHistory] = useState<TripHistoryItem[]>([]);
+
+  const google_user_id = localStorage.getItem("google_sub");
+
+  // helper to update state fields
+  const updateField = (field: keyof PlanningFormData, value: any) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  useEffect(() => {
+    const profileCompleted = localStorage.getItem("profileCompleted");
+    
+    // Security check: Redirect and STOP execution
+    if (!profileCompleted) {
+      navigate("/register");
+      return; 
+    }
+
+    const controller = new AbortController();
+
+    const fetchEvs = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/get-user-evs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ google_id: google_user_id }), 
+          signal: controller.signal,
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setEvList(data.ev_cars || []);
+        } else {
+          console.error("Failed to fetch EV list");
+        }
+      } catch (error: any) {
+        if (error.name !== 'AbortError') {
+          console.error("Error fetching EVs:", error);
+        }
+      }
+    };
+
+    const fetchHistory = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/get-history", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ google_id: google_user_id }), 
+          signal: controller.signal,
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data)
+          setTripHistory(data || []);
+        } else {
+          console.error("ailed to fetch EV list");
+        }
+      } catch (error: any) {
+        if (error.name !== 'AbortError') {
+          console.error("Error fetching EVs:", error);
+        }
+      }
+    };
+
+    fetchEvs();
+    fetchHistory();
+
+    return () => controller.abort(); // cleanup on unmount
+  }, [navigate, google_user_id]);
+
+  // auto fill location from gps if empty
+
+  useEffect(() => {
+    if (city && city !== "Loading..." && !formData.location) {
+      updateField("location", city);
+    }
+  }, [city, formData.location]);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    // Returns format like "30 Nov • 13:47"
+    return `${date.getDate()} ${date.toLocaleString('default', { month: 'short' })} • ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+  };
+
+  const formatDuration = (seconds: number) => {
+    if (!seconds) return "0 min";
+    const minutes = Math.round(seconds / 60);
+    if (minutes >= 60) {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return `${hours} hr ${mins > 0 ? `${mins} min` : ""} charging`;
+    }
+    return `${minutes} min charging`;
+  };
+
+  const cleanAddress = (addr: string) => addr.split(',')[0];
+
+  // handle form submission to find chargers
+
   const handleFindChargers = async (e: React.FormEvent) => {
     e.preventDefault();
-    const minutesAtDestination = timeAtDestinationMinutes;
+    setErrorMessage(null);
+    setIsSubmitting(true);
 
-    // Prepare payload
+    // save inputs to localStorage
+    Object.entries(formData).forEach(([key, value]) => {
+      localStorage.setItem(key, String(value));
+    });
+
+    // calculate total minutes
+    const timeAtDestination = (Number(formData.hours) || 0) * 60 + (Number(formData.minutes) || 0);
+
+    // construct payload using the imported TripPlan type
     const payload: TripPlan = {
-      latitude,
-      longitude,
-      location,
-      destination,
-      EVModel,
-      minutesAtDestination,
-      battery,
+      latitude: latitude,
+      longitude: longitude,
+      city: city,
+      location: formData.location,
+      destination: formData.destination,
+      EVModel: formData.EVModel || "",
+      minutesAtDestination: timeAtDestination,
+      battery: formData.battery,
       temperature: temp,
     };
 
+    // set whole data to localStorage
+    const currentTripPlan = payload;
+    localStorage.setItem("currentTripPlan", JSON.stringify(currentTripPlan));
+    
     try {
-      /*await fetch("", {
-        // backend endpoint to be added
+      const response = await fetch("http://localhost:5000/api/find-charger", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      });*/
-      // handle response
-      // Navigate to results page
-      navigate("/app/suggestions", { state: { trip: payload } }); // Navigate to charger suggestions page
-    } catch (err) {
-      console.error("Failed to send trip data", err);
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data.error) {
+        throw new Error(data.error || "Can't reach destination chargers");
+      }
+
+      navigate("/suggestions", {
+        state: { trip: payload, chargers: data },
+      });
+
+    } 
+    catch (err: any) {
+      console.error("Failed to fetch trip data", err);
+      setErrorMessage(err.message || "Network error, please try again");
+    } 
+    finally {
+      setIsSubmitting(false);
     }
   };
-
-  // Auto-fill location when available
-  useEffect(() => {
-    if (city && city !== "Loading...") {
-      setLocation(city);
-    }
-  }, [city]);
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
@@ -97,9 +240,9 @@ export default function PlanningPage() {
               <FormControl>
                 <FormLabel>Current Location</FormLabel>
                 <Input
-                  value={location}
+                  value={formData.location}
                   placeholder="Enter your current location"
-                  onChange={(e) => setLocation(e.target.value)}
+                  onChange={(e) => updateField('location', e.target.value)}
                   required
                 />
               </FormControl>
@@ -108,7 +251,8 @@ export default function PlanningPage() {
                 <FormLabel>Destination</FormLabel>
                 <Input
                   placeholder="Where are you going?"
-                  onChange={(e) => setDestination(e.target.value)}
+                  value={formData.destination}
+                  onChange={(e) => updateField('destination', e.target.value)}
                   required
                 />
               </FormControl>
@@ -123,18 +267,19 @@ export default function PlanningPage() {
                       type="number"
                       placeholder="0"
                       slotProps={{ input: { min: 0, max: 12 } }}
-                      onChange={(e) => setHours(e.target.value)}
+                      value={formData.hours}
+                      onChange={(e) => updateField('hours', e.target.value)}
                       required
                     />
                   </FormControl>
-
                   <FormControl sx={{ flex: 1 }}>
                     <FormLabel>Minutes</FormLabel>
                     <Input
                       type="number"
                       placeholder="0"
                       slotProps={{ input: { min: 0, max: 59 } }}
-                      onChange={(e) => setMinutes(e.target.value)}
+                      value={formData.minutes}
+                      onChange={(e) => updateField('minutes', e.target.value)}
                       required
                     />
                   </FormControl>
@@ -145,14 +290,14 @@ export default function PlanningPage() {
                 <FormLabel>Current Battery Level</FormLabel>
                 <div className="flex items-center gap-4">
                   <Slider
-                    value={battery}
+                    value={formData.battery}
+                    // the second argument newValue is the actual number
+                    onChange={(_, newValue) => updateField('battery', newValue)} 
                     min={0}
                     max={100}
-                    onChange={(_, value) => setBattery(value as number)}
-                    sx={{ flex: 1 }}
                   />
                   <Typography level="body-lg" fontWeight="lg">
-                    {battery}%
+                    {formData.battery}%
                   </Typography>
                 </div>
                 <div className="flex justify-between text-[10px] text-slate-400 mt-1">
@@ -166,11 +311,49 @@ export default function PlanningPage() {
 
               <FormControl>
                 <FormLabel>EV Car Model</FormLabel>
-                <Input
-                  placeholder="e.g., Tesla Model 3, Nissan Leaf"
-                  onChange={(e) => setEVModel(e.target.value)}
+                
+                <Select
+                  
+                  placeholder="Select your EV model"
+                  startDecorator={<span className="text-xl">🚗</span>}
+
+                  // connect to your existing state variable
+                  value={formData.EVModel} 
+                  onChange={(_, newValue) => updateField('EVModel', newValue)} 
+                  
                   required
-                />
+                  
+                  // apply your custom styling
+                  variant="soft"
+                  color="neutral"
+                  sx={{
+                    borderRadius: "12px",     // matches your other inputs
+                    paddingBlock: "12px", 
+                    backgroundColor: "#f3f4f6", // matches bg-gray-100
+                    "&:hover": { backgroundColor: "#e5e7eb" },
+                    "--Select-decoratorChildHeight": "30px",
+                    width: "100%" // ensure it fills the form control
+                  }}
+
+                >
+
+                  {formData.EVModel && (
+                      <Option value={formData.EVModel} style={{ display: 'none' }}>
+                        {formData.EVModel}
+                      </Option>
+                  )}
+
+                  {evList.length === 0 && (
+                    <Option value={null} disabled>Loading cars...</Option>
+                  )}
+
+                  {evList.map((ev, index) => (
+                    <Option key={index} value={ev.ev_name}>
+                      {ev.ev_name}
+                    </Option>
+                  ))}
+                  
+                </Select>
               </FormControl>
 
               <Sheet
@@ -195,7 +378,7 @@ export default function PlanningPage() {
 
                   <div className="text-right">
                     <Typography level="h4">
-                      {loading ? "..." : `${temp}°C`}
+                      {loading ? "..." : (temp !== null ? `${temp}°C` : "--")}
                     </Typography>
                     <Typography level="body-xs" sx={{ color: "success.500" }}>
                       Optimal range
@@ -210,38 +393,56 @@ export default function PlanningPage() {
                 sx={{ mt: 2, borderRadius: "xl" }}
                 className="w-full"
                 type="submit"
+                disabled={isSubmitting}
               >
-                Find Chargers
+                {isSubmitting ? "Calculating..." : "Find Chargers"}
+                
               </Button>
+
+              {errorMessage && (
+                <Alert 
+                  variant="soft" 
+                  color="danger" 
+                  sx={{ mb: 2, borderRadius: "md" }}
+                >
+                  <Typography level="body-sm" color="danger">
+                    {errorMessage}
+                  </Typography>
+                </Alert>
+              )}
+
             </div>
           </form>
 
-          <div className="pt-4">
+        <div className="pt-4">
             <Typography level="title-sm" className="mb-2">
               Recent Trips
             </Typography>
-            <Sheet
-              variant="outlined"
-              sx={{ borderRadius: "lg", mb: 1, px: 2, py: 1.5 }}
-            >
-              <Typography level="body-md" fontWeight="md">
-                Home ➜ Downtown Mall
+
+            {/* 5. Dynamic Rendering */}
+            {tripHistory.length === 0 ? (
+              <Typography level="body-sm" sx={{ color: "neutral.500", fontStyle: "italic" }}>
+                No recent trips found.
               </Typography>
-              <Typography level="body-xs" sx={{ color: "neutral.500" }}>
-                2 days ago • 45 min charging
-              </Typography>
-            </Sheet>
-            <Sheet
-              variant="outlined"
-              sx={{ borderRadius: "lg", px: 2, py: 1.5 }}
-            >
-              <Typography level="body-md" fontWeight="md">
-                Office ➜ Airport
-              </Typography>
-              <Typography level="body-xs" sx={{ color: "neutral.500" }}>
-                1 week ago • 1 hr charging
-              </Typography>
-            </Sheet>
+            ) : (
+              tripHistory.map((trip, index) => (
+                <Sheet
+                  key={index} // Use unique ID if available, otherwise index
+                  variant="outlined"
+                  sx={{ borderRadius: "lg", mb: 1, px: 2, py: 1.5 }}
+                >
+                  <Typography level="body-md" fontWeight="md">
+                    {/* Dynamic Locations */}
+                    {cleanAddress(trip.starting_points)} ➜ {cleanAddress(trip.ending_points)}
+                  </Typography>
+                  
+                  <Typography level="body-xs" sx={{ color: "neutral.500" }}>
+                    {/* Dynamic Date & Duration */}
+                    {formatDate(trip.car_start_charging_timestamp)} • {formatDuration(trip.expected_charging_time)}
+                  </Typography>
+                </Sheet>
+              ))
+            )}
           </div>
         </Card>
       </div>
