@@ -5,23 +5,21 @@ from app.services.handle_db_connections import create_conn, execute_insert, exec
 bp = Blueprint("charger_reviews", __name__)
 
 @bp.route("/insert-review", methods=['POST'])
-def insert_user():
-
-    """
-    {
-        "google_charger_id": "ChIJN1t_tDeuEmsRUsoyG83frY4"
-        "rating": 1
-        "review" = "Nice!"
-        "user_id": "104598189720184254586"
-    }
-    """
+def insert_review():
 
     try:
-        user_info = request.get_json()
-        if not user_info:
+        info = request.get_json()
+        if not info:
             return jsonify({"error": "No JSON data provided"}), 400
     except:
         return jsonify({"error": "Invalid JSON format"}), 400
+    
+    info = {
+        "google_charger_id": "ChIJN1t_tDeuEmsRUsoyG83frY4",
+        "rating": 1,
+        "review": "Nice!",
+        "user_id": "104598189720184254586"
+    }
 
     connection = create_conn()
 
@@ -31,12 +29,14 @@ def insert_user():
     """
 
     ###############################################################
-    user_id = user_info.get("google_user_id")
-    user_email = user_info.get("email")
-    user_name = user_info.get("name")
-    ev_cars = json.dumps(user_info.get("ev_cars"))
+
+    google_charger_id = info.get("google_user_id")
+    user_email = info.get("email")
+    user_name = info.get("name")
+    ev_cars = json.dumps(info.get("ev_cars"))
     
-    insert_statements = [(user_id, user_email, user_name, ev_cars)]
+    insert_statements = [(google_charger_id, user_email, user_name, ev_cars)]
+
     ###############################################################
 
     try:

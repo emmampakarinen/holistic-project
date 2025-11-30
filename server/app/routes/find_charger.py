@@ -251,22 +251,25 @@ def find_charge():
         raw_type = connector.get("type")
 
         formatted_entry = {
-            "battery_at_charger_near_destination": charger.get("battery_at_charger_near_destination"),
+            "googleChargerId": charger.get('id'), 
+            "batteryAtChargerNearDestination": round(charger.get("battery_at_charger_near_destination")),
             "displayName": charger.get("displayName"),
+            "address": charger.get("formattedAddress"),
+            "websiteUri": charger.get("websiteUri"),
+            "rating": charger.get("rating"),
+            "googleMapsLink": charger.get("googleMapsLink"),
             "distanceMetersDrivingToCharger": charger.get("distanceMetersDrivingToCharger"),
             "distanceMetersWalkingToDestination": charger.get("distanceMetersWalkingToDestination"),
             "travelTimeSecondsDrivingToCharger": charger.get("travelTimeSecondsDrivingToCharger"),
             "travelTimeSecondsWalkingToDestination": round((charger.get("travelTimeSecondsWalkingToDestination") / 60)),
-            "bestEvChargeOption": {
-                "charger_delta_seconds": connector.get("charger_delta_seconds"),
-                "maxChargeRateKw": connector.get("maxChargeRateKw"),
-                "total_time_to_charge_seconds": connector.get("total_time_to_charge"),
-                "total_time_to_charge_formatted_time": total_time_to_charge_formatted_time,
-                "type": connector_map.get(raw_type, raw_type),
-                "charging_speed": speed_category_map.get(raw_type)
-            }
+            "chargerDeltaSeconds": connector.get("charger_delta_seconds"),
+            "maxChargeRateKw": connector.get("maxChargeRateKw"),
+            "totalTimeToChargeSeconds": connector.get("total_time_to_charge"),
+            "totalTimeToChargeFormattedTime": total_time_to_charge_formatted_time,
+            "type": connector_map.get(raw_type, raw_type),
+            "chargingSpeed": speed_category_map.get(raw_type)
         }
-
+        
         print(formatted_entry)
         
         final_results.append(formatted_entry)

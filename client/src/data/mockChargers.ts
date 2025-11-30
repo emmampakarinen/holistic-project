@@ -1,6 +1,7 @@
 import type { Charger } from "../types/charger";
 
 export const mockChargers: Charger[] = [
+  /*
   {
     id: "1",
     displayName: {
@@ -55,4 +56,5 @@ export const mockChargers: Charger[] = [
     total_time_to_charge: "85",
     type: "slow",
   },
+  */
 ];

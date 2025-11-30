@@ -3,9 +3,16 @@ import { ArrowRight } from "lucide-react";
 import type { Charger } from "../types/charger";
 import { useNavigate } from "react-router-dom";
 
-// A card component to display individual charger details on the charger suggestions page
-export default function ChargerCard({ charger }: { charger: Charger }) {
+interface ChargerCardProps {
+  charger: Charger;
+  onSelect: () => void; // ✅ Add this prop
+}
+
+// a card component to display individual charger details on the charger suggestions page
+export default function ChargerCard({ charger, onSelect }: ChargerCardProps) {
+
   const navigate = useNavigate();
+
   return (
     <Card
       variant="outlined"
@@ -25,7 +32,7 @@ export default function ChargerCard({ charger }: { charger: Charger }) {
             color="success"
             sx={{ borderRadius: "999px", fontSize: 12 }}
           >
-            {charger.bestEvChargeOption.charging_speed} charger
+            {charger.chargingSpeed} charger
           </Chip>
         </div>
 
@@ -42,7 +49,7 @@ export default function ChargerCard({ charger }: { charger: Charger }) {
               Power Output
             </Typography>
             <Typography level="body-md" fontWeight={600}>
-              {charger.bestEvChargeOption.maxChargeRateKw} kW
+              {charger.maxChargeRateKw} kW
             </Typography>
           </div>
 
@@ -51,7 +58,7 @@ export default function ChargerCard({ charger }: { charger: Charger }) {
               Est. Charge Time to 100%
             </Typography>
             <Typography level="body-md" fontWeight={600}>
-              {charger.bestEvChargeOption.total_time_to_charge}
+              {charger.totalTimeToChargeFormattedTime}
             </Typography>
           </div>
 
@@ -60,7 +67,7 @@ export default function ChargerCard({ charger }: { charger: Charger }) {
               Connector Type
             </Typography>
             <Typography level="body-md" fontWeight={600}>
-              {charger.bestEvChargeOption.type}
+              {charger.type}
             </Typography>
           </div>
 
@@ -69,7 +76,7 @@ export default function ChargerCard({ charger }: { charger: Charger }) {
               Battery at the Charger
             </Typography>
             <Typography level="body-md" fontWeight={600}>
-              {charger.battery_at_charger_near_destination}
+              {charger.batteryAtChargerNearDestination}
             </Typography>
           </div>
         </div>
@@ -79,7 +86,9 @@ export default function ChargerCard({ charger }: { charger: Charger }) {
           color="primary"
           endDecorator={<ArrowRight size={18} />}
           sx={{ mt: 3, borderRadius: "lg", width: "100%" }}
-          onClick={() => navigate("/app/journey")}
+          onClick={() => {
+             onSelect(); 
+          }}
         >
           View Details
         </Button>

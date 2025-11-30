@@ -10,7 +10,7 @@ def insert_user():
     connection = create_conn()
 
     query = """
-    SELECT DISTINCT ev_name FROM charger_analysis 
+    SELECT DISTINCT ev_name FROM ev_charger_analysis 
     """
 
     try:
