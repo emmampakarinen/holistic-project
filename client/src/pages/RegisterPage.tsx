@@ -3,16 +3,15 @@ import { useNavigate } from "react-router-dom";
 import Select from "@mui/joy/Select";
 import Option from "@mui/joy/Option";
 import Chip from "@mui/joy/Chip";
-import Box from "@mui/joy/Box"; 
+import Box from "@mui/joy/Box";
 
 export default function RegisterPage() {
-
   const navigate = useNavigate();
 
   const [fullName, setFullName] = useState("");
   const [mobile, setMobile] = useState("");
 
-  const [selectedCars, setSelectedCars] = useState<string[]>([]); 
+  const [selectedCars, setSelectedCars] = useState<string[]>([]);
   const [evList, setEvList] = useState<{ ev_name: string }[]>([]);
 
   const googleUserId = localStorage.getItem("google_sub");
@@ -21,16 +20,16 @@ export default function RegisterPage() {
   useEffect(() => {
     const fetchEvs = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/get-available-evs");
+        const response = await fetch(
+          "http://localhost:5000/api/get-available-evs"
+        );
         if (response.ok) {
           const data = await response.json();
           setEvList(data);
-        } 
-        else {
+        } else {
           console.error("Failed to fetch EV list");
         }
-      } 
-      catch (error) {
+      } catch (error) {
         console.error("Error fetching EVs:", error);
       }
     };
@@ -46,8 +45,8 @@ export default function RegisterPage() {
 
     const payload = {
       googleUserId: googleUserId,
-      emailAddress: emailAddress, 
-      fullName: fullName, 
+      emailAddress: emailAddress,
+      fullName: fullName,
       evList: evList,
     };
 
@@ -68,18 +67,14 @@ export default function RegisterPage() {
         localStorage.setItem("userData", JSON.stringify(payload));
         localStorage.setItem("profileCompleted", "true");
 
-        navigate("/planning");
-      } 
-      else {
+        navigate("/app/planning");
+      } else {
         alert("Error saving profile: " + data.error);
       }
-    } 
-
-    catch (error) {
+    } catch (error) {
       console.error("Network Error:", error);
       alert("Failed to connect to the server.");
     }
-
   };
 
   return (
@@ -129,23 +124,21 @@ export default function RegisterPage() {
               startDecorator={<span className="text-xl">🚗</span>}
               value={selectedCars}
               onChange={(e, newValues) => setSelectedCars(newValues)}
-              
               // This prop controls how the selected values look inside the box
               renderValue={(selected) => (
-                <Box sx={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+                <Box sx={{ display: "flex", gap: "0.25rem", flexWrap: "wrap" }}>
                   {selected.map((selectedOption) => (
-                    <Chip 
-                        key={selectedOption.value} 
-                        variant="soft" 
-                        color="primary" 
-                        size="sm"
+                    <Chip
+                      key={selectedOption.value}
+                      variant="soft"
+                      color="primary"
+                      size="sm"
                     >
                       {selectedOption.label}
                     </Chip>
                   ))}
                 </Box>
               )}
-
               variant="soft"
               color="neutral"
               sx={{
@@ -154,21 +147,23 @@ export default function RegisterPage() {
                 backgroundColor: "#f3f4f6",
                 "&:hover": { backgroundColor: "#e5e7eb" },
                 "--Select-decoratorChildHeight": "30px",
-                minHeight: "52px" // Ensure height allows for chips
+                minHeight: "52px", // Ensure height allows for chips
               }}
               slotProps={{
                 listbox: {
                   sx: {
-                    maxHeight: '200px', // Limit dropdown height
-                    overflow: 'auto',   // Scroll if too many cars
+                    maxHeight: "200px", // Limit dropdown height
+                    overflow: "auto", // Scroll if too many cars
                   },
                 },
               }}
             >
               {evList.length === 0 && (
-                 <Option value={null} disabled>Loading cars...</Option>
+                <Option value={null} disabled>
+                  Loading cars...
+                </Option>
               )}
-              
+
               {evList.map((ev, index) => (
                 <Option key={index} value={ev.ev_name}>
                   {ev.ev_name}

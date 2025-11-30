@@ -30,13 +30,12 @@ interface TripHistoryItem {
   starting_points: string;
   ending_points: string;
   car_start_charging_timestamp: string;
-  expected_charging_time: number; 
+  expected_charging_time: number;
 }
 
 // the planning page where users input their trip details to find suitable chargers
 
 export default function PlanningPage() {
-
   // custom hooks to get current temperature and users location
 
   const navigate = useNavigate();
@@ -51,7 +50,10 @@ export default function PlanningPage() {
     hours: localStorage.getItem("hours") || "",
     minutes: localStorage.getItem("minutes") || "",
     battery: Number(localStorage.getItem("battery")) || 65,
-    EVModel: localStorage.getItem("EVModel") === "null" ? null : localStorage.getItem("EVModel"),
+    EVModel:
+      localStorage.getItem("EVModel") === "null"
+        ? null
+        : localStorage.getItem("EVModel"),
   }));
 
   const [evList, setEvList] = useState<{ ev_name: string }[]>([]);
@@ -68,11 +70,11 @@ export default function PlanningPage() {
 
   useEffect(() => {
     const profileCompleted = localStorage.getItem("profileCompleted");
-    
+
     // Security check: Redirect and STOP execution
     if (!profileCompleted) {
       navigate("/register");
-      return; 
+      return;
     }
 
     const controller = new AbortController();
@@ -82,7 +84,7 @@ export default function PlanningPage() {
         const response = await fetch("http://localhost:5000/api/get-user-evs", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ google_id: google_user_id }), 
+          body: JSON.stringify({ google_id: google_user_id }),
           signal: controller.signal,
         });
 
@@ -93,7 +95,7 @@ export default function PlanningPage() {
           console.error("Failed to fetch EV list");
         }
       } catch (error: any) {
-        if (error.name !== 'AbortError') {
+        if (error.name !== "AbortError") {
           console.error("Error fetching EVs:", error);
         }
       }
@@ -104,19 +106,19 @@ export default function PlanningPage() {
         const response = await fetch("http://localhost:5000/api/get-history", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ google_id: google_user_id }), 
+          body: JSON.stringify({ google_id: google_user_id }),
           signal: controller.signal,
         });
 
         if (response.ok) {
           const data = await response.json();
-          console.log(data)
+          console.log(data);
           setTripHistory(data || []);
         } else {
           console.error("ailed to fetch EV list");
         }
       } catch (error: any) {
-        if (error.name !== 'AbortError') {
+        if (error.name !== "AbortError") {
           console.error("Error fetching EVs:", error);
         }
       }
@@ -139,7 +141,9 @@ export default function PlanningPage() {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     // Returns format like "30 Nov • 13:47"
-    return `${date.getDate()} ${date.toLocaleString('default', { month: 'short' })} • ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+    return `${date.getDate()} ${date.toLocaleString("default", {
+      month: "short",
+    })} • ${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`;
   };
 
   const formatDuration = (seconds: number) => {
@@ -153,7 +157,7 @@ export default function PlanningPage() {
     return `${minutes} min charging`;
   };
 
-  const cleanAddress = (addr: string) => addr.split(',')[0];
+  const cleanAddress = (addr: string) => addr.split(",")[0];
 
   // handle form submission to find chargers
 
@@ -168,7 +172,8 @@ export default function PlanningPage() {
     });
 
     // calculate total minutes
-    const timeAtDestination = (Number(formData.hours) || 0) * 60 + (Number(formData.minutes) || 0);
+    const timeAtDestination =
+      (Number(formData.hours) || 0) * 60 + (Number(formData.minutes) || 0);
 
     // construct payload using the imported TripPlan type
     const payload: TripPlan = {
@@ -186,7 +191,7 @@ export default function PlanningPage() {
     // set whole data to localStorage
     const currentTripPlan = payload;
     localStorage.setItem("currentTripPlan", JSON.stringify(currentTripPlan));
-    
+
     try {
       const response = await fetch("http://localhost:5000/api/find-charger", {
         method: "POST",
@@ -200,22 +205,19 @@ export default function PlanningPage() {
         throw new Error(data.error || "Can't reach destination chargers");
       }
 
-      navigate("/suggestions", {
+      navigate("/app/suggestions", {
         state: { trip: payload, chargers: data },
       });
-
-    } 
-    catch (err: any) {
+    } catch (err: any) {
       console.error("Failed to fetch trip data", err);
       setErrorMessage(err.message || "Network error, please try again");
-    } 
-    finally {
+    } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+    <div className=" bg-slate-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-4xl">
         <div className="text-center mb-8">
           <Typography level="h2" className="font-bold">
@@ -242,7 +244,7 @@ export default function PlanningPage() {
                 <Input
                   value={formData.location}
                   placeholder="Enter your current location"
-                  onChange={(e) => updateField('location', e.target.value)}
+                  onChange={(e) => updateField("location", e.target.value)}
                   required
                 />
               </FormControl>
@@ -252,7 +254,7 @@ export default function PlanningPage() {
                 <Input
                   placeholder="Where are you going?"
                   value={formData.destination}
-                  onChange={(e) => updateField('destination', e.target.value)}
+                  onChange={(e) => updateField("destination", e.target.value)}
                   required
                 />
               </FormControl>
@@ -268,7 +270,7 @@ export default function PlanningPage() {
                       placeholder="0"
                       slotProps={{ input: { min: 0, max: 12 } }}
                       value={formData.hours}
-                      onChange={(e) => updateField('hours', e.target.value)}
+                      onChange={(e) => updateField("hours", e.target.value)}
                       required
                     />
                   </FormControl>
@@ -279,7 +281,7 @@ export default function PlanningPage() {
                       placeholder="0"
                       slotProps={{ input: { min: 0, max: 59 } }}
                       value={formData.minutes}
-                      onChange={(e) => updateField('minutes', e.target.value)}
+                      onChange={(e) => updateField("minutes", e.target.value)}
                       required
                     />
                   </FormControl>
@@ -292,7 +294,7 @@ export default function PlanningPage() {
                   <Slider
                     value={formData.battery}
                     // the second argument newValue is the actual number
-                    onChange={(_, newValue) => updateField('battery', newValue)} 
+                    onChange={(_, newValue) => updateField("battery", newValue)}
                     min={0}
                     max={100}
                   />
@@ -311,40 +313,39 @@ export default function PlanningPage() {
 
               <FormControl>
                 <FormLabel>EV Car Model</FormLabel>
-                
+
                 <Select
-                  
                   placeholder="Select your EV model"
                   startDecorator={<span className="text-xl">🚗</span>}
-
                   // connect to your existing state variable
-                  value={formData.EVModel} 
-                  onChange={(_, newValue) => updateField('EVModel', newValue)} 
-                  
+                  value={formData.EVModel}
+                  onChange={(_, newValue) => updateField("EVModel", newValue)}
                   required
-                  
                   // apply your custom styling
                   variant="soft"
                   color="neutral"
                   sx={{
-                    borderRadius: "12px",     // matches your other inputs
-                    paddingBlock: "12px", 
+                    borderRadius: "12px", // matches your other inputs
+                    paddingBlock: "12px",
                     backgroundColor: "#f3f4f6", // matches bg-gray-100
                     "&:hover": { backgroundColor: "#e5e7eb" },
                     "--Select-decoratorChildHeight": "30px",
-                    width: "100%" // ensure it fills the form control
+                    width: "100%", // ensure it fills the form control
                   }}
-
                 >
-
                   {formData.EVModel && (
-                      <Option value={formData.EVModel} style={{ display: 'none' }}>
-                        {formData.EVModel}
-                      </Option>
+                    <Option
+                      value={formData.EVModel}
+                      style={{ display: "none" }}
+                    >
+                      {formData.EVModel}
+                    </Option>
                   )}
 
                   {evList.length === 0 && (
-                    <Option value={null} disabled>Loading cars...</Option>
+                    <Option value={null} disabled>
+                      Loading cars...
+                    </Option>
                   )}
 
                   {evList.map((ev, index) => (
@@ -352,7 +353,6 @@ export default function PlanningPage() {
                       {ev.ev_name}
                     </Option>
                   ))}
-                  
                 </Select>
               </FormControl>
 
@@ -378,7 +378,7 @@ export default function PlanningPage() {
 
                   <div className="text-right">
                     <Typography level="h4">
-                      {loading ? "..." : (temp !== null ? `${temp}°C` : "--")}
+                      {loading ? "..." : temp !== null ? `${temp}°C` : "--"}
                     </Typography>
                     <Typography level="body-xs" sx={{ color: "success.500" }}>
                       Optimal range
@@ -396,13 +396,12 @@ export default function PlanningPage() {
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Calculating..." : "Find Chargers"}
-                
               </Button>
 
               {errorMessage && (
-                <Alert 
-                  variant="soft" 
-                  color="danger" 
+                <Alert
+                  variant="soft"
+                  color="danger"
                   sx={{ mb: 2, borderRadius: "md" }}
                 >
                   <Typography level="body-sm" color="danger">
@@ -410,18 +409,20 @@ export default function PlanningPage() {
                   </Typography>
                 </Alert>
               )}
-
             </div>
           </form>
 
-        <div className="pt-4">
+          <div className="pt-4">
             <Typography level="title-sm" className="mb-2">
               Recent Trips
             </Typography>
 
             {/* 5. Dynamic Rendering */}
             {tripHistory.length === 0 ? (
-              <Typography level="body-sm" sx={{ color: "neutral.500", fontStyle: "italic" }}>
+              <Typography
+                level="body-sm"
+                sx={{ color: "neutral.500", fontStyle: "italic" }}
+              >
                 No recent trips found.
               </Typography>
             ) : (
@@ -433,12 +434,14 @@ export default function PlanningPage() {
                 >
                   <Typography level="body-md" fontWeight="md">
                     {/* Dynamic Locations */}
-                    {cleanAddress(trip.starting_points)} ➜ {cleanAddress(trip.ending_points)}
+                    {cleanAddress(trip.starting_points)} ➜{" "}
+                    {cleanAddress(trip.ending_points)}
                   </Typography>
-                  
+
                   <Typography level="body-xs" sx={{ color: "neutral.500" }}>
                     {/* Dynamic Date & Duration */}
-                    {formatDate(trip.car_start_charging_timestamp)} • {formatDuration(trip.expected_charging_time)}
+                    {formatDate(trip.car_start_charging_timestamp)} •{" "}
+                    {formatDuration(trip.expected_charging_time)}
                   </Typography>
                 </Sheet>
               ))

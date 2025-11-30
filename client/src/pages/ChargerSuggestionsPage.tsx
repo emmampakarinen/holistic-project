@@ -17,31 +17,31 @@ import type { TripPlan } from "../types/trip";
 // the charger suggestions page that displays recommended chargers based on user input
 
 export default function ChargerSuggestionsPage() {
-
   const location = useLocation();
   const navigate = useNavigate();
 
-  const state = location.state as { trip?: TripPlan; chargers?: Charger[] } | null;
+  const state = location.state as {
+    trip?: TripPlan;
+    chargers?: Charger[];
+  } | null;
 
   const [chargers] = useState<Charger[]>(state?.chargers || []);
   const [trip] = useState<TripPlan | null>(state?.trip || null);
 
   // safety check - handle page refresh
   useEffect(() => {
-
     // redirect back to planning so they can fetch data again
     if (!trip || !state?.chargers) {
       console.warn("No trip data found in state. Redirecting to planning.");
-      navigate("/planning", { replace: true });
+      navigate("/app/planning", { replace: true });
     }
   }, [trip, state, navigate]);
 
   // navigation handler
   const handleViewDetails = (selectedCharger: Charger) => {
-
     const chargerData = selectedCharger;
     localStorage.setItem("chargerData", JSON.stringify(chargerData));
-  
+
     navigate(`/charger/${selectedCharger.google_charger_id}`, {
       state: {
         charger: selectedCharger,
@@ -64,13 +64,13 @@ export default function ChargerSuggestionsPage() {
   if (!trip) return null; // prevent rendering while redirecting
 
   return (
-    <div className="min-h-screen bg-[#f4f6fb]">
+    <div className="bg-[#f4f6fb] py-6">
       <div className="max-w-6xl mx-auto px-6 py-6">
         <Button
           size="sm"
           variant="plain"
           startDecorator={<ArrowLeft size={18} />}
-          onClick={() => navigate("/planning")}
+          onClick={() => navigate("/app/planning")}
         >
           Back to Planning
         </Button>
@@ -112,9 +112,9 @@ export default function ChargerSuggestionsPage() {
             <Grid container spacing={3}>
               {chargers.map((charger) => (
                 <Grid xs={12} md={6} key={charger.google_charger_id}>
-                  <ChargerCard 
-                    charger={charger} 
-                    onSelect={() => handleViewDetails(charger)} 
+                  <ChargerCard
+                    charger={charger}
+                    onSelect={() => handleViewDetails(charger)}
                   />
                 </Grid>
               ))}
