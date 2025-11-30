@@ -1,56 +1,92 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Select from "@mui/joy/Select";
+import Option from "@mui/joy/Option";
+import Chip from "@mui/joy/Chip";
+import Box from "@mui/joy/Box"; 
 
 export default function RegisterPage() {
+
   const navigate = useNavigate();
 
   const [fullName, setFullName] = useState("");
-  const [carName, setCarName] = useState("");
   const [mobile, setMobile] = useState("");
 
-  const email = localStorage.getItem("google_email");
+  const [selectedCars, setSelectedCars] = useState<string[]>([]); 
+  const [evList, setEvList] = useState<{ ev_name: string }[]>([]);
+
+  const googleUserId = localStorage.getItem("google_sub");
+  const emailAddress = localStorage.getItem("google_email");
+
+  useEffect(() => {
+    const fetchEvs = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/get-available-evs");
+        if (response.ok) {
+          const data = await response.json();
+          setEvList(data);
+        } 
+        else {
+          console.error("Failed to fetch EV list");
+        }
+      } 
+      catch (error) {
+        console.error("Error fetching EVs:", error);
+      }
+    };
+
+    fetchEvs();
+  }, []);
 
   const handleSubmit = async () => {
-    if (!fullName || !carName || !mobile) {
+    if (!fullName || !evList || !mobile) {
       alert("Please fill in all fields.");
       return;
     }
 
+    const payload = {
+      googleUserId: googleUserId,
+      emailAddress: emailAddress, 
+      fullName: fullName, 
+      evList: evList,
+    };
 
-     // Save profile data to backend
-    // try {
-    //   const response = await fetch("/api/register", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     body: JSON.stringify({
-    //       fullName,
-    //       carName,
-    //       mobile,
-    //       email,
-    //     }),
-    //   });
+    try {
+      const response = await fetch("http://localhost:5000/api/insert-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
-      // const data = await response.json();
-      // console.log("Saved to backend:", data);
+      const data = await response.json();
 
+      if (response.ok) {
+        console.log("success:", data);
 
-    // Save profile locally (or send to backend)
-    localStorage.setItem("profile_completed", "true");
+        localStorage.setItem("userData", JSON.stringify(payload));
+        localStorage.setItem("profileCompleted", "true");
 
-    // Go to planning inside /app
-    navigate("/app/planning");
-     //   } catch (error) {
-  //   console.error("Error saving to backend:", error);
-  // }
+        navigate("/planning");
+      } 
+      else {
+        alert("Error saving profile: " + data.error);
+      }
+    } 
+
+    catch (error) {
+      console.error("Network Error:", error);
+      alert("Failed to connect to the server.");
+    }
 
   };
 
   return (
-    <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-50 px-5 p-5">
-      <div className="bg-white shadow-lg rounded-3xl px-10 py-5 max-w-xl w-full">
+    <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-50 px-6">
+      <div className="bg-white shadow-lg rounded-3xl px-10 py-12 max-w-xl w-full">
         {/* Top Icon */}
-        <div className="flex justify-center mb-2">
+        <div className="flex justify-center mb-6">
           <div className="w-14 h-14 bg-blue-100 flex items-center justify-center rounded-full">
             <span className="text-blue-600 text-3xl">👤</span>
           </div>
@@ -85,18 +121,60 @@ export default function RegisterPage() {
           {/* EV Car Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              EV Car Name
+              EV Car Models (Select all that apply)
             </label>
-            <div className="flex items-center gap-3 bg-gray-100 rounded-xl px-4 py-3">
-              <span className="text-gray-400">🚗</span>
-              <input
-                type="text"
-                placeholder="e.g., Tesla Model 3, Nissan Leaf"
-                className="bg-transparent outline-none w-full"
-                value={carName}
-                onChange={(e) => setCarName(e.target.value)}
-              />
-            </div>
+            <Select
+              multiple // <--- ENABLE MULTI SELECT
+              placeholder="Select your EV model(s)"
+              startDecorator={<span className="text-xl">🚗</span>}
+              value={selectedCars}
+              onChange={(e, newValues) => setSelectedCars(newValues)}
+              
+              // This prop controls how the selected values look inside the box
+              renderValue={(selected) => (
+                <Box sx={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+                  {selected.map((selectedOption) => (
+                    <Chip 
+                        key={selectedOption.value} 
+                        variant="soft" 
+                        color="primary" 
+                        size="sm"
+                    >
+                      {selectedOption.label}
+                    </Chip>
+                  ))}
+                </Box>
+              )}
+
+              variant="soft"
+              color="neutral"
+              sx={{
+                borderRadius: "12px",
+                paddingBlock: "12px",
+                backgroundColor: "#f3f4f6",
+                "&:hover": { backgroundColor: "#e5e7eb" },
+                "--Select-decoratorChildHeight": "30px",
+                minHeight: "52px" // Ensure height allows for chips
+              }}
+              slotProps={{
+                listbox: {
+                  sx: {
+                    maxHeight: '200px', // Limit dropdown height
+                    overflow: 'auto',   // Scroll if too many cars
+                  },
+                },
+              }}
+            >
+              {evList.length === 0 && (
+                 <Option value={null} disabled>Loading cars...</Option>
+              )}
+              
+              {evList.map((ev, index) => (
+                <Option key={index} value={ev.ev_name}>
+                  {ev.ev_name}
+                </Option>
+              ))}
+            </Select>
           </div>
 
           {/* Mobile Number */}
@@ -128,7 +206,7 @@ export default function RegisterPage() {
                   type="text"
                   className="bg-transparent outline-none w-full"
                   readOnly
-                  value={email || ""}
+                  value={emailAddress || ""}
                 />
               </div>
               <span className="text-green-600 text-xs font-semibold bg-green-100 px-2 py-1 rounded-full">
@@ -144,11 +222,12 @@ export default function RegisterPage() {
         {/* Submit Button */}
         <button
           onClick={handleSubmit}
-          className="w-full mt-5 py-4 text-white font-medium rounded-xl btn-primary flex items-center justify-center gap-2 whitespace-nowrap"
+          className="w-full mt-10 py-4 text-white font-medium rounded-xl bg-linear-to-r from-green-400 to-blue-500 shadow-md hover:opacity-90"
         >
-          Save & Continue
+          Save & Continue →
         </button>
 
+        {/* Security Notice */}
         <div className="flex items-center justify-center mt-6 text-gray-400 text-xs gap-2">
           <span className="text-blue-600">🔒</span>
           <span>Your information is secure and will never be shared</span>

@@ -2,6 +2,7 @@
 export interface TripPlan {
   latitude: number | null;
   longitude: number | null;
+  city: string;
   location: string;
   destination: string;
   EVModel: string;
