@@ -2,11 +2,9 @@ import { GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 
 function LoginPage() {
-
   const navigate = useNavigate();
 
   const handleSuccess = async (credentialResponse: any) => {
-
     console.log("Google Login Success:", credentialResponse);
 
     const token = credentialResponse.credential;
@@ -25,20 +23,19 @@ function LoginPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(google_user_id), 
+        body: JSON.stringify(google_user_id),
       });
 
       if (response.ok) {
-
         const data = await response.json();
 
         localStorage.setItem("userData", JSON.stringify(data));
         localStorage.setItem("profileCompleted", "true");
-        
-        navigate("/planning");
+
+        navigate("/app/planning");
       } else {
         console.log("user not found, redirecting to register");
-        localStorage.removeItem("profile_completed"); 
+        localStorage.removeItem("profile_completed");
         navigate("/register");
       }
     } catch (error) {

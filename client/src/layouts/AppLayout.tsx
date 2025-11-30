@@ -13,7 +13,7 @@ import Divider from "@mui/joy/Divider";
 import { Menu, LogOut } from "lucide-react";
 
 const navItems = [
-  { label: "Chat", to: "/app/prompt" },
+  { label: "Plan", to: "/app/planning" },
   { label: "Profile", to: "/app/profile" },
 ];
 
@@ -46,7 +46,7 @@ export default function AppLayout() {
         }}
       >
         <Typography level="h4" sx={{ fontWeight: "lg" }}>
-          ChargeMate
+          TimeCharge
         </Typography>
 
         {/* desktop nav buttons */}

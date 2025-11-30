@@ -12,47 +12,41 @@ import ChargingProgress from "./pages/ChargingProgress";
 import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 
+import AppLayout from "./layouts/AppLayout";
+
 export const router = createBrowserRouter([
+  // ---------- PUBLIC ROUTES (no header) ----------
   {
     path: "/",
     element: <LandingPage />,
   },
-
   {
     path: "/login",
     element: <LoginPage />,
   },
-
   {
     path: "/register",
     element: <RegisterPage />,
   },
 
-  // ---------- MAIN APP FLOW ----------
+  // ---------- MAIN APP LAYOUT  ----------
   {
-    path: "/planning",
-    element: <PlanningPage />,
-  },
-  {
-    path: "/suggestions",
-    element: <ChargerSuggestionsPage />,
-  },
-  {
-    path: "/charger/:id",
-    element: <ChargerDetails />,
-  },
-  {
-    path: "/charging/:id",
-    element: <ChargingProgress />,
-  },
-  {
-    path: "/profile",
-    element: <ProfilePage />,
+    path: "/app",
+    element: <AppLayout />,
+    children: [
+      { index: true, element: <Navigate to="planning" replace /> },
+
+      { path: "planning", element: <PlanningPage /> },
+      { path: "suggestions", element: <ChargerSuggestionsPage /> },
+      { path: "charger/:id", element: <ChargerDetails /> },
+      { path: "charging/:id", element: <ChargingProgress /> },
+      { path: "profile", element: <ProfilePage /> },
+    ],
   },
 
   // ---------- 404 ----------
   {
     path: "*",
     element: <NotFound />,
-  }
+  },
 ]);
