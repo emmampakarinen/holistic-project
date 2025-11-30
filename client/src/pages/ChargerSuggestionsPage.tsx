@@ -15,57 +15,53 @@ import { useNavigate, useLocation } from "react-router-dom";
 import type { TripPlan } from "../types/trip";
 
 // the charger suggestions page that displays recommended chargers based on user input
+
 export default function ChargerSuggestionsPage() {
 
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [chargers, setChargers] = useState<Charger[]>(location.state?.chargers || []);
-  const [loading, setLoading] = useState(!location.state?.chargers);
-  const [trip, setTrip] = useState<TripPlan | null>(null);
+  const state = location.state as { trip?: TripPlan; chargers?: Charger[] } | null;
 
-  useEffect(() => {
-    const stateTrip = (location.state as { trip?: TripPlan })?.trip ?? null;
-    setTrip(stateTrip);
-  }, [location.state]);
+  const [chargers] = useState<Charger[]>(state?.chargers || []);
+  const [trip] = useState<TripPlan | null>(state?.trip || null);
 
+  // safety check - handle page refresh
   useEffect(() => {
 
-    if (location.state?.chargers) {
-      return;
+    // redirect back to planning so they can fetch data again
+    if (!trip || !state?.chargers) {
+      console.warn("No trip data found in state. Redirecting to planning.");
+      navigate("/planning", { replace: true });
     }
+  }, [trip, state, navigate]);
 
-    async function fetchData() {
-      try {
+  // navigation handler
+  const handleViewDetails = (selectedCharger: Charger) => {
 
-        setChargers(location.state.chargers);
+    const chargerData = selectedCharger;
+    localStorage.setItem("chargerData", JSON.stringify(chargerData));
+  
+    navigate(`/charger/${selectedCharger.google_charger_id}`, {
+      state: {
+        charger: selectedCharger,
+        trip: trip,
+      },
+    });
+  };
 
-        navigate(".", { 
-            state: { ...location.state, chargers: location.state.chargers }, 
-            replace: true 
-        });
+  // helper for formatting duration
+  const getDurationString = (minutes: number) => {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return `${h} h ${m} min`;
+  };
 
-      } catch (err) {
-        console.error("Failed to fetch chargers", err);
-        setChargers(mockChargers);
-      } finally {
-        setLoading(false);
-      }
-    }
+  const stayText = trip ? getDurationString(trip.minutesAtDestination) : "-";
 
-    if (location.state?.trip) {
-        fetchData();
-    }
-  }, []);
+  const loading = !trip;
 
-  // for showing the stay duration in hours and minutes
-
-  const stayText =
-    trip != null
-      ? `${Math.floor(trip.minutesAtDestination / 60)} h ${
-          trip.minutesAtDestination % 60
-        } min`
-      : "-";
+  if (!trip) return null; // prevent rendering while redirecting
 
   return (
     <div className="min-h-screen bg-[#f4f6fb]">
@@ -74,7 +70,7 @@ export default function ChargerSuggestionsPage() {
           size="sm"
           variant="plain"
           startDecorator={<ArrowLeft size={18} />}
-          onClick={() => navigate("/app/planning")}
+          onClick={() => navigate("/planning")}
         >
           Back to Planning
         </Button>
@@ -115,8 +111,11 @@ export default function ChargerSuggestionsPage() {
           {!loading && chargers && chargers.length > 0 && (
             <Grid container spacing={3}>
               {chargers.map((charger) => (
-                <Grid xs={12} md={6} key={charger.id}>
-                  <ChargerCard charger={charger} />
+                <Grid xs={12} md={6} key={charger.google_charger_id}>
+                  <ChargerCard 
+                    charger={charger} 
+                    onSelect={() => handleViewDetails(charger)} 
+                  />
                 </Grid>
               ))}
             </Grid>

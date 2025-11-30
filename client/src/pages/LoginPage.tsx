@@ -2,48 +2,47 @@ import { GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 
 function LoginPage() {
+
   const navigate = useNavigate();
 
-  const handleSuccess = (credentialResponse: any) => {
+  const handleSuccess = async (credentialResponse: any) => {
+
     console.log("Google Login Success:", credentialResponse);
 
-    // get token
     const token = credentialResponse.credential;
 
-    // decode Google email
     const payload = JSON.parse(atob(token.split(".")[1]));
     const email = payload.email;
     const google_user_id = payload.sub;
 
-    // Save user info
     localStorage.setItem("google_token", token);
     localStorage.setItem("google_email", email);
     localStorage.setItem("google_sub", google_user_id);
 
-    //      try {
-    //   const res = await fetch(
-    //     `/api/users/check?email=${email}`
-    //   );
-    //   const data = await res.json();
+    try {
+      const response = await fetch("http://localhost:5000/api/get-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(google_user_id), 
+      });
 
-    //   if (data.exists === true) {
-    //     // Already registered → go to planning
-    //     navigate("/planning");
-    //   } else {
-    //     // New user → go to register
-    //     navigate("/register");
-    //   }
-    // } catch (error) {
-    //   console.error("Error checking email:", error);
-    //   alert("Server error. Please try again.");
-    // }
+      if (response.ok) {
 
-    const previouslyRegistered = localStorage.getItem("profile_completed");
+        const data = await response.json();
 
-    if (previouslyRegistered === "true") {
-      navigate("/app/planning");
-    } else {
-      navigate("/register");
+        localStorage.setItem("userData", JSON.stringify(data));
+        localStorage.setItem("profileCompleted", "true");
+        
+        navigate("/planning");
+      } else {
+        console.log("user not found, redirecting to register");
+        localStorage.removeItem("profile_completed"); 
+        navigate("/register");
+      }
+    } catch (error) {
+      console.error("Network error fetching user:", error);
     }
   };
 

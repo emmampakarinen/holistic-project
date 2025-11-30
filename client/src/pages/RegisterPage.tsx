@@ -15,16 +15,8 @@ export default function RegisterPage() {
   const [selectedCars, setSelectedCars] = useState<string[]>([]); 
   const [evList, setEvList] = useState<{ ev_name: string }[]>([]);
 
-  const email = localStorage.getItem("google_email");
-  const google_user_id = localStorage.getItem("google_sub");
-
-  // useEffect(() => {
-      // const isProfileDone = localStorage.getItem("profile_completed");
-      
-      // if (isProfileDone === "true") {
-        // navigate("/app/planning", { replace: true });
-      // }
-  // }, [navigate]);
+  const googleUserId = localStorage.getItem("google_sub");
+  const emailAddress = localStorage.getItem("google_email");
 
   useEffect(() => {
     const fetchEvs = async () => {
@@ -53,10 +45,10 @@ export default function RegisterPage() {
     }
 
     const payload = {
-      google_user_id: google_user_id,
-      email: email, 
-      name: fullName, 
-      ev_cars: evList,
+      googleUserId: googleUserId,
+      emailAddress: emailAddress, 
+      fullName: fullName, 
+      evList: evList,
     };
 
     try {
@@ -71,19 +63,22 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (response.ok) {
-        console.log("Success:", data);
-        localStorage.setItem("profile_completed", "true");
-        navigate("/app/planning");
-      } else {
+        console.log("success:", data);
+
+        localStorage.setItem("userData", JSON.stringify(payload));
+        localStorage.setItem("profileCompleted", "true");
+
+        navigate("/planning");
+      } 
+      else {
         alert("Error saving profile: " + data.error);
       }
-    } catch (error) {
+    } 
+
+    catch (error) {
       console.error("Network Error:", error);
       alert("Failed to connect to the server.");
     }
-
-    // save profile data to localStorage (or send to backend)
-    // localStorage.setItem("profile_completed", "true");
 
   };
 
@@ -211,7 +206,7 @@ export default function RegisterPage() {
                   type="text"
                   className="bg-transparent outline-none w-full"
                   readOnly
-                  value={email || ""}
+                  value={emailAddress || ""}
                 />
               </div>
               <span className="text-green-600 text-xs font-semibold bg-green-100 px-2 py-1 rounded-full">

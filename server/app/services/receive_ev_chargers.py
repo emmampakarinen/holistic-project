@@ -33,7 +33,7 @@ def find_candidate_chargers(maps_api_key, search_center_coords, search_radius_me
     auth_headers = {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": maps_api_key,
-        "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.location,places.rating,places.evChargeOptions" # specific fields to retrieve
+        "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.evChargeOptions,places.websiteUri" # specific fields to retrieve
     }
 
     search_payload = {
@@ -52,7 +52,6 @@ def find_candidate_chargers(maps_api_key, search_center_coords, search_radius_me
         api_response.raise_for_status()
         places_json = api_response.json()
         found_places = places_json.get("places", []) # list of places returned by the api
-        
         valid_chargers = []
         for place in found_places:
             # ensure the place actually has EV charging options data

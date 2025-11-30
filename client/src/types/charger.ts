@@ -1,15 +1,19 @@
 // for charger suggestions page
 export interface Charger {
-  id: string;
+  googleChargerId: string;
+  batteryAtChargerNearDestination: number;
   displayName: {text: string};
+  address: {text: string};
+  websiteUri: {text: string};
+  rating: number;
+  googleMapsLink: {text: string};
   distanceMetersWalkingToDestination: number;
+  travelTimeSecondsDrivingToCharger: number;
   travelTimeSecondsWalkingToDestination: number;
-  battery_at_charger_near_destination: number;
-  bestEvChargeOption: {
-    maxChargeRateKw: number;
-    total_time_to_charge_formatted_time: number;
-    type: string;
-    charging_speed: "slow" | "fast";
-  };
-  total_time_to_charge_formatted_time: string;
+  chargerDeltaSeconds: number;
+  maxChargeRateKw: number;
+  totalTimeToChargeSeconds: number;
+  totalTimeToChargeFormattedTime: number;
+  type: string;
+  chargingSpeed: "slow" | "fast";
 }

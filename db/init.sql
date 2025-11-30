@@ -6,15 +6,17 @@ CREATE TABLE users (
     email VARCHAR(255) NOT NULL UNIQUE,
     name VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    ev_cars JSON
+    ev_cars JSON,
+    trip_history JSON
 );
 
-INSERT INTO users (user_id, email, name, ev_cars)
+INSERT INTO users (user_id, email, name, ev_cars, trip_history)
 VALUES (
-    "448141881"
+    "448141881",
     'test@example.com',
     'Jane Doe',
-    '["Tesla Model Y", "Nissan Leaf", "Rivian R1S"]'
+    '["Tesla Model Y", "Nissan Leaf", "Rivian R1S"]',
+    '[{"starting_points": "Riga", "ending_points": "Radio iela 8, Liepāja, LV-3401", "car_start_charging_timestamp": "2025-11-30 13:19:18", "expected_charging_time": 0}]'
 );
 
 CREATE TABLE ev_charger_analysis (
@@ -78,7 +80,6 @@ CREATE TABLE charger_reviews (
     user_id VARCHAR(255) NOT NULL,     
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_charger_reviews_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 INSERT INTO charger_reviews (google_charger_id, rating, review, user_id)
