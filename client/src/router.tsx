@@ -13,6 +13,7 @@ import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 
 import AppLayout from "./layouts/AppLayout";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 export const router = createBrowserRouter([
   // ---------- PUBLIC ROUTES (no header) ----------
@@ -32,7 +33,11 @@ export const router = createBrowserRouter([
   // ---------- MAIN APP LAYOUT  ----------
   {
     path: "/app",
-    element: <AppLayout />,
+    element: (
+      <ProtectedRoute>
+        <AppLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <Navigate to="planning" replace /> },
 

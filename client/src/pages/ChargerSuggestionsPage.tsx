@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import ChargerCard from "../components/ChargerCard";
-import { mockChargers } from "../data/mockChargers";
 import type { Charger } from "../types/charger";
 import { Button, Grid, Typography } from "@mui/joy";
 import {
@@ -42,7 +41,7 @@ export default function ChargerSuggestionsPage() {
     const chargerData = selectedCharger;
     localStorage.setItem("chargerData", JSON.stringify(chargerData));
 
-    navigate(`/charger/${selectedCharger.google_charger_id}`, {
+    navigate(`/app/charger/${selectedCharger.googleChargerId}`, {
       state: {
         charger: selectedCharger,
         trip: trip,
@@ -64,7 +63,7 @@ export default function ChargerSuggestionsPage() {
   if (!trip) return null; // prevent rendering while redirecting
 
   return (
-    <div className="bg-[#f4f6fb] py-6">
+    <div className="bg-[#f4f6fb] flex-1 flex flex-col">
       <div className="max-w-6xl mx-auto px-6 py-6">
         <Button
           size="sm"
@@ -111,7 +110,7 @@ export default function ChargerSuggestionsPage() {
           {!loading && chargers && chargers.length > 0 && (
             <Grid container spacing={3}>
               {chargers.map((charger) => (
-                <Grid xs={12} md={6} key={charger.google_charger_id}>
+                <Grid xs={12} md={6} key={charger.googleChargerId}>
                   <ChargerCard
                     charger={charger}
                     onSelect={() => handleViewDetails(charger)}

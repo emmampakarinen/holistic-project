@@ -217,7 +217,7 @@ export default function PlanningPage() {
   };
 
   return (
-    <div className=" bg-slate-50 flex items-center justify-center px-4 py-8">
+    <div className=" bg-slate-50 flex items-center justify-center px-4 py-2">
       <div className="w-full max-w-4xl">
         <div className="text-center mb-8">
           <Typography level="h2" className="font-bold">

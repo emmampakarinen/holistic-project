@@ -1,18 +1,14 @@
 import { Button, Card, CardContent, Chip, Typography } from "@mui/joy";
 import { ArrowRight } from "lucide-react";
 import type { Charger } from "../types/charger";
-import { useNavigate } from "react-router-dom";
 
 interface ChargerCardProps {
   charger: Charger;
-  onSelect: () => void; // ✅ Add this prop
+  onSelect: () => void;
 }
 
 // a card component to display individual charger details on the charger suggestions page
 export default function ChargerCard({ charger, onSelect }: ChargerCardProps) {
-
-  const navigate = useNavigate();
-
   return (
     <Card
       variant="outlined"
@@ -40,7 +36,8 @@ export default function ChargerCard({ charger, onSelect }: ChargerCardProps) {
           <span role="img" aria-label="location">
             📍
           </span>{" "}
-          {charger.distanceMetersWalkingToDestination} meters from destination, {charger.travelTimeSecondsWalkingToDestination} minute walk
+          {charger.distanceMetersWalkingToDestination} meters from destination,{" "}
+          {charger.travelTimeSecondsWalkingToDestination} minute walk
         </Typography>
 
         <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
@@ -87,7 +84,7 @@ export default function ChargerCard({ charger, onSelect }: ChargerCardProps) {
           endDecorator={<ArrowRight size={18} />}
           sx={{ mt: 3, borderRadius: "lg", width: "100%" }}
           onClick={() => {
-             onSelect(); 
+            onSelect();
           }}
         >
           View Details
