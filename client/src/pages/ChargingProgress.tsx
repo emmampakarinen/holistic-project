@@ -185,7 +185,7 @@ const ChargingProgress = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 max-w-7xl pt-[32px] pb-[200px]">
         <button
-          onClick={() => navigate(`/charger/${id}`)}
+          onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
         >
           <ArrowLeft className="h-5 w-5" />

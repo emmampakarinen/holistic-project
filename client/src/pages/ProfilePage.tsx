@@ -9,7 +9,6 @@ import { User, Car } from "lucide-react";
 import Footer from "../components/Footer";
 import logo from "../assets/logo.png";
 
-
 const Profile = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -54,7 +53,10 @@ const Profile = () => {
               >
                 History
               </Button>
-              <Button variant="ghost" className="text-info border-b-2 border-info">
+              <Button
+                variant="ghost"
+                className="text-info border-b-2 border-info"
+              >
                 Profile
               </Button>
             </div>
@@ -92,28 +94,34 @@ const Profile = () => {
               </div>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Full Name</label>
+                  <label className="text-sm font-medium mb-2 block">
+                    Full Name
+                  </label>
                   <Input
                     value={formData.fullName}
-                    onChange={(e) => handleInputChange("fullName", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("fullName", e.target.value)
+                    }
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Mobile Number</label>
+                  <label className="text-sm font-medium mb-2 block">
+                    Mobile Number
+                  </label>
                   <Input
                     value={formData.mobileNumber}
-                    onChange={(e) => handleInputChange("mobileNumber", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("mobileNumber", e.target.value)
+                    }
                   />
                 </div>
               </div>
               <div className="mt-4">
-                <label className="text-sm font-medium mb-2 block">Email Address</label>
+                <label className="text-sm font-medium mb-2 block">
+                  Email Address
+                </label>
                 <div className="flex gap-2 items-center">
-                  <Input
-                    value={formData.email}
-                    disabled
-                    className="flex-1"
-                  />
+                  <Input value={formData.email} disabled className="flex-1" />
                   <Badge variant="outline" className="shrink-0">
                     Google Account
                   </Badge>
@@ -132,10 +140,14 @@ const Profile = () => {
                 <h2 className="text-xl font-bold">EV Information</h2>
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">EV Car Name</label>
+                <label className="text-sm font-medium mb-2 block">
+                  EV Car Name
+                </label>
                 <Input
                   value={formData.evCarName}
-                  onChange={(e) => handleInputChange("evCarName", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("evCarName", e.target.value)
+                  }
                 />
               </div>
             </div>
@@ -170,11 +182,7 @@ const Profile = () => {
 
         {/* Permanently Delete Button */}
         <div className="mt-8 flex justify-center">
-          <Button
-            variant="destructive"
-            size="lg"
-            onClick={handleDeleteAccount}
-          >
+          <Button variant="destructive" size="lg" onClick={handleDeleteAccount}>
             Permanently Delete Account
           </Button>
         </div>
