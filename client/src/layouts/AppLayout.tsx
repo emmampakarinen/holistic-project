@@ -20,18 +20,17 @@ const navItems = [
 export default function AppLayout() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isActive = (to: string) => location.pathname.startsWith(to);
 
-  const navigate = useNavigate();
-
   const handleLogout = () => {
-    // TODO: later on remove token from localStorage.removeItem("accessToken"); etc
-    navigate("/");
+    localStorage.clear();
+    navigate("/"); // Redirect to landing page after logout
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
       {/* top bar */}
       <Sheet
         component="header"
@@ -103,11 +102,26 @@ export default function AppLayout() {
               </ListItem>
             ))}
           </List>
+          <Divider />
+          <Box sx={{ p: 2 }}>
+            <Button
+              fullWidth
+              variant="outlined"
+              color="neutral"
+              startDecorator={<LogOut size={18} />}
+              onClick={(e) => {
+                e.stopPropagation(); // so drawer's onClick doesn't fire first
+                handleLogout();
+              }}
+            >
+              Log out
+            </Button>
+          </Box>
         </Box>
       </Drawer>
 
       {/* routed content */}
-      <Box component="main" sx={{ flexGrow: 1 }}>
+      <Box component="main" sx={{ flexGrow: 1, overflowY: "auto" }}>
         <Outlet />
       </Box>
     </Box>

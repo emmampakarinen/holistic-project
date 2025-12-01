@@ -151,7 +151,7 @@ const ChargerDetails = () => {
       <main className="container mx-auto px-4 max-w-7xl py-[32px] pb-[200px]">
         {/* Back Button */}
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
         >
           <ArrowLeft className="h-5 w-5" />

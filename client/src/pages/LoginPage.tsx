@@ -47,10 +47,14 @@ function LoginPage() {
     <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-50 px-5">
       {/* CARD */}
       <div className="bg-white shadow-lg rounded-3xl px-10 py-12 max-w-md w-full text-center">
-        <h1 className="text-2xl font-bold mb-2">EV timeCharge</h1>
-        <p className="text-gray-500 text-sm mb-6">
-          Plan smarter EV charging sessions
-        </p>
+        <div className="flex flex-col items-center mb-6">
+          <img
+            src="/images/logo.png"
+            alt="Ev-Logo"
+            className="icon-lg mx-auto mb-2"
+          />
+          <h1 className="text-4xl font-bold">EV TimeCharge</h1>
+        </div>
 
         <h2 className="text-xl font-semibold mb-2">Welcome</h2>
         <p className="text-gray-500 text-sm mb-6">
