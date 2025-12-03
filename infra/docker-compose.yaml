@@ -56,7 +56,6 @@ services:
       - ../client:/app
       - /app/node_modules
       - vite_cache:/app/node_modules/.vite
-    
 
   adminer:
     image: adminer:4
