@@ -3,9 +3,8 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-
-
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
+import RatingForm from "../components/RatingForm";
 
 import {
   ArrowLeft,
@@ -14,7 +13,6 @@ import {
   Map,
   Navigation,
   Calendar,
-  Star,
   Info,
 } from "lucide-react";
 import { Zap } from "lucide-react";
@@ -32,6 +30,7 @@ const ChargerDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
+  const userId = localStorage.getItem("google_sub")
 
   // get charger data
   const charger = location.state?.charger;
@@ -203,19 +202,19 @@ if (!chargerCoords) return <p>Cannot get charger location</p>;
             </div>
 
             {/* Map Placeholder */}
-<Card>
-  <CardContent className="p-0">
-  <div className="relative h-80 rounded-lg overflow-hidden">
-  <GoogleMap
-    mapContainerStyle={{ width: "100%", height: "100%" }}
-    center={chargerCoords}
-    zoom={16}
-  >
-    <Marker position={chargerCoords} />
-  </GoogleMap>
-</div>
-  </CardContent>
-</Card>
+            <Card>
+              <CardContent className="p-0">
+              <div className="relative h-80 rounded-lg overflow-hidden">
+              <GoogleMap
+                mapContainerStyle={{ width: "100%", height: "100%" }}
+                center={chargerCoords}
+                zoom={16}
+              >
+                <Marker position={chargerCoords} />
+              </GoogleMap>
+            </div>
+              </CardContent>
+            </Card>
             {/* Charger Specifications */}
             <div>
               <h2 className="text-2xl font-bold mb-4">
@@ -342,29 +341,13 @@ if (!chargerCoords) return <p>Cannot get charger location</p>;
             </Card>
 
             {/* Station Rating */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-bold text-lg mb-4">Station Rating</h3>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="flex">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={`h-5 w-5 ${
-                          star <= Math.floor(charger.rating)
-                            ? "fill-warning text-warning"
-                            : "text-muted"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-2xl font-bold">{charger.rating}</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Based on {charger.reviews} reviews
-                </p>
-              </CardContent>
-            </Card>
+          <RatingForm
+            googleChargerId={charger.googleChargerId}
+            userId={userId}
+            existingRating={charger?.rating}
+            totalReviews={charger?.reviews_count}
+            // onSubmitSuccess={refreshChargerData}
+          />
           </div>
         </div>
       </main>
