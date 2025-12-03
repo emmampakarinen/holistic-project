@@ -11,6 +11,7 @@ import {
   Alert,
   Select,
   Option,
+  FormHelperText,
 } from "@mui/joy";
 import { useCurrentTemperature } from "../hooks/useWeather";
 import { useCurrentLocation } from "../hooks/useLocation";
@@ -219,7 +220,7 @@ export default function PlanningPage() {
   return (
     <div className=" bg-slate-50 flex items-center justify-center px-4 py-2">
       <div className="w-full max-w-4xl">
-        <div className="text-center mb-8">
+        <div className="text-center mb-4">
           <Typography level="h2" className="font-bold">
             Plan Your Journey
           </Typography>
@@ -290,13 +291,20 @@ export default function PlanningPage() {
 
               <FormControl>
                 <FormLabel>Current Battery Level</FormLabel>
+                <FormHelperText sx={{ fontSize: "xs", mb: 1 }}>
+                  Minimum battery level is 14%. This ensures the app can
+                  accurately show available chargers and safe driving range.
+                </FormHelperText>
                 <div className="flex items-center gap-4">
                   <Slider
                     value={formData.battery}
-                    // the second argument newValue is the actual number
-                    onChange={(_, newValue) => updateField("battery", newValue)}
                     min={0}
                     max={100}
+                    onChange={(_, newValue) => {
+                      const v = Number(newValue);
+                      // enforce minimum logical value (14)
+                      updateField("battery", Math.max(14, v));
+                    }}
                   />
                   <Typography level="body-lg" fontWeight="lg">
                     {formData.battery}%
