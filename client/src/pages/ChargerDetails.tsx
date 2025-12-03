@@ -3,6 +3,10 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
+
+
+import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
+
 import {
   ArrowLeft,
   MapPin,
@@ -130,6 +134,33 @@ const ChargerDetails = () => {
     }
   };
 
+// Helper function to extract lat/lng from Google Maps link
+const getLatLngFromGoogleMapsLink = (link: string) => {
+  try {
+    const url = new URL(link);
+    const params = url.searchParams;
+    const destination = params.get("destination"); // ex: "60.16777,24.9415428"
+    if (!destination) return null;
+    const [lat, lng] = destination.split(",").map(Number);
+    return { lat, lng };
+  } catch (err) {
+    console.error("Invalid Google Maps link", err);
+    return null;
+  }
+};
+
+// Extract charger coordinates
+const chargerCoords = getLatLngFromGoogleMapsLink(charger.googleMapsLink);
+
+// Load Google Maps API
+const { isLoaded, loadError } = useJsApiLoader({
+  googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_PLATFORM_API_KEY,
+});
+
+if (loadError) return <p>Error loading Google Maps</p>;
+if (!isLoaded) return <p>Loading map...</p>;
+if (!chargerCoords) return <p>Cannot get charger location</p>;
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
@@ -172,26 +203,19 @@ const ChargerDetails = () => {
             </div>
 
             {/* Map Placeholder */}
-            <Card>
-              <CardContent className="p-0">
-                <div className="relative h-80 bg-muted rounded-lg flex items-center justify-center">
-                  <div className="absolute top-4 right-4 bg-card px-3 py-1.5 rounded-full shadow-md flex items-center gap-2 text-sm">
-                    <Navigation className="h-4 w-4 text-secondary" />
-                    <span className="font-medium">
-                      {charger?.distanceMetersWalkingToDestination} meters from
-                      destination
-                    </span>
-                  </div>
-                  <div className="text-center">
-                    <Map className="h-16 w-16 text-muted-foreground mx-auto mb-3" />
-                    <p className="text-lg font-medium text-muted-foreground">
-                      Interactive Map View
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
+<Card>
+  <CardContent className="p-0">
+  <div className="relative h-80 rounded-lg overflow-hidden">
+  <GoogleMap
+    mapContainerStyle={{ width: "100%", height: "100%" }}
+    center={chargerCoords}
+    zoom={16}
+  >
+    <Marker position={chargerCoords} />
+  </GoogleMap>
+</div>
+  </CardContent>
+</Card>
             {/* Charger Specifications */}
             <div>
               <h2 className="text-2xl font-bold mb-4">

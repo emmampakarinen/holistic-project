@@ -81,6 +81,10 @@ const ChargingProgress = () => {
       });
 
       /////////////////////////////////////////////////////////////////
+//send feedback
+const [showReviewPopup, setShowReviewPopup] = useState(false);
+const [reviewScore, setReviewScore] = useState(null);
+const [reviewText, setReviewText] = useState("");
 
       const data = await response.json();
 
