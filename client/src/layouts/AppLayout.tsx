@@ -87,7 +87,7 @@ export default function AppLayout() {
           onClick={() => setOpen(false)}
           onKeyDown={() => setOpen(false)}
         >
-          <Typography sx={{ p: 2 }}>Menu</Typography>
+          <Typography sx={{ p: 2, fontWeight: 800 }}>Menu</Typography>
           <Divider />
           <List>
             {navItems.map((item) => (
