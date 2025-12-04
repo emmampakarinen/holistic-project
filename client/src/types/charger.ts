@@ -2,11 +2,11 @@
 export interface Charger {
   googleChargerId: string;
   batteryAtChargerNearDestination: number;
-  displayName: {text: string};
-  address: {text: string};
-  websiteUri: {text: string};
+  displayName: { text: string };
+  address: { text: string };
+  websiteUri: string;
   rating: number;
-  googleMapsLink: {text: string};
+  googleMapsLink: string;
   distanceMetersWalkingToDestination: number;
   travelTimeSecondsDrivingToCharger: number;
   travelTimeSecondsWalkingToDestination: number;
@@ -16,4 +16,5 @@ export interface Charger {
   totalTimeToChargeFormattedTime: number;
   type: string;
   chargingSpeed: "slow" | "fast";
+  reviews_count?: number;
 }

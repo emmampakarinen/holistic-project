@@ -1,9 +1,14 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent } from "../components/ui/card";
-import { Button } from "../components/ui/button";
+import {
+  Button,
+  Card,
+  FormControl,
+  FormLabel,
+  ListItem,
+  ListItemContent,
+  Typography,
+} from "@mui/joy";
 import { Input } from "../components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Badge } from "../components/ui/badge";
 import { User, Car } from "lucide-react";
 
@@ -63,16 +68,11 @@ const Profile = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSaveChanges = () => {
-    console.log("Saving changes:", formData);
-  };
-
-  const handleLogout = () => {
-    console.log("Logging out");
-    navigate("/");
-  };
-
   const handleDeleteAccount = () => {
+    console.log("Permanently deleting account");
+  };
+
+  const handleUpdateData = () => {
     console.log("Permanently deleting account");
   };
 
@@ -84,7 +84,7 @@ const Profile = () => {
           <h1 className="text-4xl font-bold mb-2">My Profile</h1>
           <p className="text-muted-foreground">
             Manage your account settings and EV information
-          </p>
+          </Typography>
         </div>
 
         <Card className="overflow-hidden border-0 shadow-lg">
@@ -101,97 +101,130 @@ const Profile = () => {
             </div>
 
             {/* Basic Information */}
-            <div className="mb-8">
+            <section>
               <div className="flex items-center gap-2 mb-4">
-                <User className="w-5 h-5 text-info" />
-                <h2 className="text-xl font-bold">Basic Information</h2>
+                <Typography level="title-lg" fontWeight="lg">
+                  Basic Information
+                </Typography>
               </div>
+
               <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Full Name
-                  </label>
+                <FormControl>
+                  <FormLabel>Full Name</FormLabel>
                   <Input
                     value={formData.fullName}
                     onChange={(e) =>
                       handleInputChange("fullName", e.target.value)
                     }
                   />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Mobile Number
-                  </label>
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>Mobile Number</FormLabel>
                   <Input
                     value={formData.mobileNumber}
                     onChange={(e) =>
                       handleInputChange("mobileNumber", e.target.value)
                     }
                   />
-                </div>
+                </FormControl>
               </div>
-              <div className="mt-4">
-                <label className="text-sm font-medium mb-2 block">
-                  Email Address
-                </label>
-                <div className="flex gap-2 items-center">
-                  <Input value={formData.email} disabled className="flex-1" />
-                  <Badge variant="outline" className="shrink-0">
-                    Google Account
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                  <span>🔒</span>
-                  Email cannot be changed as it's linked to your Google account
-                </p>
-              </div>
-            </div>
 
-            {/* EV Information */}
-            <div className="mb-8">
-              <div className="flex items-center gap-2 mb-4">
-                <Car className="w-5 h-5 text-success" />
-                <h2 className="text-xl font-bold">EV Information</h2>
+              <div className="mt-4">
+                <FormControl>
+                  <FormLabel>Email Address</FormLabel>
+                  <div className="flex gap-2 items-center">
+                    <Input value={formData.email} disabled className="flex-1" />
+                    <Badge variant="outline" className="shrink-0">
+                      Google Account
+                    </Badge>
+                  </div>
+                </FormControl>
+                <Typography
+                  level="body-xs"
+                  className="mt-1 flex items-center gap-1 text-slate-500"
+                >
+                  <span>🔒</span>
+                  Email cannot be changed as it&apos;s linked to your Google
+                  account
+                </Typography>
               </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  EV Car Name
-                </label>
+            </section>
+
+            <section>
+              <div className="flex items-center gap-2 mb-4">
+                <Car className="w-5 h-5 text-emerald-500" />
+                <Typography level="title-lg" fontWeight="lg">
+                  EV Information
+                </Typography>
+              </div>
+
+              <FormControl>
+                <FormLabel>Default EV Car Name</FormLabel>
                 <Input
                   value={formData.evCarName}
                   onChange={(e) =>
                     handleInputChange("evCarName", e.target.value)
                   }
                 />
-              </div>
-            </div>
+              </FormControl>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between pt-6 border-t border-border">
+              {/* List of all EVs from userData */}
+              <div className="mt-4">
+                <Typography level="title-sm" sx={{ mb: 1 }}>
+                  My EVs
+                </Typography>
+
+                {!userData?.ev_cars || userData.ev_cars.length !== 0 ? (
+                  <Typography
+                    level="body-sm"
+                    sx={{ color: "neutral.500", fontStyle: "italic" }}
+                  >
+                    No EVs saved yet.
+                  </Typography>
+                ) : (
+                  <List
+                    variant="outlined"
+                    sx={{
+                      borderRadius: "lg",
+                      borderColor: "neutral.outlinedBorder",
+                      px: 1,
+                      py: 0.5,
+                    }}
+                  >
+                    {userData.ev_cars.map((car, index) => (
+                      <ListItem key={index} sx={{ py: 0.5 }}>
+                        <ListItemContent>
+                          <Typography level="body-md">{car.ev_name}</Typography>
+                        </ListItemContent>
+                      </ListItem>
+                    ))}
+                  </List>
+                )}
+              </div>
+            </section>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6 ">
               <Button
-                variant="destructive"
+                variant="solid"
+                color="danger"
                 onClick={handleDeleteAccount}
+                sx={{ borderRadius: "xl" }}
                 className="w-full sm:w-auto"
               >
                 Delete Account
               </Button>
-              <div className="flex gap-3 w-full sm:w-auto">
-                <Button
-                  variant="outline"
-                  onClick={handleLogout}
-                  className="flex-1 sm:flex-none"
-                >
-                  Logout
-                </Button>
-                <Button
-                  onClick={handleSaveChanges}
-                  className="flex-1 sm:flex-none bg-gradient-to-r from-success to-info hover:opacity-90"
-                >
-                  Save Changes
-                </Button>
-              </div>
+              <Button
+                variant="solid"
+                color="primary"
+                onClick={handleUpdateData}
+                sx={{ borderRadius: "xl" }}
+                className="w-full sm:w-auto"
+              >
+                Update Data
+              </Button>
             </div>
-          </CardContent>
+          </div>
         </Card>
       </main>
     </div>

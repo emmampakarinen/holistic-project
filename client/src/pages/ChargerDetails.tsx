@@ -1,7 +1,7 @@
 import { useLocation, useParams, useNavigate, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "../components/ui/card";
-import { Button } from "../components/ui/button";
+import { Button, IconButton } from "@mui/joy";
 import { Badge } from "../components/ui/badge";
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 import RatingForm from "../components/RatingForm";
@@ -31,10 +31,10 @@ const ChargerDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
-  const userId = localStorage.getItem("google_sub")
+  const userId = localStorage.getItem("google_sub");
 
   // get charger data
-  const charger = location.state?.charger;
+  const charger = location.state?.charger as Charger;
 
   // handle missing data (refresh protection)
   if (!charger) {
@@ -134,46 +134,46 @@ const ChargerDetails = () => {
     }
   };
 
-// Helper function to extract lat/lng from Google Maps link
-const getLatLngFromGoogleMapsLink = (link: string) => {
-  try {
-    const url = new URL(link);
-    const params = url.searchParams;
-    const destination = params.get("destination"); // ex: "60.16777,24.9415428"
-    if (!destination) return null;
-    const [lat, lng] = destination.split(",").map(Number);
-    return { lat, lng };
-  } catch (err) {
-    console.error("Invalid Google Maps link", err);
-    return null;
-  }
-};
+  // Helper function to extract lat/lng from Google Maps link
+  const getLatLngFromGoogleMapsLink = (link: string) => {
+    try {
+      const url = new URL(link);
+      const params = url.searchParams;
+      const destination = params.get("destination"); // ex: "60.16777,24.9415428"
+      if (!destination) return null;
+      const [lat, lng] = destination.split(",").map(Number);
+      return { lat, lng };
+    } catch (err) {
+      console.error("Invalid Google Maps link", err);
+      return null;
+    }
+  };
 
-// Extract charger coordinates
-const chargerCoords = getLatLngFromGoogleMapsLink(charger.googleMapsLink);
+  // Extract charger coordinates
+  const chargerCoords = getLatLngFromGoogleMapsLink(charger.googleMapsLink);
 
-// Load Google Maps API
-const { isLoaded, loadError } = useJsApiLoader({
-  googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_PLATFORM_API_KEY,
-});
+  // Load Google Maps API
+  const { isLoaded, loadError } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_PLATFORM_API_KEY,
+  });
 
-if (loadError) return <p>Error loading Google Maps</p>;
-if (!isLoaded) return <p>Loading map...</p>;
-if (!chargerCoords) return <p>Cannot get charger location</p>;
+  if (loadError) return <p>Error loading Google Maps</p>;
+  if (!isLoaded) return <p>Loading map...</p>;
+  if (!chargerCoords) return <p>Cannot get charger location</p>;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 max-w-7xl py-[32px] pb-[200px]">
-        {/* Back Button */}
-        <button
+      <div className="container mx-auto px-4 max-w-7xl pb-[200px]">
+        <Button
+          size="sm"
+          variant="plain"
+          startDecorator={<ArrowLeft size={18} />}
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
         >
-          <ArrowLeft className="h-5 w-5" />
-          <span className="font-medium">Back to Results</span>
-        </button>
+          Back to Results
+        </Button>
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-6">
@@ -221,9 +221,8 @@ if (!chargerCoords) return <p>Cannot get charger location</p>;
                         </p>
                         <p className="font-bold text-lg">{charger.type}</p>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
 
                 <Card className="bg-secondary/10 border-0">
                   <CardContent className="p-6">
@@ -231,17 +230,8 @@ if (!chargerCoords) return <p>Cannot get charger location</p>;
                       <div className="bg-secondary/20 p-2 rounded-lg">
                         <Zap className="h-5 w-5 text-secondary" />
                       </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          Power Output
-                        </p>
-                        <p className="font-bold text-lg">
-                          {charger.maxChargeRateKw} kW
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
 
                 <Card className="bg-muted border-0">
                   <CardContent className="p-6">
@@ -249,19 +239,10 @@ if (!chargerCoords) return <p>Cannot get charger location</p>;
                       <div className="bg-background p-2 rounded-lg">
                         <Clock className="h-5 w-5 text-foreground" />
                       </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          Est. Charge Time
-                        </p>
-                        <p className="font-bold text-lg">
-                          {charger.totalTimeToChargeFormattedTime}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
-            </div>
 
             {/* Perfect Match Info */}
             <Card className="bg-secondary/5 border-0">
@@ -282,48 +263,57 @@ if (!chargerCoords) return <p>Cannot get charger location</p>;
                       ready to leave.
                     </p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-
           {/* Right Column - Quick Actions & Info */}
-          <div className="space-y-6">
+          <div>
             {/* Quick Actions */}
             <Card className="border-0">
               <CardContent className="p-6">
                 <h3 className="font-bold text-lg mb-4">Quick Actions</h3>
-                <div className="space-y-3">
+                <div className="flex flex-col gap-2">
                   <Button
-                    className="w-full bg-primary hover:bg-primary/90 h-12"
+                    sx={{
+                      width: "100%",
+                      height: "48px",
+                      backgroundColor: "#22c55e",
+                      color: "white",
+                      borderRadius: "12px",
+                      fontSize: "16px",
+                      "&:hover": {
+                        backgroundColor: "#16a34a",
+                      },
+                    }}
                     onClick={handleStartCharging}
                   >
                     Start Charging
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full h-12 border-secondary text-secondary hover:bg-secondary/10"
-                  >
-                    <Navigation className="mr-2 h-5 w-5" />
-                    <a
+                  <div className="flex flex-row gap-2">
+                    <Button
+                      variant="solid"
+                      className="w-full h-12"
+                      component="a"
                       href={charger.googleMapsLink}
                       target="_blank"
                       rel="noopener noreferrer"
+                      startDecorator={<Navigation className="mr-2 h-5 w-5" />} // Joy UI
                     >
                       Navigate to Charger
-                    </a>
-                  </Button>
-                  <Button variant="outline" className="w-full h-12" asChild>
-                    {/* Use a standard anchor tag for external sites */}
-                    <a
+                    </Button>
+                    <Button
+                      variant="solid"
+                      className="w-full h-12"
+                      component="a"
                       href={charger.websiteUri}
                       target="_blank"
                       rel="noopener noreferrer"
+                      startDecorator={<Calendar className="h-5 w-5" />} // Joy UI
                     >
-                      <Calendar className="mr-2 h-5 w-5" />
                       Book Charger
-                    </a>
-                  </Button>
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
