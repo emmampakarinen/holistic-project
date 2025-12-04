@@ -3,6 +3,9 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
+import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
+import RatingForm from "../components/RatingForm";
+
 import {
   ArrowLeft,
   MapPin,
@@ -10,7 +13,6 @@ import {
   Map,
   Navigation,
   Calendar,
-  Star,
   Info,
 } from "lucide-react";
 import { Zap } from "lucide-react";
@@ -28,6 +30,7 @@ const ChargerDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
+  const userId = localStorage.getItem("google_sub")
 
   // get charger data
   const charger = location.state?.charger;
@@ -42,8 +45,7 @@ const ChargerDetails = () => {
         </p>
         <button
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          onClick={() => navigate("/app/planning")}
-
+          onClick={() => navigate("/planning")}
         >
           Back to Planning
         </button>
@@ -131,9 +133,49 @@ const ChargerDetails = () => {
     }
   };
 
+// Helper function to extract lat/lng from Google Maps link
+const getLatLngFromGoogleMapsLink = (link: string) => {
+  try {
+    const url = new URL(link);
+    const params = url.searchParams;
+    const destination = params.get("destination"); // ex: "60.16777,24.9415428"
+    if (!destination) return null;
+    const [lat, lng] = destination.split(",").map(Number);
+    return { lat, lng };
+  } catch (err) {
+    console.error("Invalid Google Maps link", err);
+    return null;
+  }
+};
+
+// Extract charger coordinates
+const chargerCoords = getLatLngFromGoogleMapsLink(charger.googleMapsLink);
+
+// Load Google Maps API
+const { isLoaded, loadError } = useJsApiLoader({
+  googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_PLATFORM_API_KEY,
+});
+
+if (loadError) return <p>Error loading Google Maps</p>;
+if (!isLoaded) return <p>Loading map...</p>;
+if (!chargerCoords) return <p>Cannot get charger location</p>;
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      
+      {/* Header */}
+      <header className="bg-card border-b border-border sticky top-0 z-10 shadow-sm">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img src={logo} alt="EV SmartCharge" className="h-10 w-10" />
+              <span className="font-bold text-xl">EV SmartCharge</span>
+            </div>
+            <Button variant="outline" size="sm">
+              Profile
+            </Button>
+          </div>
+        </div>
+      </header>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 max-w-7xl py-[32px] pb-[200px]">
@@ -160,33 +202,26 @@ const ChargerDetails = () => {
             </div>
 
             {/* Map Placeholder */}
-            <Card className="border-0>
+            <Card>
               <CardContent className="p-0">
-                <div className="relative h-80 bg-muted rounded-lg flex items-center justify-center">
-                  <div className="absolute top-4 right-4 bg-card px-3 py-1.5 rounded-full shadow-md flex items-center gap-2 text-sm">
-                    <Navigation className="h-4 w-4 text-secondary" />
-                    <span className="font-medium">
-                      {charger?.distanceMetersWalkingToDestination} meters from
-                      destination
-                    </span>
-                  </div>
-                  <div className="text-center">
-                    <Map className="h-16 w-16 text-muted-foreground mx-auto mb-3" />
-                    <p className="text-lg font-medium text-muted-foreground">
-                      Interactive Map View
-                    </p>
-                  </div>
-                </div>
+              <div className="relative h-80 rounded-lg overflow-hidden">
+              <GoogleMap
+                mapContainerStyle={{ width: "100%", height: "100%" }}
+                center={chargerCoords}
+                zoom={16}
+              >
+                <Marker position={chargerCoords} />
+              </GoogleMap>
+            </div>
               </CardContent>
             </Card>
-
             {/* Charger Specifications */}
             <div>
               <h2 className="text-2xl font-bold mb-4">
                 Charger Specifications
               </h2>
               <div className="grid sm:grid-cols-3 gap-4">
-                <Card className="bg-accent/50 border-0">
+                <Card className="bg-accent/50">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-3">
                       <div className="bg-accent/30 p-2 rounded-lg">
@@ -202,7 +237,7 @@ const ChargerDetails = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-secondary/10 border-0">
+                <Card className="bg-secondary/10">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-3">
                       <div className="bg-secondary/20 p-2 rounded-lg">
@@ -220,7 +255,7 @@ const ChargerDetails = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-muted border-0">
+                <Card className="bg-muted">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-3">
                       <div className="bg-background p-2 rounded-lg">
@@ -241,7 +276,7 @@ const ChargerDetails = () => {
             </div>
 
             {/* Perfect Match Info */}
-            <Card className="bg-secondary/5 border-0">
+            <Card className="bg-secondary/5 border-secondary/20">
               <CardContent className="p-6">
                 <div className="flex gap-3">
                   <div className="bg-secondary/20 p-2 rounded-full h-fit">
@@ -267,7 +302,7 @@ const ChargerDetails = () => {
           {/* Right Column - Quick Actions & Info */}
           <div className="space-y-6">
             {/* Quick Actions */}
-            <Card className="border-0">
+            <Card>
               <CardContent className="p-6">
                 <h3 className="font-bold text-lg mb-4">Quick Actions</h3>
                 <div className="space-y-3">
@@ -306,33 +341,17 @@ const ChargerDetails = () => {
             </Card>
 
             {/* Station Rating */}
-            <Card className="border-0">
-              <CardContent className="p-6">
-                <h3 className="font-bold text-lg mb-4">Station Rating</h3>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="flex">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={`h-5 w-5 ${
-                          star <= Math.floor(charger.rating)
-                            ? "fill-warning text-warning"
-                            : "text-muted"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-2xl font-bold">{charger.rating}</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Based on {charger.reviews} reviews
-                </p>
-              </CardContent>
-            </Card>
+          <RatingForm
+            googleChargerId={charger.googleChargerId}
+            userId={userId}
+            existingRating={charger?.rating}
+            totalReviews={charger?.reviews_count}
+            // onSubmitSuccess={refreshChargerData}
+          />
           </div>
         </div>
       </main>
-      
+      <Footer />
     </div>
   );
 };
