@@ -1,7 +1,7 @@
 import { useLocation, useParams, useNavigate, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "../components/ui/card";
-import { Button } from "../components/ui/button";
+import { Button, IconButton } from "@mui/joy";
 import { Badge } from "../components/ui/badge";
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 import RatingForm from "../components/RatingForm";
@@ -33,7 +33,7 @@ const ChargerDetails = () => {
   const userId = localStorage.getItem("google_sub");
 
   // get charger data
-  const charger = location.state?.charger;
+  const charger = location.state?.charger as Charger;
 
   // handle missing data (refresh protection)
   if (!charger) {
@@ -161,17 +161,17 @@ const ChargerDetails = () => {
   if (!chargerCoords) return <p>Cannot get charger location</p>;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="bg-slate-50 min-h-screen flex items-center justify-center px-4 py-2 flex-col">
       {/* Main Content */}
-      <main className="container mx-auto px-4 max-w-7xl py-[32px] pb-[200px]">
-        {/* Back Button */}
-        <button
+      <div className="container mx-auto px-4 max-w-7xl pb-[200px]">
+        <Button
+          size="sm"
+          variant="plain"
+          startDecorator={<ArrowLeft size={18} />}
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
         >
-          <ArrowLeft className="h-5 w-5" />
-          <span className="font-medium">Back to Results</span>
-        </button>
+          Back to Results
+        </Button>
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-6">
@@ -288,61 +288,68 @@ const ChargerDetails = () => {
           {/* Right Column - Quick Actions & Info */}
           <div>
             {/* Quick Actions */}
-            <Card className="border-none shadow-none bg-white rounded-[10px]">
+            <Card className="border-none bg-white rounded-[10px] shadow-sm mb-6">
               <CardContent className="p-6 mb-6">
                 <h3 className="font-bold text-lg mb-4">Quick Actions</h3>
-                <div className="space-y-3">
+                <div className="flex flex-col gap-2">
                   <Button
-                    className="w-full h-12 bg-green-500 hover:bg-green-600 text-white rounded-lg text-[16px]"
+                    sx={{
+                      width: "100%",
+                      height: "48px",
+                      backgroundColor: "#22c55e",
+                      color: "white",
+                      borderRadius: "12px",
+                      fontSize: "16px",
+                      "&:hover": {
+                        backgroundColor: "#16a34a",
+                      },
+                    }}
                     onClick={handleStartCharging}
                   >
                     Start Charging
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-[16px]"
-                  >
-                    <Navigation className="mr-2 h-5 w-5" />
-                    <a
+                  <div className="flex flex-row gap-2">
+                    <Button
+                      variant="solid"
+                      className="w-full h-12"
+                      component="a"
                       href={charger.googleMapsLink}
                       target="_blank"
                       rel="noopener noreferrer"
+                      startDecorator={<Navigation className="mr-2 h-5 w-5" />} // Joy UI
                     >
                       Navigate to Charger
-                    </a>
-                  </Button>
-                  <Button variant="outline" className="w-full h-12" asChild>
-                    {/* Use a standard anchor tag for external sites */}
-                    <a
+                    </Button>
+                    <Button
+                      variant="solid"
+                      className="w-full h-12"
+                      component="a"
                       href={charger.websiteUri}
                       target="_blank"
                       rel="noopener noreferrer"
+                      startDecorator={<Calendar className="h-5 w-5" />} // Joy UI
                     >
-                      <Calendar className="mr-2 h-5 w-5" />
                       Book Charger
-                    </a>
-                  </Button>
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Station Rating */}
             <div className="rating-form bg-white rounded-[20px] p-4">
-             
-                <RatingForm
-                  googleChargerId={charger.googleChargerId}
-                  userId={userId}
-                  existingRating={charger?.rating}
-                  totalReviews={charger?.reviews_count}
-                  bordered={false}
-                  // onSubmitSuccess={refreshChargerData}
-                />
-      
+              <RatingForm
+                googleChargerId={charger.googleChargerId}
+                userId={userId}
+                existingRating={charger?.rating}
+                totalReviews={charger?.reviews_count}
+                bordered={false}
+                // onSubmitSuccess={refreshChargerData}
+              />
             </div>
           </div>
         </div>
-      </main>
-      <Footer />
+      </div>
     </div>
   );
 };

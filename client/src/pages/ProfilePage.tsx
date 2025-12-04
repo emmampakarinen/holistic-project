@@ -1,194 +1,213 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent } from "../components/ui/card";
-import { Button } from "../components/ui/button";
+import {
+  Button,
+  Card,
+  FormControl,
+  FormLabel,
+  ListItem,
+  ListItemContent,
+  Typography,
+} from "@mui/joy";
 import { Input } from "../components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Badge } from "../components/ui/badge";
-import { User, Car } from "lucide-react";
-import Footer from "../components/Footer";
-import logo from "../assets/logo.png";
+import { Car, List } from "lucide-react";
+import type { StoredUserData } from "../types/userdata";
 
 const Profile = () => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    fullName: "John Anderson",
-    mobileNumber: "+1 (555) 123-4567",
-    email: "john.anderson@gmail.com",
-    evCarName: "Tesla Model 3 Long Range",
+  const [formData, setFormData] = useState(() => {
+    const raw = localStorage.getItem("userData");
+    let parsed: StoredUserData | null = null;
+
+    if (raw) {
+      try {
+        parsed = JSON.parse(raw) as StoredUserData;
+      } catch (err) {
+        console.error("Failed to parse userData from localStorage", err);
+      }
+    }
+
+    return {
+      fullName: parsed?.name ?? "",
+      mobileNumber: "",
+      email: parsed?.email ?? "",
+      evCarName: parsed?.ev_cars?.[0]?.ev_name ?? "",
+    };
   });
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSaveChanges = () => {
-    console.log("Saving changes:", formData);
-  };
-
-  const handleLogout = () => {
-    console.log("Logging out");
-    navigate("/");
-  };
-
   const handleDeleteAccount = () => {
     console.log("Permanently deleting account");
   };
 
+  const handleUpdateData = () => {
+    console.log("Permanently deleting account");
+  };
+
+  const [userData] = useState<StoredUserData | null>(() => {
+    const raw = localStorage.getItem("userData");
+    if (!raw) return null;
+
+    try {
+      return JSON.parse(raw) as StoredUserData;
+    } catch (err) {
+      console.error("Failed to parse userData from localStorage", err);
+      return null;
+    }
+  });
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-10 shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img src={logo} alt="EV SmartCharge" className="h-10 w-10" />
-              <span className="font-bold text-xl">EV SmartCharge</span>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                onClick={() => navigate("/history")}
-                className="text-muted-foreground"
-              >
-                History
-              </Button>
-              <Button
-                variant="ghost"
-                className="text-info border-b-2 border-info"
-              >
-                Profile
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 max-w-4xl flex-1">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">My Profile</h1>
-          <p className="text-muted-foreground">
+    <div className="bg-slate-50 flex items-center justify-center px-4 py-2 min-h-screen">
+      <div className="w-full max-w-4xl">
+        {/* Title section – same style as PlanningPage */}
+        <div className="text-center mb-4">
+          <Typography level="h2" className="font-bold">
+            My Profile
+          </Typography>
+          <Typography level="body-sm" className="text-slate-500 mt-1">
             Manage your account settings and EV information
-          </p>
+          </Typography>
         </div>
 
-        <Card className="overflow-hidden">
-          {/* Gradient Header */}
-          <div className="h-32 bg-gradient-to-r from-success via-info to-secondary" />
-
-          <CardContent className="p-8 -mt-16">
-            {/* Avatar */}
-            <div className="flex justify-center mb-8">
-              <Avatar className="w-32 h-32 border-4 border-card shadow-lg">
-                <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=John" />
-                <AvatarFallback className="text-3xl">JA</AvatarFallback>
-              </Avatar>
-            </div>
-
+        <Card
+          variant="outlined"
+          sx={{
+            borderRadius: 24,
+            boxShadow: "lg",
+            px: { xs: 2, md: 4 },
+            py: { xs: 3, md: 4 },
+          }}
+        >
+          <div className="space-y-6">
             {/* Basic Information */}
-            <div className="mb-8">
+            <section>
               <div className="flex items-center gap-2 mb-4">
-                <User className="w-5 h-5 text-info" />
-                <h2 className="text-xl font-bold">Basic Information</h2>
+                <Typography level="title-lg" fontWeight="lg">
+                  Basic Information
+                </Typography>
               </div>
+
               <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Full Name
-                  </label>
+                <FormControl>
+                  <FormLabel>Full Name</FormLabel>
                   <Input
                     value={formData.fullName}
                     onChange={(e) =>
                       handleInputChange("fullName", e.target.value)
                     }
                   />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Mobile Number
-                  </label>
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>Mobile Number</FormLabel>
                   <Input
                     value={formData.mobileNumber}
                     onChange={(e) =>
                       handleInputChange("mobileNumber", e.target.value)
                     }
                   />
-                </div>
+                </FormControl>
               </div>
-              <div className="mt-4">
-                <label className="text-sm font-medium mb-2 block">
-                  Email Address
-                </label>
-                <div className="flex gap-2 items-center">
-                  <Input value={formData.email} disabled className="flex-1" />
-                  <Badge variant="outline" className="shrink-0">
-                    Google Account
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                  <span>🔒</span>
-                  Email cannot be changed as it's linked to your Google account
-                </p>
-              </div>
-            </div>
 
-            {/* EV Information */}
-            <div className="mb-8">
-              <div className="flex items-center gap-2 mb-4">
-                <Car className="w-5 h-5 text-success" />
-                <h2 className="text-xl font-bold">EV Information</h2>
+              <div className="mt-4">
+                <FormControl>
+                  <FormLabel>Email Address</FormLabel>
+                  <div className="flex gap-2 items-center">
+                    <Input value={formData.email} disabled className="flex-1" />
+                    <Badge variant="outline" className="shrink-0">
+                      Google Account
+                    </Badge>
+                  </div>
+                </FormControl>
+                <Typography
+                  level="body-xs"
+                  className="mt-1 flex items-center gap-1 text-slate-500"
+                >
+                  <span>🔒</span>
+                  Email cannot be changed as it&apos;s linked to your Google
+                  account
+                </Typography>
               </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  EV Car Name
-                </label>
+            </section>
+
+            <section>
+              <div className="flex items-center gap-2 mb-4">
+                <Car className="w-5 h-5 text-emerald-500" />
+                <Typography level="title-lg" fontWeight="lg">
+                  EV Information
+                </Typography>
+              </div>
+
+              <FormControl>
+                <FormLabel>Default EV Car Name</FormLabel>
                 <Input
                   value={formData.evCarName}
                   onChange={(e) =>
                     handleInputChange("evCarName", e.target.value)
                   }
                 />
-              </div>
-            </div>
+              </FormControl>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between pt-6 border-t border-border">
+              {/* List of all EVs from userData */}
+              <div className="mt-4">
+                <Typography level="title-sm" sx={{ mb: 1 }}>
+                  My EVs
+                </Typography>
+
+                {!userData?.ev_cars || userData.ev_cars.length !== 0 ? (
+                  <Typography
+                    level="body-sm"
+                    sx={{ color: "neutral.500", fontStyle: "italic" }}
+                  >
+                    No EVs saved yet.
+                  </Typography>
+                ) : (
+                  <List
+                    variant="outlined"
+                    sx={{
+                      borderRadius: "lg",
+                      borderColor: "neutral.outlinedBorder",
+                      px: 1,
+                      py: 0.5,
+                    }}
+                  >
+                    {userData.ev_cars.map((car, index) => (
+                      <ListItem key={index} sx={{ py: 0.5 }}>
+                        <ListItemContent>
+                          <Typography level="body-md">{car.ev_name}</Typography>
+                        </ListItemContent>
+                      </ListItem>
+                    ))}
+                  </List>
+                )}
+              </div>
+            </section>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6 ">
               <Button
-                variant="destructive"
+                variant="solid"
+                color="danger"
                 onClick={handleDeleteAccount}
+                sx={{ borderRadius: "xl" }}
                 className="w-full sm:w-auto"
               >
                 Delete Account
               </Button>
-              <div className="flex gap-3 w-full sm:w-auto">
-                <Button
-                  variant="outline"
-                  onClick={handleLogout}
-                  className="flex-1 sm:flex-none"
-                >
-                  Logout
-                </Button>
-                <Button
-                  onClick={handleSaveChanges}
-                  className="flex-1 sm:flex-none bg-gradient-to-r from-success to-info hover:opacity-90"
-                >
-                  Save Changes
-                </Button>
-              </div>
+              <Button
+                variant="solid"
+                color="primary"
+                onClick={handleUpdateData}
+                sx={{ borderRadius: "xl" }}
+                className="w-full sm:w-auto"
+              >
+                Update Data
+              </Button>
             </div>
-          </CardContent>
+          </div>
         </Card>
-
-        {/* Permanently Delete Button */}
-        <div className="mt-8 flex justify-center">
-          <Button variant="destructive" size="lg" onClick={handleDeleteAccount}>
-            Permanently Delete Account
-          </Button>
-        </div>
-      </main>
-
-      <Footer />
+      </div>
     </div>
   );
 };
