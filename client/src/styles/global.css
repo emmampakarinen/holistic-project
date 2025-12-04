@@ -7,6 +7,46 @@
 /* Custom CSS */
 :root {
   --gradient-green-blue: linear-gradient(90deg, #30c67c 0%, #2979ff 100%);
+
+  --color-background: #f5f5f5;
+  --color-foreground: #212121;
+
+
+  --color-card: #ffffff;
+  --color-card-foreground: #111827;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #111827;
+
+
+  --color-primary: #30c67c;           
+  --color-primary-foreground: #ffffff;
+
+
+  --color-secondary: #e5e7eb;         
+  --color-secondary-foreground: #111827;
+
+
+  --color-muted: #f3f4f6;
+  --color-muted-foreground: #6b7280;
+
+
+  --color-accent: #e0f2fe;            
+  --color-accent-foreground: #075985; 
+
+
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+
+
+  --color-border: #e5e7eb;
+  --color-input: #e5e7eb;
+  --color-ring: #30c67c;
+
+
+  --color-success: #22c55e;           
+  --color-warning: #f59e0b;           
+  --color-info: #2979ff;        
+
 }
 
 body {

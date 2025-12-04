@@ -10,29 +10,59 @@ import {
 } from "@mui/joy";
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
-import { Car, List } from "lucide-react";
-import type { StoredUserData } from "../types/userdata";
+import { User, Car } from "lucide-react";
 
 const Profile = () => {
-  const [formData, setFormData] = useState(() => {
-    const raw = localStorage.getItem("userData");
-    let parsed: StoredUserData | null = null;
+  const navigate = useNavigate();
 
-    if (raw) {
-      try {
-        parsed = JSON.parse(raw) as StoredUserData;
-      } catch (err) {
-        console.error("Failed to parse userData from localStorage", err);
+  // Read raw user data from localStorage (set by login/register)
+  const rawUserData = localStorage.getItem("userData");
+  const googleEmail = localStorage.getItem("google_email");
+
+  // Build initial values for the form
+  let initial = {
+    fullName: "",
+    mobileNumber: "",
+    email: googleEmail || "",
+    evCarName: "",
+  };
+
+  if (rawUserData) {
+    try {
+      const user = JSON.parse(rawUserData);
+
+      // Name: support both shapes (register payload & DB row)
+      initial.fullName = user.fullName || user.name || initial.fullName;
+
+      // Mobile: only in register payload for now
+      initial.mobileNumber = user.mobile || initial.mobileNumber;
+
+      // Email: from register payload, DB, or Google
+      initial.email =
+        user.emailAddress || user.email || initial.email;
+
+      // EV car name:
+      // 1) If we stored selectedCars (array of strings), show them
+      if (Array.isArray(user.selectedCars) && user.selectedCars.length > 0) {
+        initial.evCarName = user.selectedCars.join(", ");
       }
-    }
+      // 2) Or if we have ev_cars from DB (JSON string), show first one
+      else if (user.ev_cars) {
+        try {
+          const cars = JSON.parse(user.ev_cars);
+          if (Array.isArray(cars) && cars.length > 0) {
+            initial.evCarName = String(cars[0]);
+          }
+        } catch {
 
-    return {
-      fullName: parsed?.name ?? "",
-      mobileNumber: "",
-      email: parsed?.email ?? "",
-      evCarName: parsed?.ev_cars?.[0]?.ev_name ?? "",
-    };
-  });
+        }
+      }
+    } catch (e) {
+      console.error("Failed to parse userData from localStorage", e);
+    }
+  }
+
+  const [formData, setFormData] = useState(initial);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -46,41 +76,30 @@ const Profile = () => {
     console.log("Permanently deleting account");
   };
 
-  const [userData] = useState<StoredUserData | null>(() => {
-    const raw = localStorage.getItem("userData");
-    if (!raw) return null;
-
-    try {
-      return JSON.parse(raw) as StoredUserData;
-    } catch (err) {
-      console.error("Failed to parse userData from localStorage", err);
-      return null;
-    }
-  });
-
   return (
-    <div className="bg-slate-50 flex items-center justify-center px-4 py-2 min-h-screen">
-      <div className="w-full max-w-4xl">
-        {/* Title section – same style as PlanningPage */}
-        <div className="text-center mb-4">
-          <Typography level="h2" className="font-bold">
-            My Profile
-          </Typography>
-          <Typography level="body-sm" className="text-slate-500 mt-1">
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8 max-w-4xl flex-1">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2">My Profile</h1>
+          <p className="text-muted-foreground">
             Manage your account settings and EV information
           </Typography>
         </div>
 
-        <Card
-          variant="outlined"
-          sx={{
-            borderRadius: 24,
-            boxShadow: "lg",
-            px: { xs: 2, md: 4 },
-            py: { xs: 3, md: 4 },
-          }}
-        >
-          <div className="space-y-6">
+        <Card className="overflow-hidden border-0 shadow-lg">
+          {/* Gradient Header */}
+          <div className="h-32 bg-[linear-gradient(90deg,#30C67C_0%,#2979FF_100%)]" />
+
+          <CardContent className="p-8 -mt-16">
+            {/* Avatar */}
+            <div className="flex justify-center mb-8">
+              <Avatar className="w-32 h-32 border-4 border-card shadow-lg">
+                <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=John" />
+                <AvatarFallback className="text-3xl">JA</AvatarFallback>
+              </Avatar>
+            </div>
+
             {/* Basic Information */}
             <section>
               <div className="flex items-center gap-2 mb-4">
@@ -207,7 +226,7 @@ const Profile = () => {
             </div>
           </div>
         </Card>
-      </div>
+      </main>
     </div>
   );
 };
