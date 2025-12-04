@@ -105,7 +105,7 @@ def find_charge():
 
     ####################################
 
-    connector_map = {"EV_CONNECTOR_TYPE_CHADEMO": "CHAdeMO", "EV_CONNECTOR_TYPE_CCS_COMBO_2": "CCS2", "EV_CONNECTOR_TYPE_TYPE_2": "Type2"}
+    connector_map = {"EV_CONNECTOR_TYPE_CHADEMO": "CHAdeMO", "EV_CONNECTOR_TYPE_CCS_COMBO_2": "CCS2", "EV_CONNECTOR_TYPE_TYPE_2": "Type2", "EV_CONNECTOR_TYPE_TESLA": "CCS2"}
 
     rev_conn_map = {v: k for k, v in connector_map.items()}
     
@@ -139,7 +139,7 @@ def find_charge():
 
                 if connector.get('type') == vehicle_specs.get("dc_default_charger_type"):
 
-                    raw_curve_data = vehicle_specs.get('dc_charging_curve_data').get('charging_curve')
+                    raw_curve_data = vehicle_specs.get('dc_charging_curve_data')
                     
                     start_soc = charger.get("battery_at_charger_near_destination")
                     end_soc = 100
@@ -204,6 +204,9 @@ def find_charge():
                     charge_duration = duration_hours * 3600
 
                     print(f"time to charge ac: {charge_duration:.2f} seconds")
+
+                else:
+                    continue
                 
                 connector['total_time_to_charge'] = charge_duration
                 connector["charger_delta_seconds"] = abs(charge_duration - total_trip_time)
@@ -235,7 +238,8 @@ def find_charge():
     speed_category_map = {
         "EV_CONNECTOR_TYPE_TYPE_2": "slow",
         "EV_CONNECTOR_TYPE_CCS_COMBO_2": "fast",
-        "EV_CONNECTOR_TYPE_CHADEMO": "fast"
+        "EV_CONNECTOR_TYPE_CHADEMO": "fast",
+        "EV_CONNECTOR_TYPE_TESLA": "fast"
     }
 
     for candidate in top_3_candidates:

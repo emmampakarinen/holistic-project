@@ -357,10 +357,11 @@ export default function PlanningPage() {
                   )}
 
                   {evList.map((ev, index) => (
-                    <Option key={index} value={ev.ev_name}>
-                      {ev.ev_name}
+                    <Option key={index} value={ev}>
+                      {ev}
                     </Option>
                   ))}
+
                 </Select>
               </FormControl>
 
