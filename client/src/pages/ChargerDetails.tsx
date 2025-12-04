@@ -13,6 +13,7 @@ import {
   Map,
   Navigation,
   Calendar,
+  Star,
   Info,
 } from "lucide-react";
 import { Zap } from "lucide-react";
@@ -45,7 +46,7 @@ const ChargerDetails = () => {
         </p>
         <button
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          onClick={() => navigate("/planning")}
+          onClick={() => navigate("app/planning")}
         >
           Back to Planning
         </button>
@@ -162,20 +163,6 @@ if (!chargerCoords) return <p>Cannot get charger location</p>;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-10 shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img src={logo} alt="EV SmartCharge" className="h-10 w-10" />
-              <span className="font-bold text-xl">EV SmartCharge</span>
-            </div>
-            <Button variant="outline" size="sm">
-              Profile
-            </Button>
-          </div>
-        </div>
-      </header>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 max-w-7xl py-[32px] pb-[200px]">
@@ -202,26 +189,27 @@ if (!chargerCoords) return <p>Cannot get charger location</p>;
             </div>
 
             {/* Map Placeholder */}
-            <Card>
+            <Card className="border-0">
               <CardContent className="p-0">
-              <div className="relative h-80 rounded-lg overflow-hidden">
-              <GoogleMap
-                mapContainerStyle={{ width: "100%", height: "100%" }}
-                center={chargerCoords}
-                zoom={16}
-              >
-                <Marker position={chargerCoords} />
-              </GoogleMap>
-            </div>
+                <div className="relative h-80 rounded-lg overflow-hidden">
+                  <GoogleMap
+                    mapContainerStyle={{ width: "100%", height: "100%" }}
+                    center={chargerCoords}
+                    zoom={16}
+                  >
+                    <Marker position={chargerCoords} />
+                  </GoogleMap>
+                </div>
               </CardContent>
             </Card>
+
             {/* Charger Specifications */}
             <div>
               <h2 className="text-2xl font-bold mb-4">
                 Charger Specifications
               </h2>
               <div className="grid sm:grid-cols-3 gap-4">
-                <Card className="bg-accent/50">
+                <Card className="bg-accent/50 border-0">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-3">
                       <div className="bg-accent/30 p-2 rounded-lg">
@@ -237,7 +225,7 @@ if (!chargerCoords) return <p>Cannot get charger location</p>;
                   </CardContent>
                 </Card>
 
-                <Card className="bg-secondary/10">
+                <Card className="bg-secondary/10 border-0">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-3">
                       <div className="bg-secondary/20 p-2 rounded-lg">
@@ -255,7 +243,7 @@ if (!chargerCoords) return <p>Cannot get charger location</p>;
                   </CardContent>
                 </Card>
 
-                <Card className="bg-muted">
+                <Card className="bg-muted border-0">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-3">
                       <div className="bg-background p-2 rounded-lg">
@@ -276,7 +264,7 @@ if (!chargerCoords) return <p>Cannot get charger location</p>;
             </div>
 
             {/* Perfect Match Info */}
-            <Card className="bg-secondary/5 border-secondary/20">
+            <Card className="bg-secondary/5 border-0">
               <CardContent className="p-6">
                 <div className="flex gap-3">
                   <div className="bg-secondary/20 p-2 rounded-full h-fit">
@@ -302,7 +290,7 @@ if (!chargerCoords) return <p>Cannot get charger location</p>;
           {/* Right Column - Quick Actions & Info */}
           <div className="space-y-6">
             {/* Quick Actions */}
-            <Card>
+            <Card className="border-0">
               <CardContent className="p-6">
                 <h3 className="font-bold text-lg mb-4">Quick Actions</h3>
                 <div className="space-y-3">
@@ -341,17 +329,17 @@ if (!chargerCoords) return <p>Cannot get charger location</p>;
             </Card>
 
             {/* Station Rating */}
-          <RatingForm
-            googleChargerId={charger.googleChargerId}
-            userId={userId}
-            existingRating={charger?.rating}
-            totalReviews={charger?.reviews_count}
-            // onSubmitSuccess={refreshChargerData}
-          />
+            <RatingForm
+              googleChargerId={charger.googleChargerId}
+              userId={userId}
+              existingRating={charger?.rating}
+              totalReviews={charger?.reviews_count}
+              // onSubmitSuccess={refreshChargerData}
+            />
+
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

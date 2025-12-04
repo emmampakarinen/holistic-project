@@ -6,17 +6,58 @@ import { Input } from "../components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Badge } from "../components/ui/badge";
 import { User, Car } from "lucide-react";
-import Footer from "../components/Footer";
-import logo from "../assets/logo.png";
 
 const Profile = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    fullName: "John Anderson",
-    mobileNumber: "+1 (555) 123-4567",
-    email: "john.anderson@gmail.com",
-    evCarName: "Tesla Model 3 Long Range",
-  });
+
+  // Read raw user data from localStorage (set by login/register)
+  const rawUserData = localStorage.getItem("userData");
+  const googleEmail = localStorage.getItem("google_email");
+
+  // Build initial values for the form
+  let initial = {
+    fullName: "",
+    mobileNumber: "",
+    email: googleEmail || "",
+    evCarName: "",
+  };
+
+  if (rawUserData) {
+    try {
+      const user = JSON.parse(rawUserData);
+
+      // Name: support both shapes (register payload & DB row)
+      initial.fullName = user.fullName || user.name || initial.fullName;
+
+      // Mobile: only in register payload for now
+      initial.mobileNumber = user.mobile || initial.mobileNumber;
+
+      // Email: from register payload, DB, or Google
+      initial.email =
+        user.emailAddress || user.email || initial.email;
+
+      // EV car name:
+      // 1) If we stored selectedCars (array of strings), show them
+      if (Array.isArray(user.selectedCars) && user.selectedCars.length > 0) {
+        initial.evCarName = user.selectedCars.join(", ");
+      }
+      // 2) Or if we have ev_cars from DB (JSON string), show first one
+      else if (user.ev_cars) {
+        try {
+          const cars = JSON.parse(user.ev_cars);
+          if (Array.isArray(cars) && cars.length > 0) {
+            initial.evCarName = String(cars[0]);
+          }
+        } catch {
+
+        }
+      }
+    } catch (e) {
+      console.error("Failed to parse userData from localStorage", e);
+    }
+  }
+
+  const [formData, setFormData] = useState(initial);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -37,33 +78,6 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-10 shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img src={logo} alt="EV SmartCharge" className="h-10 w-10" />
-              <span className="font-bold text-xl">EV SmartCharge</span>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                onClick={() => navigate("/history")}
-                className="text-muted-foreground"
-              >
-                History
-              </Button>
-              <Button
-                variant="ghost"
-                className="text-info border-b-2 border-info"
-              >
-                Profile
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-4xl flex-1">
         <div className="mb-8">
@@ -73,9 +87,9 @@ const Profile = () => {
           </p>
         </div>
 
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden border-0 shadow-lg">
           {/* Gradient Header */}
-          <div className="h-32 bg-gradient-to-r from-success via-info to-secondary" />
+          <div className="h-32 bg-[linear-gradient(90deg,#30C67C_0%,#2979FF_100%)]" />
 
           <CardContent className="p-8 -mt-16">
             {/* Avatar */}
@@ -179,16 +193,7 @@ const Profile = () => {
             </div>
           </CardContent>
         </Card>
-
-        {/* Permanently Delete Button */}
-        <div className="mt-8 flex justify-center">
-          <Button variant="destructive" size="lg" onClick={handleDeleteAccount}>
-            Permanently Delete Account
-          </Button>
-        </div>
       </main>
-
-      <Footer />
     </div>
   );
 };
