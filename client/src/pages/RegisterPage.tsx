@@ -47,9 +47,7 @@ export default function RegisterPage() {
       googleUserId: googleUserId,
       emailAddress: emailAddress,
       fullName: fullName,
-      mobile: mobile,
       evList: evList,
-      selectedCars: selectedCars
     };
 
     try {

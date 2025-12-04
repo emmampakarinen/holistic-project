@@ -168,7 +168,19 @@ const ChargingProgress = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-   
+      <header className="bg-card border-b border-border sticky top-0 z-10 shadow-sm">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-px">
+              <img src={logo} alt="EV SmartCharge" className="h-10 w-10" />
+              <span className="font-bold text-xl">EV SmartCharge</span>
+            </div>
+            <Button variant="outline" size="sm">
+              Profile
+            </Button>
+          </div>
+        </div>
+      </header>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 max-w-7xl pt-[32px] pb-[200px]">
@@ -191,7 +203,7 @@ const ChargingProgress = () => {
           {/* Left Column - Progress */}
           <div className="lg:col-span-2 space-y-6">
             {/* Progress Circle */}
-            <Card className="border-0">
+            <Card>
               <CardContent className="p-8">
                 <div className="flex flex-col items-center mb-8">
                   {/* Circular Progress */}
@@ -234,7 +246,7 @@ const ChargingProgress = () => {
 
                   {/* Stats Grid */}
                   <div className="grid grid-cols-3 gap-4 w-full max-w-2xl">
-                    <Card className="bg-secondary/10 border-0">
+                    <Card className="bg-secondary/10 border-secondary/20">
                       <CardContent className="p-4 text-center">
                         <div className="text-3xl font-bold text-secondary mb-1">
                           {activeChargingSessionData.time_remaining_formatted}
@@ -244,7 +256,7 @@ const ChargingProgress = () => {
                         </div>
                       </CardContent>
                     </Card>
-                    <Card className="bg-primary/10 border-0">
+                    <Card className="bg-primary/10 border-primary/20">
                       <CardContent className="p-4 text-center">
                         <div className="text-3xl font-bold text-primary mb-1">
                           {activeChargingSessionData.total_energy} kWh
@@ -254,7 +266,7 @@ const ChargingProgress = () => {
                         </div>
                       </CardContent>
                     </Card>
-                    <Card className="bg-accent border-0">
+                    <Card className="bg-accent border-accent-foreground/20">
                       <CardContent className="p-4 text-center">
                         <div className="text-3xl font-bold text-accent-foreground mb-1">
                           {activeChargingSessionData.current_charging_speed} kW
@@ -324,7 +336,7 @@ const ChargingProgress = () => {
           {/* Right Column - Details */}
           <div className="space-y-6">
             {/* Charger Details */}
-            <Card className="border-0">
+            <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Zap className="h-5 w-5 text-primary" />
@@ -359,7 +371,7 @@ const ChargingProgress = () => {
             </Card>
 
             {/* Battery Status */}
-            <Card className="border-0">
+            <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Battery className="h-5 w-5 text-primary" />
@@ -399,7 +411,7 @@ const ChargingProgress = () => {
             </Card>
 
             {/* Temperature Warning */}
-            <Card className="bg-warning/10 border-0">
+            <Card className="bg-warning/10 border-warning/30">
               <CardContent className="p-6">
                 <div className="flex items-start gap-3">
                   <div className="bg-warning/20 p-2 rounded-lg">
@@ -420,7 +432,7 @@ const ChargingProgress = () => {
           </div>
         </div>
       </main>
-      
+      <Footer />
     </div>
   );
 };
