@@ -199,13 +199,13 @@ const ChargingProgress = () => {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-6 ">
           {/* Left Column - Progress */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-6 ">
             {/* Progress Circle */}
-            <Card>
+            <Card className="bg-white rounded-[20px] p-4 shadow border-none">
               <CardContent className="p-8">
-                <div className="flex flex-col items-center mb-8">
+                <div className="flex flex-col items-center mb-8 ">
                   {/* Circular Progress */}
                   <div className="relative w-64 h-64 mb-8">
                     <svg className="transform -rotate-90 w-64 h-64">
@@ -245,33 +245,33 @@ const ChargingProgress = () => {
                   </div>
 
                   {/* Stats Grid */}
-                  <div className="grid grid-cols-3 gap-4 w-full max-w-2xl">
-                    <Card className="bg-secondary/10 border-secondary/20">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-2xl mx-auto">
+                    <Card className="!border-none bg-gradient-to-r from-blue-200/40 to-white rounded-lg">
                       <CardContent className="p-4 text-center">
                         <div className="text-3xl font-bold text-secondary mb-1">
                           {activeChargingSessionData.time_remaining_formatted}
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-sm text-blue-800/70">
                           Time Remaining
                         </div>
                       </CardContent>
                     </Card>
-                    <Card className="bg-primary/10 border-primary/20">
+                    <Card className="!border-none bg-gradient-to-r from-green-200/40 to-white rounded-lg">
                       <CardContent className="p-4 text-center">
                         <div className="text-3xl font-bold text-primary mb-1">
                           {activeChargingSessionData.total_energy} kWh
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-sm text-green-800/70">
                           Current Charge
                         </div>
                       </CardContent>
                     </Card>
-                    <Card className="bg-accent border-accent-foreground/20">
+                    <Card className="!border-none bg-gradient-to-r from-purple-200/40 to-white rounded-lg">
                       <CardContent className="p-4 text-center">
                         <div className="text-3xl font-bold text-accent-foreground mb-1">
                           {activeChargingSessionData.current_charging_speed} kW
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-sm text-purple-800/70">
                           Charging Speed
                         </div>
                       </CardContent>
@@ -280,7 +280,8 @@ const ChargingProgress = () => {
                 </div>
 
                 {/* Time Info */}
-                <div className="flex justify-between items-center mb-6 pb-6 border-b border-border">
+                <div className="bg-gray-100 rounded-lg p-4 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  {/* Left section */}
                   <div className="flex items-center gap-2">
                     <Clock className="h-5 w-5 text-secondary" />
                     <div>
@@ -292,7 +293,8 @@ const ChargingProgress = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
+                    {/* Right section */}
+                  <div className="text-left sm:text-right">
                     <div className="text-sm text-muted-foreground">
                       Started At
                     </div>
@@ -311,20 +313,25 @@ const ChargingProgress = () => {
                   <div className="relative">
                     <Progress
                       value={activeChargingSessionData.soc}
-                      className="h-3"
+                      className="h-3 rounded-full overflow-hidden"
                     />
-                    <div className="flex justify-between text-xs mt-1 text-muted-foreground">
-                      <span>0%</span>
-                      <span>{activeChargingSessionData.soc}%</span>
-                      <span>100%</span>
-                    </div>
+                    {/* Gradient bar */}
+      <div
+        className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-red-500 via-blue-500 to-green-500"
+        style={{ width: `${activeChargingSessionData.soc}%` }}
+      />
+    
+                    
+                   <div className="flex justify-center mt-1 text-xs font-bold text-gray-700">
+      {activeChargingSessionData.soc}%
+    </div>
                   </div>
                 </div>
 
                 {/* Stop Button */}
                 <Button
                   variant="destructive"
-                  className="w-full h-12 text-lg font-semibold"
+                  className="w-full h-12 text-lg font-semibold bg-red-600 hover:bg-red-700 text-white"
                   onClick={handleStopCharging}
                 >
                   Stop Charging
@@ -336,9 +343,9 @@ const ChargingProgress = () => {
           {/* Right Column - Details */}
           <div className="space-y-6">
             {/* Charger Details */}
-            <Card>
+            <Card className="!border-none shadow-none bg-white rounded-[20px]">
               <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center gap-2 mb-4 ">
                   <Zap className="h-5 w-5 text-primary" />
                   <h3 className="font-bold text-lg">Charger Details</h3>
                 </div>
@@ -371,7 +378,7 @@ const ChargingProgress = () => {
             </Card>
 
             {/* Battery Status */}
-            <Card>
+            <Card className="!border-none shadow-none bg-white rounded-[20px]">
               <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Battery className="h-5 w-5 text-primary" />
@@ -411,7 +418,7 @@ const ChargingProgress = () => {
             </Card>
 
             {/* Temperature Warning */}
-            <Card className="bg-warning/10 border-warning/30">
+            <Card className="!border-none bg-white rounded-lg shadow-none">
               <CardContent className="p-6">
                 <div className="flex items-start gap-3">
                   <div className="bg-warning/20 p-2 rounded-lg">
