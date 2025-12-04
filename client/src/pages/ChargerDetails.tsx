@@ -163,7 +163,6 @@ const ChargerDetails = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-
       {/* Main Content */}
       <div className="container mx-auto px-4 max-w-7xl pb-[200px]">
         <Button
@@ -221,8 +220,9 @@ const ChargerDetails = () => {
                         </p>
                         <p className="font-bold text-lg">{charger.type}</p>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </CardContent>
+                </Card>
 
                 <Card className="bg-secondary/10 border-0">
                   <CardContent className="p-6">
@@ -230,8 +230,9 @@ const ChargerDetails = () => {
                       <div className="bg-secondary/20 p-2 rounded-lg">
                         <Zap className="h-5 w-5 text-secondary" />
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </CardContent>
+                </Card>
 
                 <Card className="bg-muted border-0">
                   <CardContent className="p-6">
@@ -239,10 +240,11 @@ const ChargerDetails = () => {
                       <div className="bg-background p-2 rounded-lg">
                         <Clock className="h-5 w-5 text-foreground" />
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
+            </div>
 
             {/* Perfect Match Info */}
             <Card className="bg-secondary/5 border-0">
@@ -263,73 +265,72 @@ const ChargerDetails = () => {
                       ready to leave.
                     </p>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-          {/* Right Column - Quick Actions & Info */}
-          <div>
-            {/* Quick Actions */}
-            <Card className="border-0">
-              <CardContent className="p-6">
-                <h3 className="font-bold text-lg mb-4">Quick Actions</h3>
-                <div className="flex flex-col gap-2">
-                  <Button
-                    sx={{
-                      width: "100%",
-                      height: "48px",
-                      backgroundColor: "#22c55e",
-                      color: "white",
-                      borderRadius: "12px",
-                      fontSize: "16px",
-                      "&:hover": {
-                        backgroundColor: "#16a34a",
-                      },
-                    }}
-                    onClick={handleStartCharging}
-                  >
-                    Start Charging
-                  </Button>
-                  <div className="flex flex-row gap-2">
-                    <Button
-                      variant="solid"
-                      className="w-full h-12"
-                      component="a"
-                      href={charger.googleMapsLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      startDecorator={<Navigation className="mr-2 h-5 w-5" />} // Joy UI
-                    >
-                      Navigate to Charger
-                    </Button>
-                    <Button
-                      variant="solid"
-                      className="w-full h-12"
-                      component="a"
-                      href={charger.websiteUri}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      startDecorator={<Calendar className="h-5 w-5" />} // Joy UI
-                    >
-                      Book Charger
-                    </Button>
-                  </div>
                 </div>
               </CardContent>
             </Card>
-
-            {/* Station Rating */}
-            <RatingForm
-              googleChargerId={charger.googleChargerId}
-              userId={userId}
-              existingRating={charger?.rating}
-              totalReviews={charger?.reviews_count}
-              // onSubmitSuccess={refreshChargerData}
-            />
-
           </div>
         </div>
-      </main>
+        {/* Right Column - Quick Actions & Info */}
+        <div>
+          {/* Quick Actions */}
+          <Card className="border-0">
+            <CardContent className="p-6">
+              <h3 className="font-bold text-lg mb-4">Quick Actions</h3>
+              <div className="flex flex-col gap-2">
+                <Button
+                  sx={{
+                    width: "100%",
+                    height: "48px",
+                    backgroundColor: "#22c55e",
+                    color: "white",
+                    borderRadius: "12px",
+                    fontSize: "16px",
+                    "&:hover": {
+                      backgroundColor: "#16a34a",
+                    },
+                  }}
+                  onClick={handleStartCharging}
+                >
+                  Start Charging
+                </Button>
+                <div className="flex flex-row gap-2">
+                  <Button
+                    variant="solid"
+                    className="w-full h-12"
+                    component="a"
+                    href={charger.googleMapsLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    startDecorator={<Navigation className="mr-2 h-5 w-5" />} // Joy UI
+                  >
+                    Navigate to Charger
+                  </Button>
+                  <Button
+                    variant="solid"
+                    className="w-full h-12"
+                    component="a"
+                    href={charger.websiteUri}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    startDecorator={<Calendar className="h-5 w-5" />} // Joy UI
+                  >
+                    Book Charger
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Station Rating */}
+          <RatingForm
+            googleChargerId={charger.googleChargerId}
+            userId={userId}
+            existingRating={charger?.rating}
+            totalReviews={charger?.reviews_count}
+            // onSubmitSuccess={refreshChargerData}
+          />
+        </div>
+      </div>
     </div>
   );
 };
