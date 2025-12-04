@@ -100,3 +100,20 @@ h3 {
   text-align: center;
   margin-bottom: 24px;
 }
+
+.rating-form,
+.rating-form * {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+ .rating-form button {
+    background-color: #3b82f6; /* Tailwind blue-500 */
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+  }
+
+  .rating-form button:hover {
+    background-color: #2563eb; /* Tailwind blue-600 */
+  }

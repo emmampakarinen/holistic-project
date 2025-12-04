@@ -30,7 +30,7 @@ const ChargerDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
-  const userId = localStorage.getItem("google_sub")
+  const userId = localStorage.getItem("google_sub");
 
   // get charger data
   const charger = location.state?.charger;
@@ -133,50 +133,35 @@ const ChargerDetails = () => {
     }
   };
 
-// Helper function to extract lat/lng from Google Maps link
-const getLatLngFromGoogleMapsLink = (link: string) => {
-  try {
-    const url = new URL(link);
-    const params = url.searchParams;
-    const destination = params.get("destination"); // ex: "60.16777,24.9415428"
-    if (!destination) return null;
-    const [lat, lng] = destination.split(",").map(Number);
-    return { lat, lng };
-  } catch (err) {
-    console.error("Invalid Google Maps link", err);
-    return null;
-  }
-};
+  // Helper function to extract lat/lng from Google Maps link
+  const getLatLngFromGoogleMapsLink = (link: string) => {
+    try {
+      const url = new URL(link);
+      const params = url.searchParams;
+      const destination = params.get("destination"); // ex: "60.16777,24.9415428"
+      if (!destination) return null;
+      const [lat, lng] = destination.split(",").map(Number);
+      return { lat, lng };
+    } catch (err) {
+      console.error("Invalid Google Maps link", err);
+      return null;
+    }
+  };
 
-// Extract charger coordinates
-const chargerCoords = getLatLngFromGoogleMapsLink(charger.googleMapsLink);
+  // Extract charger coordinates
+  const chargerCoords = getLatLngFromGoogleMapsLink(charger.googleMapsLink);
 
-// Load Google Maps API
-const { isLoaded, loadError } = useJsApiLoader({
-  googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_PLATFORM_API_KEY,
-});
+  // Load Google Maps API
+  const { isLoaded, loadError } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_PLATFORM_API_KEY,
+  });
 
-if (loadError) return <p>Error loading Google Maps</p>;
-if (!isLoaded) return <p>Loading map...</p>;
-if (!chargerCoords) return <p>Cannot get charger location</p>;
+  if (loadError) return <p>Error loading Google Maps</p>;
+  if (!isLoaded) return <p>Loading map...</p>;
+  if (!chargerCoords) return <p>Cannot get charger location</p>;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-10 shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img src={logo} alt="EV SmartCharge" className="h-10 w-10" />
-              <span className="font-bold text-xl">EV SmartCharge</span>
-            </div>
-            <Button variant="outline" size="sm">
-              Profile
-            </Button>
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
       <main className="container mx-auto px-4 max-w-7xl py-[32px] pb-[200px]">
         {/* Back Button */}
@@ -202,119 +187,120 @@ if (!chargerCoords) return <p>Cannot get charger location</p>;
             </div>
 
             {/* Map Placeholder */}
-            <Card>
+            <Card className="border rounded-xl shadow-sm">
               <CardContent className="p-0">
-              <div className="relative h-80 rounded-lg overflow-hidden">
-              <GoogleMap
-                mapContainerStyle={{ width: "100%", height: "100%" }}
-                center={chargerCoords}
-                zoom={16}
-              >
-                <Marker position={chargerCoords} />
-              </GoogleMap>
-            </div>
-              </CardContent>
-            </Card>
-            {/* Charger Specifications */}
-            <div>
-              <h2 className="text-2xl font-bold mb-4">
-                Charger Specifications
-              </h2>
-              <div className="grid sm:grid-cols-3 gap-4">
-                <Card className="bg-accent/50">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-3">
-                      <div className="bg-accent/30 p-2 rounded-lg">
-                        <Zap className="h-5 w-5 text-accent-foreground" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          Charger Type
-                        </p>
-                        <p className="font-bold text-lg">{charger.type}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-secondary/10">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-3">
-                      <div className="bg-secondary/20 p-2 rounded-lg">
-                        <Zap className="h-5 w-5 text-secondary" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          Power Output
-                        </p>
-                        <p className="font-bold text-lg">
-                          {charger.maxChargeRateKw} kW
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-muted">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-3">
-                      <div className="bg-background p-2 rounded-lg">
-                        <Clock className="h-5 w-5 text-foreground" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          Est. Charge Time
-                        </p>
-                        <p className="font-bold text-lg">
-                          {charger.totalTimeToChargeFormattedTime}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-
-            {/* Perfect Match Info */}
-            <Card className="bg-secondary/5 border-secondary/20">
-              <CardContent className="p-6">
-                <div className="flex gap-3">
-                  <div className="bg-secondary/20 p-2 rounded-full h-fit">
-                    <Info className="h-5 w-5 text-secondary" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg mb-2">
-                      Perfect Match for Your Trip
-                    </h3>
-                    <p className="text-muted-foreground">
-                      This slow charger is ideal for your{" "}
-                      {localStorage.getItem("hours")}h{" "}
-                      {localStorage.getItem("minutes")} min destination stay.
-                      Your vehicle will be fully charged by the time you're
-                      ready to leave.
-                    </p>
-                  </div>
+                <div className="relative h-80 rounded-lg overflow-hidden">
+                  <GoogleMap
+                    mapContainerStyle={{ width: "100%", height: "100%" }}
+                    center={chargerCoords}
+                    zoom={16}
+                  >
+                    <Marker position={chargerCoords} />
+                  </GoogleMap>
                 </div>
               </CardContent>
             </Card>
-          </div>
+            {/* Charger Specifications */}
+            <div className="bg-white rounded-[20px] p-4 shadow">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-4 ">
+                  Charger Specifications
+                </h2>
+                <div className="grid sm:grid-cols-3 gap-4">
+                  <Card className="bg-gray-100 p-2 rounded !border-0 rounded-[10px]">
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-accent/30 p-2 rounded-lg">
+                          <Zap className="h-5 w-5 text-accent-foreground" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">
+                            Charger Type
+                          </p>
+                          <p className="font-bold text-lg">{charger.type}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
 
+                  <Card className="bg-gray-100 p-2 rounded !border-0 rounded-[10px]">
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-secondary/20 p-2 rounded-lg">
+                          <Zap className="h-5 w-5 text-secondary" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">
+                            Power Output
+                          </p>
+                          <p className="font-bold text-lg">
+                            {charger.maxChargeRateKw} kW
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gray-100 p-2 rounded !border-0 rounded-[10px]">
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-background p-2 rounded-lg">
+                          <Clock className="h-5 w-5 text-foreground" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">
+                            Est. Charge Time
+                          </p>
+                          <p className="font-bold text-lg">
+                            {charger.totalTimeToChargeFormattedTime}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Perfect Match Info */}
+              <Card className="border-none rounded-[10px] bg-gradient-to-r from-blue-200 to-green-100">
+                <CardContent className="p-6">
+                  <div className="flex gap-3">
+                    <div className="bg-secondary/20 p-2 rounded-full h-fit">
+                      <Info className="h-5 w-5 text-secondary" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg mb-2">
+                        Perfect Match for Your Trip
+                      </h3>
+                      <p className="text-muted-foreground">
+                        This slow charger is ideal for your{" "}
+                        {localStorage.getItem("hours")}h{" "}
+                        {localStorage.getItem("minutes")} min destination stay.
+                        Your vehicle will be fully charged by the time you're
+                        ready to leave.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
           {/* Right Column - Quick Actions & Info */}
-          <div className="space-y-6">
+          <div>
             {/* Quick Actions */}
-            <Card>
-              <CardContent className="p-6">
+            <Card className="border-none shadow-none bg-white rounded-[10px]">
+              <CardContent className="p-6 mb-6">
                 <h3 className="font-bold text-lg mb-4">Quick Actions</h3>
                 <div className="space-y-3">
                   <Button
-                    className="w-full bg-primary hover:bg-primary/90 h-12"
+                    className="w-full h-12 bg-green-500 hover:bg-green-600 text-white rounded-lg text-[16px]"
                     onClick={handleStartCharging}
                   >
                     Start Charging
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full h-12 border-secondary text-secondary hover:bg-secondary/10"
+                    className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-[16px]"
                   >
                     <Navigation className="mr-2 h-5 w-5" />
                     <a
@@ -341,13 +327,18 @@ if (!chargerCoords) return <p>Cannot get charger location</p>;
             </Card>
 
             {/* Station Rating */}
-          <RatingForm
-            googleChargerId={charger.googleChargerId}
-            userId={userId}
-            existingRating={charger?.rating}
-            totalReviews={charger?.reviews_count}
-            // onSubmitSuccess={refreshChargerData}
-          />
+            <div className="rating-form bg-white rounded-[20px] p-4">
+             
+                <RatingForm
+                  googleChargerId={charger.googleChargerId}
+                  userId={userId}
+                  existingRating={charger?.rating}
+                  totalReviews={charger?.reviews_count}
+                  bordered={false}
+                  // onSubmitSuccess={refreshChargerData}
+                />
+      
+            </div>
           </div>
         </div>
       </main>
