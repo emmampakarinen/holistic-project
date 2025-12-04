@@ -1,3 +1,14 @@
+"""
+streamlit
+requests
+python-dotenv
+folium
+polyline
+pandas
+"""
+
+pip install -r requirements.txt
+streamlit run app_streamlit.py
 # Holistic-project: ChargeMate
 Smart EV charging recommendation system based on routes, preferences, and nearby amenities.
 
