@@ -1,14 +1,14 @@
 from flask import Blueprint, jsonify
 from app.services.handle_db_connections import create_conn
+import pymysql
 
 bp = Blueprint("health", __name__)
 
-# health check endpoint
 @bp.get("/health")
 def health():
     try:
         connection = create_conn()
-        with connection.cursor() as cur:
+        with connection.cursor(pymysql.cursors.DictCursor) as cur:
             cur.execute("SELECT 1 as ok;")
             row = cur.fetchone()
         connection.close()
