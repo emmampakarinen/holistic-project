@@ -4,20 +4,19 @@ import { Button } from "./ui/button";
 import { Star } from "lucide-react";
 import { Input } from "../components/ui/input";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 type RatingFormProps = {
   googleChargerId: string;
   userId: string | null;
   onSubmitSuccess?: () => void;
   existingRating: number;
-  total_reviews: number | undefined;
 };
 
 export default function RatingForm({
   googleChargerId,
   userId,
   onSubmitSuccess,
-  existingRating,
-  total_reviews,
 }: RatingFormProps) {
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
@@ -25,7 +24,7 @@ export default function RatingForm({
   const [currentRating, setCurrentRating] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/get-charger-ratings", {
+    fetch(`${API_URL}/api/get-charger-ratings`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ google_charger_id: googleChargerId }),
@@ -45,7 +44,7 @@ export default function RatingForm({
     };
 
     try {
-      const res = await fetch("http://localhost:5000/api/insert-review", {
+      const res = await fetch(`${API_URL}/insert-review`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -56,7 +55,7 @@ export default function RatingForm({
 
         // refresh rating
         const updated = await fetch(
-          "http://localhost:5000/api/get-charger-ratings",
+          `${API_URL}/get-charger-ratings`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

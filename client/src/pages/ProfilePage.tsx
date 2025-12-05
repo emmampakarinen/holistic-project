@@ -165,13 +165,13 @@ const Profile = () => {
                   </Typography>
                 ) : (
                   <List
-                    variant="outlined"
-                    sx={{
-                      borderRadius: "lg",
-                      borderColor: "neutral.outlinedBorder",
-                      px: 1,
-                      py: 0.5,
-                    }}
+                    // variant="outlined"
+                    // sx={{
+                    //   borderRadius: "lg",
+                    //   borderColor: "neutral.outlinedBorder",
+                    //   px: 1,
+                    //   py: 0.5,
+                    // }}
                   >
                     {userData.ev_cars.map((car, index) => (
                       <ListItem key={index} sx={{ py: 0.5 }}>

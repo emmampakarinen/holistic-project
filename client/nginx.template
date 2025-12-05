@@ -1,0 +1,19 @@
+# nginx.template
+server {
+    # Use the ${PORT} variable placeholder
+    listen ${PORT};
+
+    server_name localhost;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    location / {
+        try_files $uri /index.html;
+    }
+
+    # You might want to add a proxy pass here later if you use this to proxy to the API
+    # location /api/ {
+    #     proxy_pass http://<backend-service-url>;
+    # }
+}

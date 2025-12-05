@@ -5,6 +5,7 @@ services:
   server:
     build:
       context: ../server
+      dockerfile: Dockerfile.dev
     container_name: holistic-server
     env_file:
       - ./.env
@@ -15,12 +16,12 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "5000:5000"
+      - "5001:5000"
 
   client:
     build:
       context: ../client
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: holistic-client
     env_file:
       - ./.env
