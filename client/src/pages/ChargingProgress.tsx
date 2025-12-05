@@ -17,6 +17,25 @@ const ChargingProgress = () => {
   const navigate = useNavigate();
 
   const [isStopping, setIsStopping] = useState(false);
+  ///////
+  const intervalRef = useRef<number | null>(null);
+
+useEffect(() => {
+  intervalRef.current = window.setInterval(() => {
+    const savedCharger = localStorage.getItem("activeChargerSession");
+    if (savedCharger) {
+      handleChargingDataUpdate();
+    }
+  }, 1000);
+
+  return () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+}, []);
+
 
   // initialize sharger state (try location first, then fallback to local storage)
   const [charger, _ ] = useState(() => {
@@ -31,29 +50,27 @@ const ChargingProgress = () => {
 
   const currentPayloads = location.state?.currentPayload;
 
+  //feedback
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackText, setFeedbackText] = useState("");
+  const [rating, setRating] = useState<number | null>(null);
+
+
   // effect: security check
   useEffect(() => {
     if (!charger) {
       console.warn("No active session found in State or Storage. Redirecting.");
-      navigate("/app/planning", { replace: true });
+      setShowFeedback(true);
     }
-  }, []);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      const savedCharger = localStorage.getItem("activeChargerSession");
-
-      if (savedCharger) {
-        console.log("Polling backend for updates...");
-        handleChargingDataUpdate();
-      }
-    }, 1000);
-
-    return () => clearInterval(intervalId);
   }, []);
 
   // stop handler
   const handleStopCharging = async () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
     setIsStopping(true);
 
     try {
@@ -84,12 +101,9 @@ const ChargingProgress = () => {
         console.log("Session stopped successfully:", data);
 
         // clear active session flags
-        localStorage.removeItem("active_charger");
-        localStorage.removeItem("active_session_start");
 
-        navigate("/app/planning", {
-          state: { summary: data },
-        });
+
+        setShowFeedback(true);
       } else {
         console.error("Backend failed to stop:", data.error);
         alert(`Error stopping session: ${data.error}`);
@@ -105,6 +119,8 @@ const ChargingProgress = () => {
 
   // start charging handler
   const handleChargingDataUpdate = async () => {
+    if (!activeChargingSessionData) return;
+    
     try {
       // generate timestamps
       const nowObject = new Date();
@@ -141,13 +157,20 @@ const ChargingProgress = () => {
 
       if (response.ok && !data.error) {
         console.log("received from backend:", data);
-        setActiveSessionData(data);
-        if (Number(data.soc) >= 100) {
-          if (!isStopping) {
-            console.log("Battery full! Auto-stopping session...");
-            handleStopCharging();
-          }
-        }
+       setActiveSessionData(data);
+        ///
+
+      if (Number(data.soc) >= 100 && !isStopping) {
+        console.log("Battery full! Auto-stopping session...");
+  handleStopCharging();
+}
+      ///
+       
+  //      
+  //       if (Number(data.soc) >= 100 && !isStopping) {
+  // console.log("Battery full! Auto-stopping session...");
+  // handleStopCharging();
+// }
       } else {
         console.error("backend error:", data.error);
         alert(`error starting session: ${data.error || "unknown error"}`);
@@ -161,8 +184,71 @@ const ChargingProgress = () => {
   // render loading or error if charger is missing (prevents crash before redirect)
   if (!charger) return <div>Loading Session...</div>;
 
-  return (
+  // Feedback Popup Component
+  const FeedbackPopup = () => {
+    if (!showFeedback) return null;
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white w-[90%] max-w-lg rounded-lg shadow-lg p-6 relative">
+          {/* Close button */}
+          <button
+            className="absolute top-3 right-3 text-gray-600 hover:text-black"
+            onClick={() => setShowFeedback(false)}
+          >
+            ✕
+          </button>
 
+          <h2 className="text-xl font-bold mb-4 text-center">
+            How satisfied are you with the overall experience?
+          </h2>
+
+          {/* Rating */}
+          <div className="flex justify-center gap-4 mb-6 text-4xl cursor-pointer">
+            {["😞", "😟", "😐", "😊", "😁"].map((face, index) => (
+              <div
+                key={index}
+                onClick={() => setRating(index + 1)}
+                className={`p-2 rounded-full ${
+                  rating === index + 1 ? "ring-2 ring-green-500" : ""
+                }`}
+              >
+                {face}
+              </div>
+            ))}
+          </div>
+
+          <label className="font-medium">What could be improved?</label>
+          <textarea
+            value={feedbackText}
+            onChange={(e) => setFeedbackText(e.target.value)}
+            className="w-full border rounded-md p-3 mt-2 h-32"
+            placeholder="Type your thoughts here..."
+          />
+
+          {/* Buttons */}
+          <div className="flex gap-4 mt-4">
+            <Button
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                onClick={async () => {
+    await handleStopCharging(); 
+    navigate("/app/planning");
+  }} // submit action
+            >
+              Stop progress and Submit feed
+            </Button>
+            <Button
+              className="flex-1 bg-gray-400 hover:bg-gray-500 text-white"
+              onClick={() => setShowFeedback(false)} // cancel action
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
     <div className="min-h-screen bg-background flex flex-col">
 
       {/* Main Content */}
@@ -276,13 +362,13 @@ const ChargingProgress = () => {
                       </div>
                     </div>
                   </div>
-                    {/* Right section */}
+                  {/* Right section */}
                   <div className="text-left sm:text-right">
                     <div className="text-sm text-muted-foreground">
                       Started At
                     </div>
                     <div className="text-xl font-bold">
-                      {currentPayloads.car_start_charging_timestamp}
+                      {currentPayloads?.car_start_charging_timestamp}
                     </div>
                   </div>
                 </div>
@@ -299,15 +385,14 @@ const ChargingProgress = () => {
                       className="h-3 rounded-full overflow-hidden"
                     />
                     {/* Gradient bar */}
-      <div
-        className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-red-500 via-blue-500 to-green-500"
-        style={{ width: `${activeChargingSessionData.soc}%` }}
-      />
+                    <div
+                      className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-red-500 via-blue-500 to-green-500"
+                      style={{ width: `${activeChargingSessionData.soc}%` }}
+                    />
 
-
-                   <div className="flex justify-center mt-1 text-xs font-bold text-gray-700">
-      {activeChargingSessionData.soc}%
-    </div>
+                    <div className="flex justify-center mt-1 text-xs font-bold text-gray-700">
+                      {activeChargingSessionData.soc}%
+                    </div>
                   </div>
                 </div>
 
@@ -315,14 +400,13 @@ const ChargingProgress = () => {
                 <Button
                   variant="destructive"
                   className="w-full h-12 text-lg font-semibold bg-red-600 hover:bg-red-700 text-white"
-                  onClick={handleStopCharging}
+                  onClick={() => setShowFeedback(true)}
                 >
                   Stop Charging
                 </Button>
               </CardContent>
             </Card>
           </div>
-
           {/* Right Column - Details */}
           <div className="space-y-6">
             {/* Charger Details */}
@@ -422,6 +506,8 @@ const ChargingProgress = () => {
           </div>
         </div>
       </main>
+      <Footer />
+      <FeedbackPopup />
     </div>
   );
 };
