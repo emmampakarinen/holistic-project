@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Progress } from "../components/ui/progress";
@@ -17,7 +17,7 @@ const ChargingProgress = () => {
   const navigate = useNavigate();
 
   const [isStopping, setIsStopping] = useState(false);
-  ///////
+  
   const intervalRef = useRef<number | null>(null);
 
 useEffect(() => {
@@ -506,7 +506,6 @@ useEffect(() => {
           </div>
         </div>
       </main>
-      <Footer />
       <FeedbackPopup />
     </div>
   );

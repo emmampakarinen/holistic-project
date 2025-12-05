@@ -1,4 +1,7 @@
 import os
+
+from collections import defaultdict
+
 from flask import Blueprint, jsonify, request 
 from app.services.receive_weather_info import get_latest_weather
 from app.services.receive_ev_chargers import find_chargers_by_travel_time
@@ -31,6 +34,8 @@ def find_charge():
             return jsonify({"error": "No JSON data provided"}), 400
     except:
         return jsonify({"error": "Invalid JSON format"}), 400
+
+    print(core_info)
 
     # key
 
@@ -105,19 +110,32 @@ def find_charge():
 
     ####################################
 
-    connector_map = {"EV_CONNECTOR_TYPE_CHADEMO": "CHAdeMO", "EV_CONNECTOR_TYPE_CCS_COMBO_2": "CCS2", "EV_CONNECTOR_TYPE_TYPE_2": "Type2", "EV_CONNECTOR_TYPE_TESLA": "CCS2"}
+    connector_map = {
+        "EV_CONNECTOR_TYPE_CHADEMO": "CHAdeMO", 
+        "EV_CONNECTOR_TYPE_CCS_COMBO_2": "CCS2", 
+        "EV_CONNECTOR_TYPE_TYPE_2": "Type2", 
+        "EV_CONNECTOR_TYPE_TESLA": "CCS2"
+    }
 
-    rev_conn_map = {v: k for k, v in connector_map.items()}
-    
-    curr_dc_std = vehicle_specs['dc_default_charger_type']
-    vehicle_specs['dc_default_charger_type'] = rev_conn_map.get(curr_dc_std, curr_dc_std)
-    
-    curr_ac_std = vehicle_specs['ac_default_charger_type']
-    vehicle_specs['ac_default_charger_type'] = rev_conn_map.get(curr_ac_std, curr_ac_std)
+    rev_conn_map = defaultdict(list)
+    for k, v in connector_map.items():
+        rev_conn_map[v].append(k)
+
+    curr_dc_std = vehicle_specs.get('dc_default_charger_type')
+    if curr_dc_std:
+        vehicle_specs['dc_default_charger_type'] = rev_conn_map.get(curr_dc_std, [curr_dc_std])
+
+    curr_ac_std = vehicle_specs.get('ac_default_charger_type')
+    if curr_ac_std:
+        vehicle_specs['ac_default_charger_type'] = rev_conn_map.get(curr_ac_std, [curr_ac_std])
+
+    print(vehicle_specs)
 
     if nearby_chargers:
 
         for charger in nearby_chargers:
+
+            print(charger)
 
             ####################################
 
@@ -137,59 +155,61 @@ def find_charge():
 
                 charge_duration = 0.0
 
-                if connector.get('type') == vehicle_specs.get("dc_default_charger_type"):
+                for k in vehicle_specs.get("dc_default_charger_type"):
 
-                    raw_curve_data = vehicle_specs.get('dc_charging_curve_data')
-                    
-                    start_soc = charger.get("battery_at_charger_near_destination")
-                    end_soc = 100
-                    
-                    station_max_kw = connector.get('maxChargeRateKw') 
-                    
-                    ordered_curve = sorted(raw_curve_data, key = lambda x: x['soc'])
-                    
-                    for curve_point in ordered_curve:
-                        if 'time_seconds' not in curve_point:
-                            h, m, s = map(int, curve_point['time'].split(':'))
-                            curve_point['time_seconds'] = h * 3600 + m * 60 + s
+                    if connector.get('type') == k:
 
-                    for idx in range(len(ordered_curve) - 1):
-                        point_curr = ordered_curve[idx]
-                        point_next = ordered_curve[idx+1]
+                        raw_curve_data = vehicle_specs.get('dc_charging_curve_data')
+                        
+                        start_soc = charger.get("battery_at_charger_near_destination")
+                        end_soc = 100
+                        
+                        station_max_kw = connector.get('maxChargeRateKw') 
+                        
+                        ordered_curve = sorted(raw_curve_data, key = lambda x: x['soc'])
+                        
+                        for curve_point in ordered_curve:
+                            if 'time_seconds' not in curve_point:
+                                h, m, s = map(int, curve_point['time'].split(':'))
+                                curve_point['time_seconds'] = h * 3600 + m * 60 + s
 
-                        seg_start_soc = point_curr['soc']
-                        seg_end_soc = point_next['soc']
+                        for idx in range(len(ordered_curve) - 1):
+                            point_curr = ordered_curve[idx]
+                            point_next = ordered_curve[idx+1]
 
-                        overlap_start = max(seg_start_soc, start_soc)
-                        overlap_end = min(seg_end_soc, end_soc)
+                            seg_start_soc = point_curr['soc']
+                            seg_end_soc = point_next['soc']
 
-                        if overlap_end > overlap_start:
-                            
-                            seg_width = seg_end_soc - seg_start_soc
-                            overlap_ratio = (overlap_end - overlap_start) / seg_width if seg_width > 0 else 0
+                            overlap_start = max(seg_start_soc, start_soc)
+                            overlap_end = min(seg_end_soc, end_soc)
 
-                            full_energy_diff = point_next['energy_charged'] - point_curr['energy_charged']
-                            full_time_diff = point_next['time_seconds'] - point_curr['time_seconds']
+                            if overlap_end > overlap_start:
+                                
+                                seg_width = seg_end_soc - seg_start_soc
+                                overlap_ratio = (overlap_end - overlap_start) / seg_width if seg_width > 0 else 0
 
-                            partial_energy = full_energy_diff * overlap_ratio
-                            partial_time = full_time_diff * overlap_ratio
+                                full_energy_diff = point_next['energy_charged'] - point_curr['energy_charged']
+                                full_time_diff = point_next['time_seconds'] - point_curr['time_seconds']
 
-                            avg_req_power = (point_curr['speed'] + point_next['speed']) / 2.0
-                            effective_power = min(avg_req_power, station_max_kw)
+                                partial_energy = full_energy_diff * overlap_ratio
+                                partial_time = full_time_diff * overlap_ratio
 
-                            segment_duration = 0.0
+                                avg_req_power = (point_curr['speed'] + point_next['speed']) / 2.0
+                                effective_power = min(avg_req_power, station_max_kw)
 
-                            if station_max_kw >= avg_req_power:
-                                segment_duration = partial_time
-                            else:
-                                if effective_power > 0:
-                                    segment_duration = (partial_energy / effective_power) * 3600
+                                segment_duration = 0.0
 
-                            charge_duration += segment_duration
+                                if station_max_kw >= avg_req_power:
+                                    segment_duration = partial_time
+                                else:
+                                    if effective_power > 0:
+                                        segment_duration = (partial_energy / effective_power) * 3600
 
-                    print(f"time to charge dc: {charge_duration:.2f} seconds")
+                                charge_duration += segment_duration
 
-                elif connector.get('type') == vehicle_specs.get("ac_default_charger_type"):
+                        print(f"time to charge dc: {charge_duration:.2f} seconds")
+
+                if connector.get('type') == vehicle_specs.get("ac_default_charger_type"):
 
                     station_ac_limit = connector.get('maxChargeRateKw')
                     
@@ -205,7 +225,7 @@ def find_charge():
 
                     print(f"time to charge ac: {charge_duration:.2f} seconds")
 
-                else:
+                if charge_duration == 0.0:
                     continue
                 
                 connector['total_time_to_charge'] = charge_duration
@@ -243,6 +263,7 @@ def find_charge():
     }
 
     for candidate in top_3_candidates:
+        
         charger = candidate['charger']
         connector = candidate['connector']
 

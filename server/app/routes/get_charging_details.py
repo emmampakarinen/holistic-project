@@ -60,13 +60,17 @@ def get_charging_details():
 
     # dc charging
     if chosen_type == ev_data.get("dc_default_charger_type"):
+
+        print(ev_data)
         
         curve_wrapper = ev_data.get('dc_charging_curve_data')
         if isinstance(curve_wrapper, str):
             curve_wrapper = json.loads(curve_wrapper)
             
-        curve_data = curve_wrapper.get('charging_curve')
+        curve_data = curve_wrapper
         
+        print(curve_data)
+
         # calculate status now (simulate forward from start soc)
         elapsed_time_accumulated = 0
         
