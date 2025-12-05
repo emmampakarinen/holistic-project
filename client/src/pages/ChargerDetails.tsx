@@ -1,8 +1,6 @@
-import { useLocation, useParams, useNavigate, Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../components/ui/card";
-import { Button, IconButton } from "@mui/joy";
-import { Badge } from "../components/ui/badge";
+import { Button } from "@mui/joy";
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 import RatingForm from "../components/RatingForm";
 
@@ -10,17 +8,15 @@ import {
   ArrowLeft,
   MapPin,
   Clock,
-  Map,
   Navigation,
   Calendar,
-  Star,
   Info,
 } from "lucide-react";
 import { Zap } from "lucide-react";
-import Footer from "../components/Footer";
-import logo from "../assets/logo.png";
 import type { Charger } from "../types/charger";
 //import { time } from "console";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 // formats date as "yyyy-mm-dd hh:mm:ss"
 const formatToPythonString = (date: Date) => {
@@ -72,8 +68,10 @@ const ChargerDetails = () => {
         user_id: localStorage.getItem("google_sub"),
       };
 
-      const response_history = await fetch(
-        "http://localhost:5000/api/save-history",
+      // const response_history = await fetch(
+
+      await fetch(
+        `${API_URL}/save-history`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -93,14 +91,14 @@ const ChargerDetails = () => {
         charging_power: charger?.maxChargeRateKw,
         car_start_charging_timestamp: timestampString,
         fetching_timestamp: timestampString,
-        expected_charging_time: charger?.total_time_to_charge_seconds || 0,
+        expected_charging_time: charger?.totalTimeToChargeSeconds || 0,
       };
 
       console.log("sending to backend:", payload);
 
       // send request
       const response = await fetch(
-        "http://localhost:5000/api/charging-details",
+        `${API_URL}/charging-details`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -183,7 +181,7 @@ const ChargerDetails = () => {
               </h1>
               <div className="flex items-center text-muted-foreground">
                 <MapPin className="h-5 w-5 mr-2 text-primary" />
-                <span className="text-lg">{charger?.address}</span>
+                <span className="text-lg">{charger?.address?.text ?? ""}</span>
               </div>
             </div>
 
@@ -323,10 +321,10 @@ const ChargerDetails = () => {
 
           {/* Station Rating */}
           <RatingForm
-            googleChargerId={charger.googleChargerId}
+            googleChargerId={charger?.googleChargerId}
             userId={userId}
             existingRating={charger?.rating}
-            totalReviews={charger?.reviews_count}
+            // totalReviews={charger?.reviews_count}
             // onSubmitSuccess={refreshChargerData}
           />
         </div>
