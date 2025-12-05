@@ -5,13 +5,14 @@ import decimal
 
 def create_conn():
 
-    db_host = os.getenv("MYSQL_HOST", "127.0.0.1") # the IP address or hostname of the database server
-    db_user = os.getenv("MYSQL_USER", "root") # the username used to authenticate with the database
-    db_pass = os.getenv("MYSQL_PASSWORD", "root") # the password used to authenticate with the database
-    db_name = os.getenv("MYSQL_DATABASE", "holistic") # the specific name of the database to access
-
+    db_host = os.getenv("MYSQL_HOST") # the IP address or hostname of the database server
+    db_user = os.getenv("MYSQL_USER") # the username used to authenticate with the database
+    db_pass = os.getenv("MYSQL_PASSWORD") # the password used to authenticate with the database
+    db_name = os.getenv("MYSQL_DATABASE") # the specific name of the database to access
+    db_port = os.getenv("MYSQL_PORT") # the port number to connect to the MySQL database
+    
     # establish and return a new active connection to the MySQL database.
-    db_connection = pymysql.connect(host = db_host, user = db_user, password = db_pass, database = db_name, connect_timeout = 2)
+    db_connection = pymysql.connect(host = db_host, user = db_user, password = db_pass, database = db_name, port = int(db_port), connect_timeout = 2, ssl = {'fake': True})
     
     return db_connection
 
