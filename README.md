@@ -1,5 +1,14 @@
-# Holistic-project: ChargeMate
-Smart EV charging recommendation system based on routes, preferences, and nearby amenities.
+# Holistic-project: EV TimeCharge
+Smart EV charging recommendation system based on user's basic input of current location, planned time of stay, destination and current battery percentage.
+The system allows the users to:
+- Sign in using Google OAuth
+- Complete a short profile (name, phone number, EV model)
+- Enter trip details: current location, destination, stay duration and battery percentage
+- View recommended charging stations near the destination
+- Compare charger options (power type, distance, estimated charge time)
+- Select a charger and navigate to it via Google Maps
+- See the charging progress and stop charging
+- Give rating of the charging experience and write feedback
 
 ## Prerequisites
 Before starting, make sure you have:
