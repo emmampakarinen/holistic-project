@@ -4,7 +4,21 @@ import { Button } from "./ui/button";
 import { Star } from "lucide-react";
 import { Input } from "../components/ui/input";
 
-export default function RatingForm({ googleChargerId, userId, onSubmitSuccess }) {
+type RatingFormProps = {
+  googleChargerId: string;
+  userId: string | null;
+  onSubmitSuccess?: () => void;
+  existingRating: number;
+  total_reviews: number | undefined;
+};
+
+export default function RatingForm({
+  googleChargerId,
+  userId,
+  onSubmitSuccess,
+  existingRating,
+  total_reviews,
+}: RatingFormProps) {
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
   const [loading, setLoading] = useState(false);
@@ -14,10 +28,10 @@ export default function RatingForm({ googleChargerId, userId, onSubmitSuccess })
     fetch("http://localhost:5000/api/get-charger-ratings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ google_charger_id: googleChargerId })
+      body: JSON.stringify({ google_charger_id: googleChargerId }),
     })
-      .then(res => res.json())
-      .then(data => setCurrentRating(data.average_rating ?? 0));
+      .then((res) => res.json())
+      .then((data) => setCurrentRating(data.average_rating ?? 0));
   }, [googleChargerId]);
 
   async function submitRating() {
@@ -41,11 +55,14 @@ export default function RatingForm({ googleChargerId, userId, onSubmitSuccess })
         onSubmitSuccess && onSubmitSuccess();
 
         // refresh rating
-        const updated = await fetch("http://localhost:5000/api/get-charger-ratings", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ google_charger_id: googleChargerId }),
-        }).then(r => r.json());
+        const updated = await fetch(
+          "http://localhost:5000/api/get-charger-ratings",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ google_charger_id: googleChargerId }),
+          }
+        ).then((r) => r.json());
 
         setCurrentRating(updated.average_rating ?? 0);
         setRating(0);
@@ -66,7 +83,8 @@ export default function RatingForm({ googleChargerId, userId, onSubmitSuccess })
         {/* Show Average Rating */}
         {currentRating !== null && (
           <p className="text-md text-green-500">
-            Average Rating: <span className="font-semibold">{currentRating}/5</span>
+            Average Rating:{" "}
+            <span className="font-semibold">{currentRating}/5</span>
           </p>
         )}
 
@@ -96,7 +114,8 @@ export default function RatingForm({ googleChargerId, userId, onSubmitSuccess })
         />
 
         <Button
-          disabled={loading || rating === 0} onClick={submitRating}
+          disabled={loading || rating === 0}
+          onClick={submitRating}
           className="w-full h-12 border-secondary text-secondary hover:bg-secondary/10text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none"
         >
           {loading ? "Submitting..." : "Submit Rating"}

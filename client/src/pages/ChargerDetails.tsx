@@ -1,7 +1,7 @@
 import { useLocation, useParams, useNavigate, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "../components/ui/card";
-import { Button } from "../components/ui/button";
+import { Button, IconButton } from "@mui/joy";
 import { Badge } from "../components/ui/badge";
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 import RatingForm from "../components/RatingForm";
@@ -13,6 +13,7 @@ import {
   Map,
   Navigation,
   Calendar,
+  Star,
   Info,
 } from "lucide-react";
 import { Zap } from "lucide-react";
@@ -33,7 +34,7 @@ const ChargerDetails = () => {
   const userId = localStorage.getItem("google_sub");
 
   // get charger data
-  const charger = location.state?.charger;
+  const charger = location.state?.charger as Charger;
 
   // handle missing data (refresh protection)
   if (!charger) {
@@ -45,7 +46,7 @@ const ChargerDetails = () => {
         </p>
         <button
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          onClick={() => navigate("/planning")}
+          onClick={() => navigate("app/planning")}
         >
           Back to Planning
         </button>
@@ -162,16 +163,17 @@ const ChargerDetails = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+
       {/* Main Content */}
-      <main className="container mx-auto px-4 max-w-7xl py-[32px] pb-[200px]">
-        {/* Back Button */}
-        <button
+      <div className="container mx-auto px-4 max-w-7xl pb-[200px]">
+        <Button
+          size="sm"
+          variant="plain"
+          startDecorator={<ArrowLeft size={18} />}
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
         >
-          <ArrowLeft className="h-5 w-5" />
-          <span className="font-medium">Back to Results</span>
-        </button>
+          Back to Results
+        </Button>
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-6">
@@ -187,7 +189,7 @@ const ChargerDetails = () => {
             </div>
 
             {/* Map Placeholder */}
-            <Card className="border rounded-xl shadow-sm">
+            <Card className="border-0">
               <CardContent className="p-0">
                 <div className="relative h-80 rounded-lg overflow-hidden">
                   <GoogleMap
@@ -200,86 +202,66 @@ const ChargerDetails = () => {
                 </div>
               </CardContent>
             </Card>
+
             {/* Charger Specifications */}
-            <div className="bg-white rounded-[20px] p-4 shadow">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-4 ">
-                  Charger Specifications
-                </h2>
-                <div className="grid sm:grid-cols-3 gap-4">
-                  <Card className="bg-gray-100 p-2 rounded !border-0 rounded-[10px]">
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-3">
-                        <div className="bg-accent/30 p-2 rounded-lg">
-                          <Zap className="h-5 w-5 text-accent-foreground" />
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground mb-1">
-                            Charger Type
-                          </p>
-                          <p className="font-bold text-lg">{charger.type}</p>
-                        </div>
+            <div>
+              <h2 className="text-2xl font-bold mb-4">
+                Charger Specifications
+              </h2>
+              <div className="grid sm:grid-cols-3 gap-4">
+                <Card className="bg-accent/50 border-0">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-accent/30 p-2 rounded-lg">
+                        <Zap className="h-5 w-5 text-accent-foreground" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">
+                          Charger Type
+                        </p>
+                        <p className="font-bold text-lg">{charger.type}</p>
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Card className="bg-gray-100 p-2 rounded !border-0 rounded-[10px]">
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-3">
-                        <div className="bg-secondary/20 p-2 rounded-lg">
-                          <Zap className="h-5 w-5 text-secondary" />
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground mb-1">
-                            Power Output
-                          </p>
-                          <p className="font-bold text-lg">
-                            {charger.maxChargeRateKw} kW
-                          </p>
-                        </div>
+                <Card className="bg-secondary/10 border-0">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-secondary/20 p-2 rounded-lg">
+                        <Zap className="h-5 w-5 text-secondary" />
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Card className="bg-gray-100 p-2 rounded !border-0 rounded-[10px]">
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-3">
-                        <div className="bg-background p-2 rounded-lg">
-                          <Clock className="h-5 w-5 text-foreground" />
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground mb-1">
-                            Est. Charge Time
-                          </p>
-                          <p className="font-bold text-lg">
-                            {charger.totalTimeToChargeFormattedTime}
-                          </p>
-                        </div>
+                <Card className="bg-muted border-0">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-background p-2 rounded-lg">
+                        <Clock className="h-5 w-5 text-foreground" />
                       </div>
                     </CardContent>
                   </Card>
                 </div>
               </div>
 
-              {/* Perfect Match Info */}
-              <Card className="border-none rounded-[10px] bg-gradient-to-r from-blue-200 to-green-100">
-                <CardContent className="p-6">
-                  <div className="flex gap-3">
-                    <div className="bg-secondary/20 p-2 rounded-full h-fit">
-                      <Info className="h-5 w-5 text-secondary" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-lg mb-2">
-                        Perfect Match for Your Trip
-                      </h3>
-                      <p className="text-muted-foreground">
-                        This slow charger is ideal for your{" "}
-                        {localStorage.getItem("hours")}h{" "}
-                        {localStorage.getItem("minutes")} min destination stay.
-                        Your vehicle will be fully charged by the time you're
-                        ready to leave.
-                      </p>
-                    </div>
+            {/* Perfect Match Info */}
+            <Card className="bg-secondary/5 border-0">
+              <CardContent className="p-6">
+                <div className="flex gap-3">
+                  <div className="bg-secondary/20 p-2 rounded-full h-fit">
+                    <Info className="h-5 w-5 text-secondary" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg mb-2">
+                      Perfect Match for Your Trip
+                    </h3>
+                    <p className="text-muted-foreground">
+                      This slow charger is ideal for your{" "}
+                      {localStorage.getItem("hours")}h{" "}
+                      {localStorage.getItem("minutes")} min destination stay.
+                      Your vehicle will be fully charged by the time you're
+                      ready to leave.
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -288,61 +270,66 @@ const ChargerDetails = () => {
           {/* Right Column - Quick Actions & Info */}
           <div>
             {/* Quick Actions */}
-            <Card className="border-none shadow-none bg-white rounded-[10px]">
-              <CardContent className="p-6 mb-6">
+            <Card className="border-0">
+              <CardContent className="p-6">
                 <h3 className="font-bold text-lg mb-4">Quick Actions</h3>
-                <div className="space-y-3">
+                <div className="flex flex-col gap-2">
                   <Button
-                    className="w-full h-12 bg-green-500 hover:bg-green-600 text-white rounded-lg text-[16px]"
+                    sx={{
+                      width: "100%",
+                      height: "48px",
+                      backgroundColor: "#22c55e",
+                      color: "white",
+                      borderRadius: "12px",
+                      fontSize: "16px",
+                      "&:hover": {
+                        backgroundColor: "#16a34a",
+                      },
+                    }}
                     onClick={handleStartCharging}
                   >
                     Start Charging
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-[16px]"
-                  >
-                    <Navigation className="mr-2 h-5 w-5" />
-                    <a
+                  <div className="flex flex-row gap-2">
+                    <Button
+                      variant="solid"
+                      className="w-full h-12"
+                      component="a"
                       href={charger.googleMapsLink}
                       target="_blank"
                       rel="noopener noreferrer"
+                      startDecorator={<Navigation className="mr-2 h-5 w-5" />} // Joy UI
                     >
                       Navigate to Charger
-                    </a>
-                  </Button>
-                  <Button variant="outline" className="w-full h-12" asChild>
-                    {/* Use a standard anchor tag for external sites */}
-                    <a
+                    </Button>
+                    <Button
+                      variant="solid"
+                      className="w-full h-12"
+                      component="a"
                       href={charger.websiteUri}
                       target="_blank"
                       rel="noopener noreferrer"
+                      startDecorator={<Calendar className="h-5 w-5" />} // Joy UI
                     >
-                      <Calendar className="mr-2 h-5 w-5" />
                       Book Charger
-                    </a>
-                  </Button>
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Station Rating */}
-            <div className="rating-form bg-white rounded-[20px] p-4">
-             
-                <RatingForm
-                  googleChargerId={charger.googleChargerId}
-                  userId={userId}
-                  existingRating={charger?.rating}
-                  totalReviews={charger?.reviews_count}
-                  bordered={false}
-                  // onSubmitSuccess={refreshChargerData}
-                />
-      
-            </div>
+            <RatingForm
+              googleChargerId={charger.googleChargerId}
+              userId={userId}
+              existingRating={charger?.rating}
+              totalReviews={charger?.reviews_count}
+              // onSubmitSuccess={refreshChargerData}
+            />
+
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };
