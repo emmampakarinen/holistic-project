@@ -57,7 +57,8 @@ useEffect(() => {
   //feedback
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackText, setFeedbackText] = useState("");
-  const [rating, setRating] = useState(null);
+  const [rating, setRating] = useState<number | null>(null);
+
 
   // effect: security check
   useEffect(() => {
