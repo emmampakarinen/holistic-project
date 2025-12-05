@@ -5,6 +5,8 @@ import Option from "@mui/joy/Option";
 import Chip from "@mui/joy/Chip";
 import Box from "@mui/joy/Box";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function RegisterPage() {
   const navigate = useNavigate();
 
@@ -21,7 +23,7 @@ export default function RegisterPage() {
     const fetchEvs = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/get-available-evs"
+         `${API_URL}/get-available-evs`
         );
         if (response.ok) {
           const data = await response.json();
@@ -53,7 +55,7 @@ export default function RegisterPage() {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/api/insert-user", {
+      const response = await fetch(`${API_URL}/insert-user`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -125,7 +127,7 @@ export default function RegisterPage() {
               placeholder="Select your EV model(s)"
               startDecorator={<span className="text-xl">🚗</span>}
               value={selectedCars}
-              onChange={(e, newValues) => setSelectedCars(newValues)}
+              onChange={(_, newValues) => setSelectedCars(newValues)}
               // This prop controls how the selected values look inside the box
               renderValue={(selected) => (
                 <Box sx={{ display: "flex", gap: "0.25rem", flexWrap: "wrap" }}>

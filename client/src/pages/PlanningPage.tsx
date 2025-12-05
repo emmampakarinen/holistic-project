@@ -18,6 +18,8 @@ import { useCurrentLocation } from "../hooks/useLocation";
 import { useNavigate } from "react-router-dom";
 import type { TripPlan } from "../types/trip";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface PlanningFormData {
   location: string;
   destination: string;
@@ -82,7 +84,7 @@ export default function PlanningPage() {
 
     const fetchEvs = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/get-user-evs", {
+        const response = await fetch(`${API_URL}/get-user-evs`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ google_id: google_user_id }),
@@ -104,7 +106,7 @@ export default function PlanningPage() {
 
     const fetchHistory = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/get-history", {
+        const response = await fetch(`${API_URL}/get-history`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ google_id: google_user_id }),
@@ -194,7 +196,7 @@ export default function PlanningPage() {
     localStorage.setItem("currentTripPlan", JSON.stringify(currentTripPlan));
 
     try {
-      const response = await fetch("http://localhost:5000/api/find-charger", {
+      const response = await fetch(`${API_URL}/find-charger`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

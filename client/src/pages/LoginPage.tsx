@@ -1,6 +1,8 @@
 import { GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function LoginPage() {
   const navigate = useNavigate();
 
@@ -18,7 +20,7 @@ function LoginPage() {
     localStorage.setItem("google_sub", google_user_id);
 
     try {
-      const response = await fetch("http://localhost:5000/api/get-user", {
+      const response = await fetch(`${API_URL}/get-user`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,29 +1,25 @@
-import { useLocation, useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
 import { Progress } from "../components/ui/progress";
 import { ArrowLeft, Clock, Battery, MapPin, Thermometer } from "lucide-react";
 import { Zap } from "lucide-react";
-import Footer from "../components/Footer";
-import logo from "../assets/logo.png";
 
-import type { Charger } from "../types/charger";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const formatToPythonString = (date: Date) => {
   return date.toLocaleString("sv-SE").replace("T", " ");
 };
 
 const ChargingProgress = () => {
-  const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
 
   const [isStopping, setIsStopping] = useState(false);
 
   // initialize sharger state (try location first, then fallback to local storage)
-  const [charger, setCharger] = useState(() => {
+  const [charger, _ ] = useState(() => {
     if (location.state?.charger) return location.state.charger;
     const saved = localStorage.getItem("active_charger");
     return saved ? JSON.parse(saved) : null;
@@ -74,7 +70,7 @@ const ChargingProgress = () => {
 
       /////////////////////////////////////////////////////////////////
 
-      const response = await fetch("http://localhost:5000/api/insert-review", {
+      const response = await fetch(`${API_URL}/insert-review`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -130,7 +126,7 @@ const ChargingProgress = () => {
 
       // send request
       const response = await fetch(
-        "http://localhost:5000/api/charging-details",
+        `${API_URL}/charging-details`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -307,8 +303,8 @@ const ChargingProgress = () => {
         className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-red-500 via-blue-500 to-green-500"
         style={{ width: `${activeChargingSessionData.soc}%` }}
       />
-    
-                    
+
+
                    <div className="flex justify-center mt-1 text-xs font-bold text-gray-700">
       {activeChargingSessionData.soc}%
     </div>
