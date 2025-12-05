@@ -26,7 +26,7 @@ def insert_user():
     user_id = user_info.get("googleUserId")
     user_email = user_info.get("emailAddress")
     user_name = user_info.get("fullName")
-    ev_cars = json.dumps(user_info.get("evList"))
+    ev_cars = json.dumps(user_info.get("selectedCars"))
     trip_history = json.dumps([])
 
     insert_statements = [(user_id, user_email, user_name, ev_cars, trip_history)]
@@ -84,7 +84,8 @@ def get_user_evs():
     """
 
     try:
-        result = execute_select(connection, query, (user_id,))        
+        result = execute_select(connection, query, (user_id,)) 
+        print(result)       
         if not result:
             return jsonify({"error": "User not found"}), 404
         return jsonify(result[0]), 200

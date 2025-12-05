@@ -50,7 +50,6 @@ export default function RegisterPage() {
       emailAddress: emailAddress,
       fullName: fullName,
       mobile: mobile,
-      evList: evList,
       selectedCars: selectedCars
     };
 
