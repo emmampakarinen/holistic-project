@@ -9,6 +9,8 @@ from .routes.find_charger import bp as logic_bp
 from .routes.get_available_evs import bp as evs_get_bp
 from .routes.get_charging_details import bp as get_charging_details_bp
 from .routes.charger_reviews import bp as charger_reviews_bp
+from .routes.nearby_places_activities import bp as nearby_places_activities_bp
+
 
 def create_app():
     app = Flask(__name__)
@@ -22,5 +24,7 @@ def create_app():
     app.register_blueprint(evs_get_bp, url_prefix="/api")
     app.register_blueprint(get_charging_details_bp, url_prefix="/api")
     app.register_blueprint(charger_reviews_bp, url_prefix="/api")
+    app.register_blueprint(nearby_places_activities_bp, url_prefix="/api")  
+    
 
     return app
