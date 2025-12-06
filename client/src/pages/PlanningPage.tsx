@@ -59,7 +59,7 @@ export default function PlanningPage() {
         : localStorage.getItem("EVModel"),
   }));
 
-  const [evList, setEvList] = useState<{ ev_name: string }[]>([]);
+  const [evList, setEvList] = useState<string []>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [tripHistory, setTripHistory] = useState<TripHistoryItem[]>([]);

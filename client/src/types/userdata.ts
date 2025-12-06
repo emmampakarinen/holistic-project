@@ -3,6 +3,7 @@ export type StoredUserData = {
   email: string;
   name: string;
   user_id: string;
+  googleUserId: string;
   ev_cars: { ev_name: string }[];
   trip_history: {
     car_start_charging_timestamp: string;
