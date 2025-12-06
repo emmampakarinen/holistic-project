@@ -5,12 +5,8 @@ import {
   FormControl,
   FormLabel,
   Typography,
-  Select,
-  Option,
-  Chip,
   Input,
 } from "@mui/joy";
-import { Car } from "lucide-react";
 import type { StoredUserData } from "../types/userdata";
 import { EvSection } from "../components/EvSection";
 const API_URL = import.meta.env.VITE_API_URL;
@@ -140,13 +136,6 @@ const Profile = () => {
       </div>
     );
   }
-  const existingCars = formData.selectedCars.filter((car) =>
-    initialCars.includes(car)
-  );
-
-  const newCars = formData.selectedCars.filter(
-    (car) => !initialCars.includes(car)
-  );
 
   return (
     <div className="bg-slate-50 flex items-center justify-center px-4 py-2 min-h-screen">
