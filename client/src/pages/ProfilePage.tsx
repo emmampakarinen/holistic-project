@@ -7,41 +7,48 @@ import {
   Typography,
   Select,
   Option,
+  Chip,
+  Input,
 } from "@mui/joy";
-import { Input } from "../components/ui/input";
-import { Badge } from "../components/ui/badge";
 import { Car } from "lucide-react";
 import type { StoredUserData } from "../types/userdata";
+import { EvSection } from "../components/EvSection";
 const API_URL = import.meta.env.VITE_API_URL;
 
 const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [evList, setEvList] = useState<string[]>([]);
+
+  const [initialCars, setInitialCars] = useState<string[]>([]);
   const [userData, setUserData] = useState<StoredUserData | null>(null);
 
   const [formData, setFormData] = useState({
-    fullName: "",
+    name: "",
     mobileNumber: "",
-    email: "",
+    emailAddress: "",
     selectedCars: [] as string[],
   });
 
   useEffect(() => {
     const raw = localStorage.getItem("userData");
-
     if (!raw) return;
 
     try {
       const parsed = JSON.parse(raw);
-
       setUserData(parsed);
 
-      // Map frontend-stored structure → formData
+      const storedCars =
+        parsed.ev_cars?.map((ev: { ev_name: string }) => ev.ev_name) ??
+        parsed.selectedCars ??
+        [];
+
+      setInitialCars(storedCars);
+
       setFormData({
-        fullName: parsed.fullName ?? "",
+        name: parsed.name ?? "",
         mobileNumber: parsed.mobile ?? "",
-        email: parsed.emailAddress ?? "",
-        selectedCars: parsed.selectedCars ?? [],
+        emailAddress: parsed.emailAddress ?? "",
+        selectedCars: storedCars,
       });
     } catch (e) {
       console.error("Failed to parse localStorage userData", e);
@@ -63,49 +70,64 @@ const Profile = () => {
     };
 
     fetchData();
-}, []);
+  }, []);
 
+  const removeCar = (car: string) => {
+    console.log("deleted", car);
+    handleInputChange(
+      "selectedCars",
+      formData.selectedCars.filter((c) => c !== car)
+    );
+  };
 
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
- const handleUpdateData = async () => {
-  if (!userData?.googleUserId) return;
-
-  const payload = {
-    googleUserId: userData.googleUserId,
-    fullName: formData.fullName,
-    emailAddress: formData.email,
-    selectedCars: formData.selectedCars,
-  };
-
-  try {
-    const res = await fetch(`${API_URL}/update-user`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await res.json();
-    console.log("Updated:", data);
-    if (res.ok) {
-      const updatedUser = {
-        ...userData,
-        name: formData.fullName,
-        email: formData.email,
-        ev_cars: formData.selectedCars.map((ev) => ({ ev_name: ev })),
-      };
-      localStorage.setItem("userData", JSON.stringify(updatedUser));
-      alert("Profile updated!");
-    } else {
-      alert(data.error || "Failed to update user");
+  const handleUpdateData = async () => {
+    if (!userData?.googleUserId) {
+      alert("Missing googleUserId in local storage");
+      return;
     }
-  } catch (e) {
-    console.error("Failed updating user", e);
-    alert("Failed to update user");
-  }
-};
+
+    const payload = {
+      googleUserId: userData.googleUserId,
+      fullName: formData.name,
+      emailAddress: formData.emailAddress,
+      selectedCars: formData.selectedCars,
+    };
+
+    try {
+      const res = await fetch(`${API_URL}/update-user`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      console.log(formData.name);
+      const data = await res.json();
+      console.log("Updated:", data);
+
+      if (res.ok) {
+        const updatedUser = {
+          ...userData,
+          name: formData.name,
+          ev_cars: formData.selectedCars.map((ev) => ({ ev_name: ev })),
+        };
+
+        localStorage.setItem("userData", JSON.stringify(updatedUser));
+        setUserData(updatedUser);
+        setInitialCars(formData.selectedCars);
+
+        alert("Profile updated!");
+      } else {
+        alert(data.error || "Failed to update user");
+      }
+    } catch (e) {
+      console.error("Failed updating user", e);
+      alert("Failed to update user");
+    }
+  };
 
   const handleDeleteAccount = () => {
     alert("Delete account logic here");
@@ -118,6 +140,13 @@ const Profile = () => {
       </div>
     );
   }
+  const existingCars = formData.selectedCars.filter((car) =>
+    initialCars.includes(car)
+  );
+
+  const newCars = formData.selectedCars.filter(
+    (car) => !initialCars.includes(car)
+  );
 
   return (
     <div className="bg-slate-50 flex items-center justify-center px-4 py-2 min-h-screen">
@@ -151,10 +180,8 @@ const Profile = () => {
                 <FormControl>
                   <FormLabel>Full Name</FormLabel>
                   <Input
-                    value={formData.fullName}
-                    onChange={(e) =>
-                      handleInputChange("fullName", e.target.value)
-                    }
+                    value={formData.name}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
                   />
                 </FormControl>
 
@@ -170,40 +197,27 @@ const Profile = () => {
               </div>
 
               <FormControl className="mt-4">
-                <FormLabel>Email Address</FormLabel>
+                <FormLabel>Email Address (Google account)</FormLabel>
                 <div className="flex gap-2 items-center">
-                  <Input value={formData.email} disabled className="flex-1" />
-                  <Badge variant="outline">Google Account</Badge>
+                  <Input
+                    value={formData.emailAddress}
+                    disabled
+                    className="flex-1"
+                  />
                 </div>
               </FormControl>
             </section>
 
             {/* EV INFORMATION */}
             <section>
-              <div className="flex items-center gap-2 mb-4">
-                <Car className="w-5 h-5 text-emerald-500" />
-                <Typography level="title-lg">EV Information</Typography>
-              </div>
-
-              <FormControl>
-                <FormLabel>Select Your EV(s)</FormLabel>
-                <Select
-                  multiple
-                  placeholder="Select your EV models"
-                  value={formData.selectedCars}
-                  onChange={(_, newValues) =>
-                    handleInputChange("selectedCars", newValues)
-                  }
-                >
-                  {evList.map((car) => (
-                    <Option key={car} value={car}>
-                      {car}
-                    </Option>
-                  ))}
-                </Select>
-              </FormControl>
+              <EvSection
+                evList={evList}
+                selectedCars={formData.selectedCars}
+                initialCars={initialCars}
+                removeCar={removeCar}
+                handleInputChange={handleInputChange}
+              />
             </section>
-
             {/* ACTION BUTTONS */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
               <Button
