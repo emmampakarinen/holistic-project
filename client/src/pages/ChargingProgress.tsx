@@ -1,12 +1,38 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { Card, CardContent, Button } from "@mui/joy";
 import { useState, useEffect, useRef } from "react";
-import { Card, CardContent } from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Progress } from "../components/ui/progress";
 import { ArrowLeft, Clock, Battery, MapPin, Thermometer } from "lucide-react";
 import { Zap } from "lucide-react";
+import { ChargingInfoCard } from "../components/ChargingInfoCard";
+import type { TripPlan } from "../types/trip";
+import { ChargingDetails } from "../components/ChargingDetails";
 
 const API_URL = import.meta.env.VITE_API_URL;
+
+function getTemperatureColors(temp: number) {
+  if (temp < 5) {
+    return {
+      bg: "from-blue-50 to-blue-100",
+      text: "text-blue-600",
+      iconBg: "bg-blue-200",
+      icon: "text-blue-600",
+    };
+  }
+  if (temp > 20) {
+    return {
+      bg: "from-orange-50 to-orange-100",
+      text: "text-orange-600",
+      iconBg: "bg-orange-200",
+      icon: "text-orange-600",
+    };
+  }
+  return {
+    bg: "from-green-50 to-green-100",
+    text: "text-green-600",
+    iconBg: "bg-green-200",
+    icon: "text-green-600",
+  };
+}
 
 const formatToPythonString = (date: Date) => {
   return date.toLocaleString("sv-SE").replace("T", " ");
@@ -15,6 +41,16 @@ const formatToPythonString = (date: Date) => {
 const ChargingProgress = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const [tripPlan] = useState<TripPlan | null>(() => {
+    try {
+      const raw = localStorage.getItem("currentTripPlan");
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      console.error("Failed to parse currentTripPlan from localStorage", e);
+      return null;
+    }
+  });
 
   const [isStopping, setIsStopping] = useState(false);
 
@@ -242,17 +278,30 @@ const ChargingProgress = () => {
     );
   };
 
+  function formatTime(timestamp: string) {
+    return new Date(timestamp).toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  }
+
+  const temperature =
+    tripPlan?.temperature ?? activeChargingSessionData.temperature;
+
+  const colors = getTemperatureColors(temperature);
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className=" bg-background flex flex-col">
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6 max-w-7xl pt-[32px] pb-[200px]">
-        <button
+      <main className="container mx-auto px-4 py-2 max-w-7xl pb-[200px]">
+        <Button
+          variant="plain"
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
         >
           <ArrowLeft className="h-5 w-5" />
           <span className="font-medium">Back to Charger Details</span>
-        </button>
+        </Button>
 
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2">Charging in Progress</h1>
@@ -308,190 +357,133 @@ const ChargingProgress = () => {
 
                   {/* Stats Grid */}
                   <div className="grid grid-cols-3 gap-4 w-full max-w-2xl">
-                    <Card className="bg-secondary/10 border-0">
-                      <CardContent className="p-4 text-center">
-                        <div className="text-3xl font-bold text-secondary mb-1">
-                          {activeChargingSessionData.time_remaining_formatted}
-                        </div>
-                        <div className="text-sm text-blue-800/70">
-                          Time Remaining
-                        </div>
-                      </CardContent>
-                    </Card>
-                    <Card className="bg-primary/10 border-0">
-                      <CardContent className="p-4 text-center">
-                        <div className="text-3xl font-bold text-primary mb-1">
-                          {activeChargingSessionData.total_energy} kWh
-                        </div>
-                        <div className="text-sm text-green-800/70">
-                          Current Charge
-                        </div>
-                      </CardContent>
-                    </Card>
-                    <Card className="bg-accent border-0">
-                      <CardContent className="p-4 text-center">
-                        <div className="text-3xl font-bold text-accent-foreground mb-1">
-                          {activeChargingSessionData.current_charging_speed} kW
-                        </div>
-                        <div className="text-sm text-purple-800/70">
-                          Charging Speed
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <ChargingInfoCard
+                      title="Time Remaining"
+                      data={activeChargingSessionData.time_remaining_formatted}
+                      type="time"
+                    />
+                    <ChargingInfoCard
+                      title="Current Charge"
+                      data={activeChargingSessionData.total_energy}
+                      type="charge"
+                    />
+                    <ChargingInfoCard
+                      title="Charging Speed"
+                      data={activeChargingSessionData.current_charging_speed}
+                      type="speed"
+                    />
                   </div>
                 </div>
 
                 {/* Time Info */}
-                <div className="bg-gray-100 rounded-lg p-4 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="bg-white shadow-sm rounded-xl p-5 mb-6 flex flex-row justify-between sm:items-center gap-6 border border-gray-100">
                   {/* Left section */}
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-secondary" />
+                  <div className="flex items-center gap-4">
+                    {/* Icon container */}
+                    <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                      <Clock className="h-5 w-5 text-blue-600" />
+                    </div>
+
                     <div>
-                      <div className="text-sm text-muted-foreground">
+                      <p className="text-sm text-gray-500">
                         Estimated Full Charge
-                      </div>
-                      <div className="text-xl font-bold">
-                        {activeChargingSessionData.charging_finish_timestamp}
-                      </div>
+                      </p>
+                      <p className="text-xl font-semibold text-gray-900">
+                        {formatTime(
+                          activeChargingSessionData.charging_finish_timestamp
+                        )}
+                      </p>
                     </div>
                   </div>
+
                   {/* Right section */}
-                  <div className="text-left sm:text-right">
-                    <div className="text-sm text-muted-foreground">
-                      Started At
-                    </div>
-                    <div className="text-xl font-bold">
-                      {currentPayloads?.car_start_charging_timestamp}
-                    </div>
+                  <div className="text-center sm:text-right">
+                    <p className="text-sm text-gray-500">Started At</p>
+                    <p className="text-xl font-semibold text-gray-900">
+                      {formatTime(
+                        currentPayloads?.car_start_charging_timestamp
+                      )}
+                    </p>
                   </div>
                 </div>
-
-                {/* Progress Timeline */}
-                <div className="mb-6">
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="font-medium">Charging Timeline</span>
-                    <span className="text-muted-foreground">Target: 100%</span>
-                  </div>
-                  <div className="relative">
-                    <Progress
-                      value={activeChargingSessionData.soc}
-                      className="h-3 rounded-full overflow-hidden"
-                    />
-                    {/* Gradient bar */}
-                    <div
-                      className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-red-500 via-blue-500 to-green-500"
-                      style={{ width: `${activeChargingSessionData.soc}%` }}
-                    />
-
-                    <div className="flex justify-center mt-1 text-xs font-bold text-gray-700">
-                      {activeChargingSessionData.soc}%
-                    </div>
-                  </div>
-                </div>
-
                 {/* Stop Button */}
-                <Button
-                  variant="destructive"
-                  className="w-full h-12 text-lg font-semibold bg-red-600 hover:bg-red-700 text-white"
-                  onClick={() => setShowFeedback(true)}
-                >
-                  Stop Charging
-                </Button>
+                <div className="flex justify-center">
+                  <Button
+                    color="danger"
+                    sx={{ width: "fit-content", height: 60 }}
+                    onClick={() => setShowFeedback(true)}
+                  >
+                    Stop Charging
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
           {/* Right Column - Details */}
           <div className="space-y-6">
-            {/* Charger Details */}
-            <Card className="border-0">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-4 ">
-                  <Zap className="h-5 w-5 text-primary" />
-                  <h3 className="font-bold text-lg">Charger Details</h3>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Station Name</span>
-                    <span className="font-semibold">
-                      {charger.displayName.text}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Charger Type</span>
-                    <span className="font-semibold">{charger.type}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Power Output</span>
-                    <span className="font-semibold">
-                      {charger.maxChargeRateKw}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Location</span>
-                    <span className="font-semibold flex items-center gap-1">
-                      <MapPin className="h-3 w-3" />
-                      {charger.address}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <ChargingDetails
+              title="Charger Details"
+              Icon={Zap}
+              iconColor="text-green-600"
+              items={[
+                { label: "Station Name", value: charger.displayName.text },
+                { label: "Charger Type", value: charger.type },
+                {
+                  label: "Power Output",
+                  value: `${charger.maxChargeRateKw} kW`,
+                },
+                {
+                  label: "Location",
+                  value: charger.address,
+                },
+              ]}
+            />
 
-            {/* Battery Status */}
-            <Card className="border-0">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Battery className="h-5 w-5 text-primary" />
-                  <h3 className="font-bold text-lg">Battery Status</h3>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Current Level</span>
-                    <span className="font-semibold">
-                      {activeChargingSessionData.soc}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      Starting Level
-                    </span>
-                    <span className="font-semibold">
-                      {charger.batteryAtChargerNearDestination}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Energy Added</span>
-                    <span className="font-semibold">
-                      {activeChargingSessionData.energy_charged} kWh
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      Estimated Range
-                    </span>
-                    <span className="font-semibold">
-                      {activeChargingSessionData.estimatedRange} miles
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <ChargingDetails
+              title="Battery Status"
+              Icon={Battery}
+              iconColor="text-blue-600"
+              items={[
+                {
+                  label: "Current Level",
+                  value: `${activeChargingSessionData.soc}%`,
+                },
+                {
+                  label: "Starting Level",
+                  value: `${charger.batteryAtChargerNearDestination}%`,
+                },
+                {
+                  label: "Energy Added",
+                  value: `${activeChargingSessionData.energy_charged} kWh`,
+                },
+              ]}
+            />
 
-            {/* Temperature Warning */}
-            <Card className="bg-warning/10 border-0">
+            <Card
+              className={`border-0 rounded-2xl bg-gradient-to-br ${colors.bg}`}
+            >
               <CardContent className="p-6">
-                <div className="flex items-start gap-3">
-                  <div className="bg-warning/20 p-2 rounded-lg">
-                    <Thermometer className="h-5 w-5 text-warning" />
-                  </div>
+                <div className="flex justify-between items-center">
+                  {/* Left Section */}
                   <div>
-                    <h3 className="font-bold mb-1">Current Temperature</h3>
-                    <p className="text-3xl font-bold text-warning mb-1">
-                      {activeChargingSessionData.temperature}°C
+                    <h3 className={`font-bold mb-1 ${colors.text}`}>
+                      Current Temperature
+                    </h3>
+
+                    <p className={`text-3xl font-bold ${colors.text}`}>
+                      {temperature}°C
                     </p>
-                    <p className="text-sm text-muted-foreground">
+
+                    <p className={`text-sm mt-1 ${colors.text}/70`}>
                       Auto-detected
                     </p>
+                  </div>
+
+                  {/* Icon */}
+                  <div
+                    className={`h-12 w-12 rounded-xl flex items-center justify-center bg-white`}
+                  >
+                    <Thermometer className={`h-6 w-6 ${colors.icon}`} />
                   </div>
                 </div>
               </CardContent>
