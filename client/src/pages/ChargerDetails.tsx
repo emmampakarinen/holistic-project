@@ -1,19 +1,12 @@
 import { useLocation, useParams, useNavigate } from "react-router-dom";
-import { Card, CardContent } from "../components/ui/card";
-import { Button } from "@mui/joy";
+import { Button, Card, CardContent } from "@mui/joy";
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 import RatingForm from "../components/RatingForm";
 
-import {
-  ArrowLeft,
-  MapPin,
-  Clock,
-  Navigation,
-  Calendar,
-  Info,
-} from "lucide-react";
+import { ArrowLeft, Clock, Navigation, Calendar, Info } from "lucide-react";
 import { Zap } from "lucide-react";
 import type { Charger } from "../types/charger";
+import { ChargerSpecCard } from "../components/ChargerSpecCard";
 //import { time } from "console";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -70,14 +63,11 @@ const ChargerDetails = () => {
 
       // const response_history = await fetch(
 
-      await fetch(
-        `${API_URL}/save-history`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(trip_history_payload),
-        }
-      );
+      await fetch(`${API_URL}/save-history`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(trip_history_payload),
+      });
 
       // save session info to localStorage
       // note: we overwrite active_session_start here because a new session is starting.
@@ -97,14 +87,11 @@ const ChargerDetails = () => {
       console.log("sending to backend:", payload);
 
       // send request
-      const response = await fetch(
-        `${API_URL}/charging-details`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch(`${API_URL}/charging-details`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       const data = await response.json();
 
@@ -160,45 +147,34 @@ const ChargerDetails = () => {
   if (!chargerCoords) return <p>Cannot get charger location</p>;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="bg-background bg-[#f4f6fb]  flex flex-col p-5">
       {/* Main Content */}
-      <div className="container mx-auto px-4 max-w-7xl pb-[200px]">
+      <div className="mx-auto max-w-7xl">
         <Button
           size="sm"
           variant="plain"
           startDecorator={<ArrowLeft size={18} />}
           onClick={() => navigate(-1)}
+          sx={{ marginBottom: 2 }}
         >
           Back to Results
         </Button>
+        {/* Station Header */}
+        <p className="text-2xl sm:text-3xl font-bold mb-4">
+          {charger?.displayName?.text}
+        </p>
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Station Header */}
-            <div>
-              <h1 className="text-4xl font-bold mb-2">
-                {charger?.displayName?.text}
-              </h1>
-              <div className="flex items-center text-muted-foreground">
-                <MapPin className="h-5 w-5 mr-2 text-primary" />
-                <span className="text-lg">{charger?.address?.text ?? ""}</span>
-              </div>
+            <div className="relative h-80 rounded-lg overflow-hidden">
+              <GoogleMap
+                mapContainerStyle={{ width: "100%", height: "100%" }}
+                center={chargerCoords}
+                zoom={16}
+              >
+                <Marker position={chargerCoords} />
+              </GoogleMap>
             </div>
-
-            {/* Map Placeholder */}
-            <Card className="border-0">
-              <CardContent className="p-0">
-                <div className="relative h-80 rounded-lg overflow-hidden">
-                  <GoogleMap
-                    mapContainerStyle={{ width: "100%", height: "100%" }}
-                    center={chargerCoords}
-                    zoom={16}
-                  >
-                    <Marker position={chargerCoords} />
-                  </GoogleMap>
-                </div>
-              </CardContent>
-            </Card>
 
             {/* Charger Specifications */}
             <div>
@@ -206,49 +182,29 @@ const ChargerDetails = () => {
                 Charger Specifications
               </h2>
               <div className="grid sm:grid-cols-3 gap-4">
-                <Card className="bg-accent/50 border-0">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-3">
-                      <div className="bg-accent/30 p-2 rounded-lg">
-                        <Zap className="h-5 w-5 text-accent-foreground" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          Charger Type
-                        </p>
-                        <p className="font-bold text-lg">{charger.type}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-secondary/10 border-0">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-3">
-                      <div className="bg-secondary/20 p-2 rounded-lg">
-                        <Zap className="h-5 w-5 text-secondary" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-muted border-0">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-3">
-                      <div className="bg-background p-2 rounded-lg">
-                        <Clock className="h-5 w-5 text-foreground" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <ChargerSpecCard
+                  title="Charger type"
+                  Icon={Zap}
+                  value={charger.type}
+                />
+                <ChargerSpecCard
+                  title="Power Output"
+                  Icon={Zap}
+                  value={charger.maxChargeRateKw}
+                />
+                <ChargerSpecCard
+                  title="Est. Charge Time"
+                  Icon={Clock}
+                  value={charger.totalTimeToChargeFormattedTime}
+                />
               </div>
             </div>
 
             {/* Perfect Match Info */}
-            <Card className="bg-secondary/5 border-0">
+            <Card variant="outlined" className="border-0">
               <CardContent className="p-6">
                 <div className="flex gap-3">
-                  <div className="bg-secondary/20 p-2 rounded-full h-fit">
+                  <div className=" p-2 rounded-full h-fit">
                     <Info className="h-5 w-5 text-secondary" />
                   </div>
                   <div>
@@ -267,66 +223,63 @@ const ChargerDetails = () => {
               </CardContent>
             </Card>
           </div>
-        </div>
-        {/* Right Column - Quick Actions & Info */}
-        <div>
-          {/* Quick Actions */}
-          <Card className="border-0">
-            <CardContent className="p-6">
-              <h3 className="font-bold text-lg mb-4">Quick Actions</h3>
-              <div className="flex flex-col gap-2">
-                <Button
-                  sx={{
-                    width: "100%",
-                    height: "48px",
-                    backgroundColor: "#22c55e",
-                    color: "white",
-                    borderRadius: "12px",
-                    fontSize: "16px",
-                    "&:hover": {
-                      backgroundColor: "#16a34a",
-                    },
-                  }}
-                  onClick={handleStartCharging}
-                >
-                  Start Charging
-                </Button>
-                <div className="flex flex-row gap-2">
+          <div className="space-y-4">
+            {/* Quick Actions */}
+            <Card className="border-0">
+              <CardContent className="p-6">
+                <h3 className="font-bold text-lg mb-4">Quick Actions</h3>
+                <div className="flex flex-col gap-2">
                   <Button
-                    variant="solid"
-                    className="w-full h-12"
-                    component="a"
-                    href={charger.googleMapsLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    startDecorator={<Navigation className="mr-2 h-5 w-5" />} // Joy UI
+                    sx={{
+                      width: "100%",
+                      height: "48px",
+                      backgroundColor: "#22c55e",
+                      color: "white",
+                      borderRadius: "12px",
+                      fontSize: "16px",
+                      "&:hover": {
+                        backgroundColor: "#16a34a",
+                      },
+                    }}
+                    onClick={handleStartCharging}
                   >
-                    Navigate to Charger
+                    Start Charging
                   </Button>
-                  <Button
-                    variant="solid"
-                    className="w-full h-12"
-                    component="a"
-                    href={charger.websiteUri}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    startDecorator={<Calendar className="h-5 w-5" />} // Joy UI
-                  >
-                    Book Charger
-                  </Button>
+                  <div className="flex flex-row gap-2">
+                    <Button
+                      variant="solid"
+                      className="w-full h-12"
+                      component="a"
+                      href={charger.googleMapsLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      startDecorator={<Navigation className="mr-2 h-5 w-5" />} // Joy UI
+                    >
+                      Navigate to Charger
+                    </Button>
+                    <Button
+                      variant="solid"
+                      className="w-full h-12"
+                      component="a"
+                      href={charger.websiteUri}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      startDecorator={<Calendar className="h-5 w-5" />} // Joy UI
+                    >
+                      Book Charger
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Station Rating */}
-          <RatingForm
-            googleChargerId={charger?.googleChargerId}
-            userId={userId}
-            existingRating={charger?.rating}
-            // totalReviews={charger?.reviews_count}
-            // onSubmitSuccess={refreshChargerData}
-          />
+            <RatingForm
+              googleChargerId={charger.googleChargerId}
+              userId={userId}
+              existingRating={charger?.rating}
+              // onSubmitSuccess={refreshChargerData}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent } from "./ui/card";
-import { Button } from "./ui/button";
+import { Card, CardContent, Button, Input } from "@mui/joy";
 import { Star } from "lucide-react";
-import { Input } from "../components/ui/input";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -54,14 +52,11 @@ export default function RatingForm({
         onSubmitSuccess && onSubmitSuccess();
 
         // refresh rating
-        const updated = await fetch(
-          `${API_URL}/get-charger-ratings`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ google_charger_id: googleChargerId }),
-          }
-        ).then((r) => r.json());
+        const updated = await fetch(`${API_URL}/get-charger-ratings`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ google_charger_id: googleChargerId }),
+        }).then((r) => r.json());
 
         setCurrentRating(updated.average_rating ?? 0);
         setRating(0);

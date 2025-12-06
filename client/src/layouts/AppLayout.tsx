@@ -30,7 +30,14 @@ export default function AppLayout() {
   };
 
   return (
-    <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+    <Box
+      sx={{
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        backgroundColor: "#f4f6fb",
+      }}
+    >
       {/* top bar */}
       <Sheet
         component="header"
