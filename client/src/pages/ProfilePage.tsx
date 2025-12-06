@@ -1,67 +1,127 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Button,
   Card,
   FormControl,
   FormLabel,
-  ListItem,
-  ListItemContent,
   Typography,
+  Select,
+  Option,
 } from "@mui/joy";
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
-import { Car, List } from "lucide-react";
+import { Car } from "lucide-react";
 import type { StoredUserData } from "../types/userdata";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Profile = () => {
-  const [formData, setFormData] = useState(() => {
-    const raw = localStorage.getItem("userData");
-    let parsed: StoredUserData | null = null;
+  const [loading, setLoading] = useState(true);
+  const [evList, setEvList] = useState<string[]>([]);
+  const [userData, setUserData] = useState<StoredUserData | null>(null);
 
-    if (raw) {
-      try {
-        parsed = JSON.parse(raw) as StoredUserData;
-      } catch (err) {
-        console.error("Failed to parse userData from localStorage", err);
-      }
-    }
-
-    return {
-      fullName: parsed?.name ?? "",
-      mobileNumber: "",
-      email: parsed?.email ?? "",
-      evCarName: parsed?.ev_cars?.[0]?.ev_name ?? "",
-    };
+  const [formData, setFormData] = useState({
+    fullName: "",
+    mobileNumber: "",
+    email: "",
+    selectedCars: [] as string[],
   });
 
-  const handleInputChange = (field: string, value: string) => {
+  useEffect(() => {
+    const raw = localStorage.getItem("userData");
+
+    if (!raw) return;
+
+    try {
+      const parsed = JSON.parse(raw);
+
+      setUserData(parsed);
+
+      // Map frontend-stored structure → formData
+      setFormData({
+        fullName: parsed.fullName ?? "",
+        mobileNumber: parsed.mobile ?? "",
+        email: parsed.emailAddress ?? "",
+        selectedCars: parsed.selectedCars ?? [],
+      });
+    } catch (e) {
+      console.error("Failed to parse localStorage userData", e);
+    }
+
+    const fetchData = async () => {
+      try {
+        // Fetch EV list
+        const evRes = await fetch(`${API_URL}/get-available-evs`);
+        const evData = await evRes.json();
+        const cleanEvs = evData.map((row: any) => row.ev_name);
+
+        setEvList(cleanEvs);
+      } catch (error) {
+        console.error("Error fetching EV list", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+}, []);
+
+
+  const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleDeleteAccount = () => {
-    console.log("Permanently deleting account");
+ const handleUpdateData = async () => {
+  if (!userData?.googleUserId) return;
+
+  const payload = {
+    googleUserId: userData.googleUserId,
+    fullName: formData.fullName,
+    emailAddress: formData.email,
+    selectedCars: formData.selectedCars,
   };
 
-  const handleUpdateData = () => {
-    console.log("Permanently deleting account");
-  };
+  try {
+    const res = await fetch(`${API_URL}/update-user`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-  const [userData] = useState<StoredUserData | null>(() => {
-    const raw = localStorage.getItem("userData");
-    if (!raw) return null;
-
-    try {
-      return JSON.parse(raw) as StoredUserData;
-    } catch (err) {
-      console.error("Failed to parse userData from localStorage", err);
-      return null;
+    const data = await res.json();
+    console.log("Updated:", data);
+    if (res.ok) {
+      const updatedUser = {
+        ...userData,
+        name: formData.fullName,
+        email: formData.email,
+        ev_cars: formData.selectedCars.map((ev) => ({ ev_name: ev })),
+      };
+      localStorage.setItem("userData", JSON.stringify(updatedUser));
+      alert("Profile updated!");
+    } else {
+      alert(data.error || "Failed to update user");
     }
-  });
+  } catch (e) {
+    console.error("Failed updating user", e);
+    alert("Failed to update user");
+  }
+};
+
+  const handleDeleteAccount = () => {
+    alert("Delete account logic here");
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Typography level="title-lg">Loading profile...</Typography>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-slate-50 flex items-center justify-center px-4 py-2 min-h-screen">
       <div className="w-full max-w-4xl">
-        {/* Title section – same style as PlanningPage */}
         <div className="text-center mb-4">
           <Typography level="h2" className="font-bold">
             My Profile
@@ -83,11 +143,9 @@ const Profile = () => {
           <div className="space-y-6">
             {/* Basic Information */}
             <section>
-              <div className="flex items-center gap-2 mb-4">
-                <Typography level="title-lg" fontWeight="lg">
-                  Basic Information
-                </Typography>
-              </div>
+              <Typography level="title-lg" className="mb-4">
+                Basic Information
+              </Typography>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <FormControl>
@@ -111,96 +169,57 @@ const Profile = () => {
                 </FormControl>
               </div>
 
-              <div className="mt-4">
-                <FormControl>
-                  <FormLabel>Email Address</FormLabel>
-                  <div className="flex gap-2 items-center">
-                    <Input value={formData.email} disabled className="flex-1" />
-                    <Badge variant="outline" className="shrink-0">
-                      Google Account
-                    </Badge>
-                  </div>
-                </FormControl>
-                <Typography
-                  level="body-xs"
-                  className="mt-1 flex items-center gap-1 text-slate-500"
-                >
-                  <span>🔒</span>
-                  Email cannot be changed as it&apos;s linked to your Google
-                  account
-                </Typography>
-              </div>
+              <FormControl className="mt-4">
+                <FormLabel>Email Address</FormLabel>
+                <div className="flex gap-2 items-center">
+                  <Input value={formData.email} disabled className="flex-1" />
+                  <Badge variant="outline">Google Account</Badge>
+                </div>
+              </FormControl>
             </section>
 
+            {/* EV INFORMATION */}
             <section>
               <div className="flex items-center gap-2 mb-4">
                 <Car className="w-5 h-5 text-emerald-500" />
-                <Typography level="title-lg" fontWeight="lg">
-                  EV Information
-                </Typography>
+                <Typography level="title-lg">EV Information</Typography>
               </div>
 
               <FormControl>
-                <FormLabel>Default EV Car Name</FormLabel>
-                <Input
-                  value={formData.evCarName}
-                  onChange={(e) =>
-                    handleInputChange("evCarName", e.target.value)
+                <FormLabel>Select Your EV(s)</FormLabel>
+                <Select
+                  multiple
+                  placeholder="Select your EV models"
+                  value={formData.selectedCars}
+                  onChange={(_, newValues) =>
+                    handleInputChange("selectedCars", newValues)
                   }
-                />
+                >
+                  {evList.map((car) => (
+                    <Option key={car} value={car}>
+                      {car}
+                    </Option>
+                  ))}
+                </Select>
               </FormControl>
-
-              {/* List of all EVs from userData */}
-              <div className="mt-4">
-                <Typography level="title-sm" sx={{ mb: 1 }}>
-                  My EVs
-                </Typography>
-
-                {!userData?.ev_cars || userData.ev_cars.length !== 0 ? (
-                  <Typography
-                    level="body-sm"
-                    sx={{ color: "neutral.500", fontStyle: "italic" }}
-                  >
-                    No EVs saved yet.
-                  </Typography>
-                ) : (
-                  <List
-                    // variant="outlined"
-                    // sx={{
-                    //   borderRadius: "lg",
-                    //   borderColor: "neutral.outlinedBorder",
-                    //   px: 1,
-                    //   py: 0.5,
-                    // }}
-                  >
-                    {userData.ev_cars.map((car, index) => (
-                      <ListItem key={index} sx={{ py: 0.5 }}>
-                        <ListItemContent>
-                          <Typography level="body-md">{car.ev_name}</Typography>
-                        </ListItemContent>
-                      </ListItem>
-                    ))}
-                  </List>
-                )}
-              </div>
             </section>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6 ">
+            {/* ACTION BUTTONS */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
               <Button
                 variant="solid"
                 color="danger"
                 onClick={handleDeleteAccount}
                 sx={{ borderRadius: "xl" }}
-                className="w-full sm:w-auto"
               >
                 Delete Account
               </Button>
+
               <Button
                 variant="solid"
                 color="primary"
                 onClick={handleUpdateData}
                 sx={{ borderRadius: "xl" }}
-                className="w-full sm:w-auto"
               >
                 Update Data
               </Button>

@@ -1,5 +1,5 @@
 import json
-from flask import Blueprint, jsonify, request 
+from flask import Blueprint, jsonify, request
 from app.services.handle_db_connections import create_conn, execute_insert, execute_select
 
 bp = Blueprint("users", __name__)
@@ -22,7 +22,7 @@ def insert_user():
     INSERT INTO users (user_id, email, name, ev_cars, trip_history)
     VALUES (%s, %s, %s, %s, %s);
     """
-    
+
     user_id = user_info.get("googleUserId")
     user_email = user_info.get("emailAddress")
     user_name = user_info.get("fullName")
@@ -36,7 +36,7 @@ def insert_user():
         return jsonify({"message": "User inserted successfully"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
 @bp.route("/get-user", methods=['POST'])
 def get_user():
 
@@ -53,17 +53,17 @@ def get_user():
 
     query = """
     SELECT * FROM users
-    WHERE user_id = %s 
+    WHERE user_id = %s
     """
 
     try:
-        result = execute_select(connection, query, (user_id,))        
+        result = execute_select(connection, query, (user_id,))
         if not result:
             return jsonify({"error": "user not found"}), 404
         return jsonify(result[0]), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
 @bp.route("/get-user-evs", methods=['POST'])
 def get_user_evs():
 
@@ -80,18 +80,18 @@ def get_user_evs():
 
     query = """
     SELECT ev_cars FROM users
-    WHERE user_id = %s 
+    WHERE user_id = %s
     """
 
     try:
-        result = execute_select(connection, query, (user_id,)) 
-        print(result)       
+        result = execute_select(connection, query, (user_id,))
+        print(result)
         if not result:
             return jsonify({"error": "User not found"}), 404
         return jsonify(result[0]), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
 @bp.route("/save-history", methods=['POST'])
 def save_history():
 
@@ -105,8 +105,8 @@ def save_history():
     user_id = info.get("user_id")
     connection = create_conn()
 
-    cursor = connection.cursor() 
-    
+    cursor = connection.cursor()
+
     query_select = "SELECT trip_history FROM users WHERE user_id = %s"
     cursor.execute(query_select, (user_id,))
     result = cursor.fetchone()
@@ -140,16 +140,16 @@ def save_history():
     try:
         cursor.execute(query_update, (updated_history_json, user_id))
         connection.commit()
-        
+
         cursor.close()
         connection.close()
-        
+
         return jsonify({"message": "Trip history updated successfully"}), 200
 
     except Exception as e:
         print(f"Update failed: {e}")
         return jsonify({"error": str(e)}), 500
-    
+
 @bp.route("/get-history", methods=['POST'])
 def get_history():
 
@@ -163,8 +163,8 @@ def get_history():
     user_id = info.get("google_id")
     connection = create_conn()
 
-    cursor = connection.cursor() 
-    
+    cursor = connection.cursor()
+
     query_select = "SELECT trip_history FROM users WHERE user_id = %s"
     cursor.execute(query_select, (user_id,))
     result = cursor.fetchone()
@@ -179,3 +179,42 @@ def get_history():
     print(current_history)
 
     return(current_history)
+
+@bp.route("/update-user", methods=['PATCH'])
+def update_user():
+    try:
+        user_info = request.get_json()
+        if not user_info:
+            return jsonify({"error": "No JSON data provided"}), 400
+    except:
+        return jsonify({"error": "Invalid JSON format"}), 400
+
+    connection = create_conn()
+    print(user_info)
+
+    user_id = user_info.get("googleUserId")
+    if not user_id:
+        return jsonify({"error": "googleUserId is required"}), 400
+
+    # Prepare fields to update
+    query = """
+    UPDATE users
+    SET email = %s,
+        name = %s,
+        ev_cars = %s,
+        trip_history = %s
+    WHERE user_id = %s;
+    """
+
+    user_email = user_info.get("emailAddress")
+    user_name = user_info.get("fullName")
+    ev_cars = json.dumps(user_info.get("selectedCars", []))
+    trip_history = json.dumps(user_info.get("tripHistory", []))
+
+    values = (user_email, user_name, ev_cars, trip_history, user_id)
+
+    try:
+        execute_insert(connection, query, [values])  # reuse insert executor
+        return jsonify({"message": "User updated successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
