@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Progress } from "../components/ui/progress";
@@ -17,28 +17,27 @@ const ChargingProgress = () => {
   const navigate = useNavigate();
 
   const [isStopping, setIsStopping] = useState(false);
-  
+
   const intervalRef = useRef<number | null>(null);
 
-useEffect(() => {
-  intervalRef.current = window.setInterval(() => {
-    const savedCharger = localStorage.getItem("activeChargerSession");
-    if (savedCharger) {
-      handleChargingDataUpdate();
-    }
-  }, 1000);
+  useEffect(() => {
+    intervalRef.current = window.setInterval(() => {
+      const savedCharger = localStorage.getItem("activeChargerSession");
+      if (savedCharger) {
+        handleChargingDataUpdate();
+      }
+    }, 1000);
 
-  return () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-  };
-}, []);
-
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, []);
 
   // initialize sharger state (try location first, then fallback to local storage)
-  const [charger, _ ] = useState(() => {
+  const [charger, _] = useState(() => {
     if (location.state?.charger) return location.state.charger;
     const saved = localStorage.getItem("active_charger");
     return saved ? JSON.parse(saved) : null;
@@ -54,7 +53,6 @@ useEffect(() => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackText, setFeedbackText] = useState("");
   const [rating, setRating] = useState<number | null>(null);
-
 
   // effect: security check
   useEffect(() => {
@@ -102,7 +100,6 @@ useEffect(() => {
 
         // clear active session flags
 
-
         setShowFeedback(true);
       } else {
         console.error("Backend failed to stop:", data.error);
@@ -120,7 +117,7 @@ useEffect(() => {
   // start charging handler
   const handleChargingDataUpdate = async () => {
     if (!activeChargingSessionData) return;
-    
+
     try {
       // generate timestamps
       const nowObject = new Date();
@@ -141,14 +138,11 @@ useEffect(() => {
       console.log("sending to backend:", payload);
 
       // send request
-      const response = await fetch(
-        `${API_URL}/charging-details`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch(`${API_URL}/charging-details`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       const data = await response.json();
       setActiveSessionData(data);
@@ -157,20 +151,20 @@ useEffect(() => {
 
       if (response.ok && !data.error) {
         console.log("received from backend:", data);
-       setActiveSessionData(data);
+        setActiveSessionData(data);
         ///
 
-      if (Number(data.soc) >= 100 && !isStopping) {
-        console.log("Battery full! Auto-stopping session...");
-  handleStopCharging();
-}
-      ///
-       
-  //      
-  //       if (Number(data.soc) >= 100 && !isStopping) {
-  // console.log("Battery full! Auto-stopping session...");
-  // handleStopCharging();
-// }
+        if (Number(data.soc) >= 100 && !isStopping) {
+          console.log("Battery full! Auto-stopping session...");
+          handleStopCharging();
+        }
+        ///
+
+        //
+        //       if (Number(data.soc) >= 100 && !isStopping) {
+        // console.log("Battery full! Auto-stopping session...");
+        // handleStopCharging();
+        // }
       } else {
         console.error("backend error:", data.error);
         alert(`error starting session: ${data.error || "unknown error"}`);
@@ -229,10 +223,10 @@ useEffect(() => {
           <div className="flex gap-4 mt-4">
             <Button
               className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                onClick={async () => {
-    await handleStopCharging(); 
-    navigate("/app/planning");
-  }} // submit action
+              onClick={async () => {
+                await handleStopCharging();
+                navigate("/app/planning");
+              }} // submit action
             >
               Stop progress and Submit feed
             </Button>
@@ -250,7 +244,6 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 max-w-7xl pt-[32px] pb-[200px]">
         <button
