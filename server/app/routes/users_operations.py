@@ -33,7 +33,16 @@ def insert_user():
 
     try:
         execute_insert(connection, query, insert_statements)
-        return jsonify({"message": "User inserted successfully"}), 201
+        connection = create_conn()
+        query = """
+        SELECT * FROM users
+        WHERE user_id = %s
+        """
+        result = execute_select(connection, query, (user_id,))
+        if not result:
+            return jsonify({"error": "User created but could not be fetched"}), 500
+
+        return jsonify(result[0]), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -223,7 +232,6 @@ def update_user():
 
 @bp.route("/delete-user", methods=["DELETE"])
 def delete_user():
-    print("Hello");
     try:
         info = request.get_json()
         if not info:

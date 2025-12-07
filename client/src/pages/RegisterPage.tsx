@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Select from "@mui/joy/Select";
-import Option from "@mui/joy/Option";
 import Chip from "@mui/joy/Chip";
-import Box from "@mui/joy/Box";
+import EvSelect from "../components/EvSelect";
+import { Typography } from "@mui/joy";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -11,7 +10,6 @@ export default function RegisterPage() {
   const navigate = useNavigate();
 
   const [fullName, setFullName] = useState("");
-  const [mobile, setMobile] = useState("");
 
   const [selectedCars, setSelectedCars] = useState<string[]>([]);
   const [evList, setEvList] = useState<{ ev_name: string }[]>([]);
@@ -22,9 +20,7 @@ export default function RegisterPage() {
   useEffect(() => {
     const fetchEvs = async () => {
       try {
-        const response = await fetch(
-         `${API_URL}/get-available-evs`
-        );
+        const response = await fetch(`${API_URL}/get-available-evs`);
         if (response.ok) {
           const data = await response.json();
           setEvList(data);
@@ -40,7 +36,7 @@ export default function RegisterPage() {
   }, []);
 
   const handleSubmit = async () => {
-    if (!fullName || !evList || !mobile) {
+    if (!fullName || selectedCars.length === 0) {
       alert("Please fill in all fields.");
       return;
     }
@@ -49,8 +45,7 @@ export default function RegisterPage() {
       googleUserId: googleUserId,
       emailAddress: emailAddress,
       fullName: fullName,
-      mobile: mobile,
-      selectedCars: selectedCars
+      selectedCars: selectedCars,
     };
 
     try {
@@ -67,7 +62,7 @@ export default function RegisterPage() {
       if (response.ok) {
         console.log("success:", data);
 
-        localStorage.setItem("userData", JSON.stringify(payload));
+        localStorage.setItem("userData", JSON.stringify(data));
         localStorage.setItem("profileCompleted", "true");
 
         navigate("/app/planning");
@@ -121,75 +116,33 @@ export default function RegisterPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               EV Car Models (Select all that apply)
             </label>
-            <Select
-              multiple // <--- ENABLE MULTI SELECT
-              placeholder="Select your EV model(s)"
-              startDecorator={<span className="text-xl">🚗</span>}
-              value={selectedCars}
-              onChange={(_, newValues) => setSelectedCars(newValues)}
-              // This prop controls how the selected values look inside the box
-              renderValue={(selected) => (
-                <Box sx={{ display: "flex", gap: "0.25rem", flexWrap: "wrap" }}>
-                  {selected.map((selectedOption) => (
+            <EvSelect
+              evList={evList.map((ev) => ev.ev_name)} // 👈 normalize here
+              selectedCars={selectedCars}
+              onChange={setSelectedCars}
+            />
+            {selectedCars.length > 0 && (
+              <div className="mt-3">
+                <Typography level="body-sm" className="mb-1 text-slate-500">
+                  Selected EVs
+                </Typography>
+                <div className="flex flex-wrap gap-2">
+                  {selectedCars.map((car) => (
                     <Chip
-                      key={selectedOption.value}
+                      key={car}
                       variant="soft"
                       color="primary"
-                      size="sm"
+                      onClick={() =>
+                        setSelectedCars((prev) => prev.filter((c) => c !== car))
+                      }
+                      endDecorator={<span className="text-xs ml-1">✕</span>}
                     >
-                      {selectedOption.label}
+                      {car}
                     </Chip>
                   ))}
-                </Box>
-              )}
-              variant="soft"
-              color="neutral"
-              sx={{
-                borderRadius: "12px",
-                paddingBlock: "12px",
-                backgroundColor: "#f3f4f6",
-                "&:hover": { backgroundColor: "#e5e7eb" },
-                "--Select-decoratorChildHeight": "30px",
-                minHeight: "52px", // Ensure height allows for chips
-              }}
-              slotProps={{
-                listbox: {
-                  sx: {
-                    maxHeight: "200px", // Limit dropdown height
-                    overflow: "auto", // Scroll if too many cars
-                  },
-                },
-              }}
-            >
-              {evList.length === 0 && (
-                <Option value={null} disabled>
-                  Loading cars...
-                </Option>
-              )}
-
-              {evList.map((ev, index) => (
-                <Option key={index} value={ev.ev_name}>
-                  {ev.ev_name}
-                </Option>
-              ))}
-            </Select>
-          </div>
-
-          {/* Mobile Number */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mobile Number
-            </label>
-            <div className="flex items-center gap-3 bg-gray-100 rounded-xl px-4 py-3">
-              <span className="text-gray-400">📞</span>
-              <input
-                type="text"
-                placeholder="+1 (555) 000-0000"
-                className="bg-transparent outline-none w-full"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-              />
-            </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Email (readonly) */}

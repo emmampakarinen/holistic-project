@@ -10,7 +10,10 @@ import {
 } from "@mui/joy";
 import type { StoredUserData } from "../types/userdata";
 import { EvSection } from "../components/EvSection";
+import type { ProfileFormData } from "../types/profileform";
 const API_URL = import.meta.env.VITE_API_URL;
+
+type EvRow = { ev_name: string };
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -20,11 +23,10 @@ const Profile = () => {
   const [initialCars, setInitialCars] = useState<string[]>([]);
   const [userData, setUserData] = useState<StoredUserData | null>(null);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProfileFormData>({
     name: "",
-    mobileNumber: "",
     emailAddress: "",
-    selectedCars: [] as string[],
+    selectedCars: [],
   });
 
   useEffect(() => {
@@ -33,12 +35,12 @@ const Profile = () => {
       setLoading(false);
       return;
     }
-
+    console.log(raw);
     try {
       const parsed = JSON.parse(raw);
 
       const normalizedCars = Array.isArray(parsed?.ev_cars)
-        ? parsed?.ev_cars.map((c: any) =>
+        ? parsed.ev_cars.map((c: { ev_name: string }) =>
             typeof c === "string" ? c : c.ev_name
           )
         : [];
@@ -47,7 +49,6 @@ const Profile = () => {
 
       setFormData({
         name: parsed?.name ?? "",
-        mobileNumber: parsed?.mobile_number ?? "",
         emailAddress: parsed?.email ?? "",
         selectedCars: normalizedCars,
       });
@@ -60,8 +61,8 @@ const Profile = () => {
       try {
         // Fetch EV list
         const evRes = await fetch(`${API_URL}/get-available-evs`);
-        const evData = await evRes.json();
-        const cleanEvs = evData.map((row: any) => row.ev_name);
+        const evData: EvRow[] = await evRes.json();
+        const cleanEvs = evData.map((row) => row.ev_name);
 
         setEvList(cleanEvs);
       } catch (error) {
@@ -82,7 +83,10 @@ const Profile = () => {
     );
   };
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = <K extends keyof ProfileFormData>(
+    field: K,
+    value: ProfileFormData[K]
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -158,17 +162,11 @@ const Profile = () => {
       console.log("Delete response:", data);
 
       if (res.ok) {
-        // Clear local storage + local state
-        localStorage.removeItem("userData");
-        localStorage.removeItem("google_email");
-        localStorage.removeItem("google_sub");
-        localStorage.removeItem("google_token");
-        localStorage.removeItem("profileCompleted");
+        localStorage.clear();
 
         setUserData(null);
         setFormData({
           name: "",
-          mobileNumber: "",
           emailAddress: "",
           selectedCars: [],
         });
@@ -221,22 +219,12 @@ const Profile = () => {
                 Basic Information
               </Typography>
 
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className=" gap-4">
                 <FormControl>
-                  <FormLabel>Full Name</FormLabel>
+                  <FormLabel>Name</FormLabel>
                   <Input
                     value={formData.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
-                  />
-                </FormControl>
-
-                <FormControl>
-                  <FormLabel>Mobile Number</FormLabel>
-                  <Input
-                    value={formData.mobileNumber}
-                    onChange={(e) =>
-                      handleInputChange("mobileNumber", e.target.value)
-                    }
                   />
                 </FormControl>
               </div>
