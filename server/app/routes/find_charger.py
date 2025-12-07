@@ -111,7 +111,7 @@ def find_charge():
         return {"error": "No chargers found in the destination area!"}
 
     if arrival_soc < 5:
-        return {"error": "Unfortunately, the charger is inaccessible because of the state of charge."}
+        return {"error": "Unfortunately, none of the chargers near the destination can be reached because the state of charge is too low!"}
 
     ####################################
 
