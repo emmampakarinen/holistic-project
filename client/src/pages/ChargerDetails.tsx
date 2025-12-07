@@ -139,7 +139,7 @@ const ChargerDetails = () => {
 
   // Load Google Maps API
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_PLATFORM_API_KEY,
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
   });
 
   if (loadError) return <p>Error loading Google Maps</p>;

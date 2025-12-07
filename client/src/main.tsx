@@ -9,7 +9,7 @@ const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 createRoot(document.getElementById("root")!).render(
   <GoogleOAuthProvider clientId={clientId}>
-    <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_PLATFORM_API_KEY}>
+    <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
       <RouterProvider router={router} />
     </APIProvider>
   </GoogleOAuthProvider>

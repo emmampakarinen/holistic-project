@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Card, CardContent, Button } from "@mui/joy";
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Clock, Battery, MapPin, Thermometer } from "lucide-react";
+import { ArrowLeft, Clock, Battery, Thermometer } from "lucide-react";
 import { Zap } from "lucide-react";
 import { ChargingInfoCard } from "../components/ChargingInfoCard";
 import type { TripPlan } from "../types/trip";
