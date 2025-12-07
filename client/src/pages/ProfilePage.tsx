@@ -33,8 +33,8 @@ const Profile = () => {
       const parsed = JSON.parse(raw);
 
       const normalizedCars =
-        Array.isArray(parsed.ev_cars)
-          ? parsed.ev_cars.map((c: any) =>
+        Array.isArray(parsed?.ev_cars)
+          ? parsed?.ev_cars.map((c: any) =>
               typeof c === "string" ? c : c.ev_name
             )
           : [];
@@ -42,9 +42,9 @@ const Profile = () => {
       setUserData(parsed);
 
       setFormData({
-        name: parsed.name ?? "",
-        mobileNumber: parsed.mobile_number ?? "",
-        emailAddress: parsed.email ?? "",
+        name: parsed?.name ?? "",
+        mobileNumber: parsed?.mobile_number ?? "",
+        emailAddress: parsed?.email ?? "",
         selectedCars: normalizedCars,
       });
     } catch (e) {
