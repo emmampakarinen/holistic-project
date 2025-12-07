@@ -96,6 +96,8 @@ def find_charge():
     # find time it takes to drive to the specific found chargers
     route_stats = fetch_drive_metrics(maps_api_key, user_coords, nearby_chargers)
 
+    arrival_soc = None
+
     for charger_stat in route_stats:
         charger_stat["travelTimeSecondsDrivingToCharger"]
         # calculate energy consumed (in kWh) based on distance driven and WLTP range.
@@ -105,8 +107,11 @@ def find_charge():
         arrival_soc = start_battery_pct - soc_loss_pct
         charger_stat["battery_at_charger_near_destination"] = arrival_soc
 
+    if arrival_soc is None:
+        return {"error": "No chargers found in the destination area!"}
+
     if arrival_soc < 5:
-        return {"error": "can't reach charger"}
+        return {"error": "Unfortunately, the charger is inaccessible because of the state of charge."}
 
     ####################################
 
