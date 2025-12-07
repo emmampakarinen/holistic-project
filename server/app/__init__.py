@@ -14,17 +14,17 @@ from .routes.nearby_places_activities import bp as nearby_places_activities_bp
 
 def create_app():
     app = Flask(__name__)
-    
+
     # enable CORS for all routes
-    CORS(app, origins=["http://localhost:3000"])
-    
+    CORS(app, origins=["http://localhost:3000", "https://timecharge-web-269579772802.europe-north1.run.app"])
+
     app.register_blueprint(health_bp, url_prefix="/api")
     app.register_blueprint(users_bp, url_prefix="/api")
     app.register_blueprint(logic_bp, url_prefix="/api")
     app.register_blueprint(evs_get_bp, url_prefix="/api")
     app.register_blueprint(get_charging_details_bp, url_prefix="/api")
     app.register_blueprint(charger_reviews_bp, url_prefix="/api")
-    app.register_blueprint(nearby_places_activities_bp, url_prefix="/api")  
-    
+    app.register_blueprint(nearby_places_activities_bp, url_prefix="/api")
+
 
     return app

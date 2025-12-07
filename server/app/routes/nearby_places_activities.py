@@ -4,7 +4,7 @@ from flask import Blueprint, jsonify, request
 
 bp = Blueprint("nearby_places_activities", __name__)
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_MAPS_PLATFORM_API_KEY", "key")
+GOOGLE_API_KEY = os.getenv("VITE_GOOGLE_MAPS_API_KEY", "key")
 
 PLACE_TYPES = {
     "coffee": ["cafe", "coffee_shop"],
