@@ -114,7 +114,10 @@ const ChargingProgress = () => {
       const payload = {
         timestamp: timestamp,
         // session_id: sessionData?.session_id, // recommended: send id if available
-        ev_name: localStorage.getItem("EVModel") || "Unknown EV",
+        google_charger_id: charger.googleChargerId,
+        rating: rating,
+        review: feedbackText,
+        user_id: localStorage.getItem("google_sub"),
       };
 
       console.log("Stopping session...", payload);
