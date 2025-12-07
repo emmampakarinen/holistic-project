@@ -293,10 +293,6 @@ export default function PlanningPage() {
 
               <FormControl>
                 <FormLabel>Current Battery Level</FormLabel>
-                <FormHelperText sx={{ fontSize: "xs", mb: 1 }}>
-                  Minimum battery level is 14%. This ensures the app can
-                  accurately show available chargers and safe driving range.
-                </FormHelperText>
                 <div className="flex items-center gap-4">
                   <Slider
                     value={formData.battery}
@@ -304,8 +300,7 @@ export default function PlanningPage() {
                     max={100}
                     onChange={(_, newValue) => {
                       const v = Number(newValue);
-                      // enforce minimum logical value (14)
-                      updateField("battery", Math.max(14, v));
+                      updateField("battery", Math.max(0, v));
                     }}
                   />
                   <Typography level="body-lg" fontWeight="lg">
@@ -413,7 +408,7 @@ export default function PlanningPage() {
                 <Alert
                   variant="soft"
                   color="danger"
-                  sx={{ mb: 2, borderRadius: "md" }}
+                  sx={{ mb: 2, borderRadius: "md", mt: 2}}
                 >
                   <Typography level="body-sm" color="danger">
                     {errorMessage}
