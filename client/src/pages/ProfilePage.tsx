@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Button,
   Card,
@@ -12,6 +13,7 @@ import { EvSection } from "../components/EvSection";
 const API_URL = import.meta.env.VITE_API_URL;
 
 const Profile = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [evList, setEvList] = useState<string[]>([]);
 
@@ -84,6 +86,7 @@ const Profile = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // update user data
   const handleUpdateData = async () => {
     if (!userData?.user_id) {
       alert("Missing googleUserId in local storage");
@@ -129,8 +132,57 @@ const Profile = () => {
     }
   };
 
-  const handleDeleteAccount = () => {
-    alert("Delete account logic here");
+  // delete account
+  const handleDeleteAccount = async () => {
+    if (!userData?.user_id) {
+      alert("Missing googleUserId in local storage");
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete your account? This action cannot be undone."
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`${API_URL}/delete-user`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          googleUserId: userData.user_id,
+        }),
+      });
+
+      const data = await res.json();
+      console.log("Delete response:", data);
+
+      if (res.ok) {
+        // Clear local storage + local state
+        localStorage.removeItem("userData");
+        localStorage.removeItem("google_email");
+        localStorage.removeItem("google_sub");
+        localStorage.removeItem("google_token");
+        localStorage.removeItem("profileCompleted");
+
+        setUserData(null);
+        setFormData({
+          name: "",
+          mobileNumber: "",
+          emailAddress: "",
+          selectedCars: [],
+        });
+        setInitialCars([]);
+
+        alert("Your account has been deleted.");
+        navigate("/");
+      } else {
+        alert(data.error || "Failed to delete account");
+      }
+    } catch (e) {
+      console.error("Failed deleting user", e);
+      alert("Failed to delete account. Please try again.");
+    }
   };
 
   if (loading) {

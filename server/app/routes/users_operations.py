@@ -223,6 +223,7 @@ def update_user():
 
 @bp.route("/delete-user", methods=["DELETE"])
 def delete_user():
+    print("Hello");
     try:
         info = request.get_json()
         if not info:
