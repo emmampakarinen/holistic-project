@@ -214,70 +214,6 @@ const ChargingProgress = () => {
   // render loading or error if charger is missing (prevents crash before redirect)
   if (!charger) return <div>Loading Session...</div>;
 
-  // Feedback Popup Component
-  const FeedbackPopup = () => {
-    if (!showFeedback) return null;
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-white w-[90%] max-w-lg rounded-lg shadow-lg p-6 relative">
-          {/* Close button */}
-          <button
-            className="absolute top-3 right-3 text-gray-600 hover:text-black"
-            onClick={() => setShowFeedback(false)}
-          >
-            ✕
-          </button>
-
-          <h2 className="text-xl font-bold mb-4 text-center">
-            How satisfied are you with the overall experience?
-          </h2>
-
-          {/* Rating */}
-          <div className="flex justify-center gap-4 mb-6 text-4xl cursor-pointer">
-            {["😞", "😟", "😐", "😊", "😁"].map((face, index) => (
-              <div
-                key={index}
-                onClick={() => setRating(index + 1)}
-                className={`p-2 rounded-full ${
-                  rating === index + 1 ? "ring-2 ring-green-500" : ""
-                }`}
-              >
-                {face}
-              </div>
-            ))}
-          </div>
-
-          <label className="font-medium">What could be improved?</label>
-          <textarea
-            value={feedbackText}
-            onChange={(e) => setFeedbackText(e.target.value)}
-            className="w-full border rounded-md p-3 mt-2 h-32"
-            placeholder="Type your thoughts here..."
-          />
-
-          {/* Buttons */}
-          <div className="flex gap-4 mt-4">
-            <Button
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-              onClick={async () => {
-                await handleStopCharging();
-                navigate("/app/planning");
-              }} // submit action
-            >
-              Stop progress and Submit feed
-            </Button>
-            <Button
-              className="flex-1 bg-gray-400 hover:bg-gray-500 text-white"
-              onClick={() => setShowFeedback(false)} // cancel action
-            >
-              Cancel
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   function formatTime(timestamp: string) {
     return new Date(timestamp).toLocaleTimeString([], {
       hour: "numeric",
@@ -491,7 +427,64 @@ const ChargingProgress = () => {
           </div>
         </div>
       </main>
-      <FeedbackPopup />
+
+      {showFeedback && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white w-[90%] max-w-lg rounded-lg shadow-lg p-6 relative">
+            <button
+              className="absolute top-3 right-3 text-gray-600 hover:text-black"
+              onClick={() => setShowFeedback(false)}
+            >
+              ✕
+            </button>
+
+            <h2 className="text-xl font-bold mb-4 text-center">
+              How satisfied are you with the overall experience?
+            </h2>
+
+            <div className="flex justify-center gap-4 mb-6 text-4xl cursor-pointer">
+              {["😞", "😟", "😐", "😊", "😁"].map((face, index) => (
+                <div
+                  key={index}
+                  onClick={() => setRating(index + 1)}
+                  className={`p-2 rounded-full ${
+                    rating === index + 1 ? "ring-2 ring-green-500" : ""
+                  }`}
+                >
+                  {face}
+                </div>
+              ))}
+            </div>
+
+            <label className="font-medium">What could be improved?</label>
+            <textarea
+              value={feedbackText}
+              onChange={(e) => setFeedbackText(e.target.value)}
+              className="w-full border rounded-md p-3 mt-2 h-32"
+              placeholder="Type your thoughts here..."
+            />
+
+            <div className="flex gap-4 mt-4">
+              <Button
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                onClick={async () => {
+                  await handleStopCharging();
+                  navigate("/app/planning");
+                }}
+              >
+                Stop progress and Submit feed
+              </Button>
+              <Button
+                className="flex-1 bg-gray-400 hover:bg-gray-500 text-white"
+                onClick={() => setShowFeedback(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
