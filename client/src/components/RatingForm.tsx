@@ -22,7 +22,7 @@ export default function RatingForm({
   const [currentRating, setCurrentRating] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch(`${API_URL}/api/get-charger-ratings`, {
+    fetch(`${API_URL}/get-charger-ratings`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ google_charger_id: googleChargerId }),
