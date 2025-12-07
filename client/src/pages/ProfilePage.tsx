@@ -27,17 +27,19 @@ const Profile = () => {
 
   useEffect(() => {
     const raw = localStorage.getItem("userData");
-    if (!raw) return;
+    if (!raw) {
+      setLoading(false);
+      return;
+    }
 
     try {
       const parsed = JSON.parse(raw);
 
-      const normalizedCars =
-        Array.isArray(parsed?.ev_cars)
-          ? parsed?.ev_cars.map((c: any) =>
-              typeof c === "string" ? c : c.ev_name
-            )
-          : [];
+      const normalizedCars = Array.isArray(parsed?.ev_cars)
+        ? parsed?.ev_cars.map((c: any) =>
+            typeof c === "string" ? c : c.ev_name
+          )
+        : [];
 
       setUserData(parsed);
 
@@ -47,6 +49,7 @@ const Profile = () => {
         emailAddress: parsed?.email ?? "",
         selectedCars: normalizedCars,
       });
+      setInitialCars(normalizedCars);
     } catch (e) {
       console.error("Failed to parse localStorage userData", e);
     }

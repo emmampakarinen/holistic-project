@@ -218,3 +218,47 @@ def update_user():
         return jsonify({"message": "User updated successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+
+@bp.route("/delete-user", methods=["DELETE"])
+def delete_user():
+    try:
+        info = request.get_json()
+        if not info:
+            return jsonify({"error": "No JSON data provided"}), 400
+    except:
+        return jsonify({"error": "Invalid JSON format"}), 400
+
+    user_id = info.get("googleUserId")
+    if not user_id:
+        return jsonify({"error": "googleUserId is required"}), 400
+
+    connection = create_conn()
+    cursor = connection.cursor()
+
+    # check if user exists
+    query_check = "SELECT 1 FROM users WHERE user_id = %s"
+    cursor.execute(query_check, (user_id,))
+    exists = cursor.fetchone()
+
+    if not exists:
+        cursor.close()
+        connection.close()
+        return jsonify({"error": "User not found"}), 404
+
+    # delete the user
+    query_delete = "DELETE FROM users WHERE user_id = %s"
+
+    try:
+        cursor.execute(query_delete, (user_id,))
+        connection.commit()
+        
+        cursor.close()
+        connection.close()
+        return jsonify({"message": "User deleted successfully"}), 200
+
+    except Exception as e:
+        cursor.close()
+        connection.close()
+        return jsonify({"error": str(e)}), 500
