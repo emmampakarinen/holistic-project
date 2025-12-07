@@ -31,20 +31,21 @@ const Profile = () => {
 
     try {
       const parsed = JSON.parse(raw);
+
+      const normalizedCars =
+        Array.isArray(parsed.ev_cars)
+          ? parsed.ev_cars.map((c: any) =>
+              typeof c === "string" ? c : c.ev_name
+            )
+          : [];
+
       setUserData(parsed);
-
-      const storedCars =
-        parsed.ev_cars?.map((ev: { ev_name: string }) => ev.ev_name) ??
-        parsed.selectedCars ??
-        [];
-
-      setInitialCars(storedCars);
 
       setFormData({
         name: parsed.name ?? "",
-        mobileNumber: parsed.mobile ?? "",
-        emailAddress: parsed.emailAddress ?? "",
-        selectedCars: storedCars,
+        mobileNumber: parsed.mobile_number ?? "",
+        emailAddress: parsed.email ?? "",
+        selectedCars: normalizedCars,
       });
     } catch (e) {
       console.error("Failed to parse localStorage userData", e);
@@ -81,13 +82,13 @@ const Profile = () => {
   };
 
   const handleUpdateData = async () => {
-    if (!userData?.googleUserId) {
+    if (!userData?.user_id) {
       alert("Missing googleUserId in local storage");
       return;
     }
 
     const payload = {
-      googleUserId: userData.googleUserId,
+      googleUserId: userData.user_id,
       fullName: formData.name,
       emailAddress: formData.emailAddress,
       selectedCars: formData.selectedCars,

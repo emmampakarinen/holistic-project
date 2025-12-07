@@ -67,9 +67,9 @@ export const EvSection = memo(
               Saved EVs
             </Typography>
             <div className="flex flex-wrap gap-2">
-              {existingCars.map((car) => (
+              {existingCars.map((car, index) => (
                 <Chip
-                  key={car}
+                  key={`${car}-${index}`}
                   variant="soft"
                   color="primary"
                   onClick={() => removeCar(car)}
