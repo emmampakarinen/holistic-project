@@ -45,18 +45,13 @@ cp .env.example .env
 Your .env should look like this:
 ```bash
 # Frontend
-VITE_API_URL=http://localhost:5000/api
-
-# MySQL (local Docker-only credentials)
+MYSQL_HOST=xxx
+MYSQL_USER=holistic_user
+MYSQL_PASSWORD=xxx
 MYSQL_DATABASE=holistic
-MYSQL_USER=root
-MYSQL_PASSWORD=root
-MYSQL_ROOT_PASSWORD=root
-MYSQL_HOST=db
 MYSQL_PORT=3306
 
-# Flask / SQLAlchemy
-DATABASE_URL=mysql+pymysql://root:root@db:3306/holistic
+VITE_GOOGLE_MAPS_API_KEY=xxx
 ```
 
 ### 4. Start the stack
