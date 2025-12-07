@@ -1,20 +1,14 @@
-import {
-  Chip,
-  FormControl,
-  FormLabel,
-  Option,
-  Select,
-  Typography,
-} from "@mui/joy";
+import { Chip, FormControl, FormLabel, Typography } from "@mui/joy";
 import { Car } from "lucide-react";
 import { memo, useMemo } from "react";
+import EvSelect from "./EvSelect";
 
 type EvSectionProps = {
   evList: string[];
   selectedCars: string[];
   initialCars: string[];
   removeCar: (car: string) => void;
-  handleInputChange: (field: string, value: any) => void;
+  handleInputChange: (field: "selectedCars", value: string[]) => void;
 };
 
 export const EvSection = memo(
@@ -44,21 +38,11 @@ export const EvSection = memo(
 
         <FormControl>
           <FormLabel>Select Your EV(s)</FormLabel>
-          <Select
-            multiple
-            placeholder="Select your EV models"
-            value={selectedCars}
-            onChange={(_, newValues) =>
-              handleInputChange("selectedCars", newValues)
-            }
-            renderValue={() => "Select EV"}
-          >
-            {evList.map((car) => (
-              <Option key={car} value={car}>
-                {car}
-              </Option>
-            ))}
-          </Select>
+          <EvSelect
+            evList={evList}
+            selectedCars={selectedCars}
+            onChange={(cars) => handleInputChange("selectedCars", cars)}
+          />
         </FormControl>
 
         {existingCars.length > 0 && (

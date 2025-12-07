@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Button,
   Card,
@@ -9,44 +10,49 @@ import {
 } from "@mui/joy";
 import type { StoredUserData } from "../types/userdata";
 import { EvSection } from "../components/EvSection";
+import type { ProfileFormData } from "../types/profileform";
 const API_URL = import.meta.env.VITE_API_URL;
 
+type EvRow = { ev_name: string };
+
 const Profile = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [evList, setEvList] = useState<string[]>([]);
 
   const [initialCars, setInitialCars] = useState<string[]>([]);
   const [userData, setUserData] = useState<StoredUserData | null>(null);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProfileFormData>({
     name: "",
-    mobileNumber: "",
     emailAddress: "",
-    selectedCars: [] as string[],
+    selectedCars: [],
   });
 
   useEffect(() => {
     const raw = localStorage.getItem("userData");
-    if (!raw) return;
-
+    if (!raw) {
+      setLoading(false);
+      return;
+    }
+    console.log(raw);
     try {
       const parsed = JSON.parse(raw);
 
-      const normalizedCars =
-        Array.isArray(parsed?.ev_cars)
-          ? parsed?.ev_cars.map((c: any) =>
-              typeof c === "string" ? c : c.ev_name
-            )
-          : [];
+      const normalizedCars = Array.isArray(parsed?.ev_cars)
+        ? parsed.ev_cars.map((c: { ev_name: string }) =>
+            typeof c === "string" ? c : c.ev_name
+          )
+        : [];
 
       setUserData(parsed);
 
       setFormData({
         name: parsed?.name ?? "",
-        mobileNumber: parsed?.mobile_number ?? "",
         emailAddress: parsed?.email ?? "",
         selectedCars: normalizedCars,
       });
+      setInitialCars(normalizedCars);
     } catch (e) {
       console.error("Failed to parse localStorage userData", e);
     }
@@ -55,8 +61,8 @@ const Profile = () => {
       try {
         // Fetch EV list
         const evRes = await fetch(`${API_URL}/get-available-evs`);
-        const evData = await evRes.json();
-        const cleanEvs = evData.map((row: any) => row.ev_name);
+        const evData: EvRow[] = await evRes.json();
+        const cleanEvs = evData.map((row) => row.ev_name);
 
         setEvList(cleanEvs);
       } catch (error) {
@@ -77,10 +83,14 @@ const Profile = () => {
     );
   };
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = <K extends keyof ProfileFormData>(
+    field: K,
+    value: ProfileFormData[K]
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // update user data
   const handleUpdateData = async () => {
     if (!userData?.user_id) {
       alert("Missing googleUserId in local storage");
@@ -126,8 +136,51 @@ const Profile = () => {
     }
   };
 
-  const handleDeleteAccount = () => {
-    alert("Delete account logic here");
+  // delete account
+  const handleDeleteAccount = async () => {
+    if (!userData?.user_id) {
+      alert("Missing googleUserId in local storage");
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete your account? This action cannot be undone."
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`${API_URL}/delete-user`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          googleUserId: userData.user_id,
+        }),
+      });
+
+      const data = await res.json();
+      console.log("Delete response:", data);
+
+      if (res.ok) {
+        localStorage.clear();
+
+        setUserData(null);
+        setFormData({
+          name: "",
+          emailAddress: "",
+          selectedCars: [],
+        });
+        setInitialCars([]);
+
+        alert("Your account has been deleted.");
+        navigate("/");
+      } else {
+        alert(data.error || "Failed to delete account");
+      }
+    } catch (e) {
+      console.error("Failed deleting user", e);
+      alert("Failed to delete account. Please try again.");
+    }
   };
 
   if (loading) {
@@ -166,22 +219,12 @@ const Profile = () => {
                 Basic Information
               </Typography>
 
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className=" gap-4">
                 <FormControl>
-                  <FormLabel>Full Name</FormLabel>
+                  <FormLabel>Name</FormLabel>
                   <Input
                     value={formData.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
-                  />
-                </FormControl>
-
-                <FormControl>
-                  <FormLabel>Mobile Number</FormLabel>
-                  <Input
-                    value={formData.mobileNumber}
-                    onChange={(e) =>
-                      handleInputChange("mobileNumber", e.target.value)
-                    }
                   />
                 </FormControl>
               </div>
